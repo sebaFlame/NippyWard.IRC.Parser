@@ -4,28 +4,28 @@ using System.Buffers;
 
 namespace ThePlague.Model.Core.Text
 {
-    public class Utf8OrdinalStringComparer : Utf8StringComparer
+    public class Utf8OrdinalStringComparer : BaseUtf8StringComparer
     {
         public static Utf8OrdinalStringComparer Instance => new();
 
-        public override int Compare(Utf8String leftStr, Utf8String rightStr)
+        public override int Compare(Utf8String x, Utf8String y)
         {
-            if(object.ReferenceEquals(leftStr, rightStr))
+            if(object.ReferenceEquals(x, y))
             {
                 return 0;
             }
 
-            if(leftStr is null)
+            if(x is null)
             {
                 return -1;
             }
 
-            if(rightStr is null)
+            if(y is null)
             {
                 return 1;
             }
 
-            int leftLength = leftStr.Length, rightLength = rightStr.Length;
+            int leftLength = x.Length, rightLength = y.Length;
 
             //lengths should be equal for ordinal compare
             if(leftLength != rightLength)
@@ -39,8 +39,8 @@ namespace ThePlague.Model.Core.Text
             }
 
             uint lCp, rCp;
-            Utf8CodePointEnumerator leftEnumerator = leftStr.GetEnumerator(),
-                rightEnumerator = rightStr.GetEnumerator();
+            Utf8CodePointEnumerator leftEnumerator = x.GetEnumerator(),
+                rightEnumerator = y.GetEnumerator();
             long compare;
 
             while(leftEnumerator.MoveNext()
@@ -65,31 +65,31 @@ namespace ThePlague.Model.Core.Text
             return 0;
         }
 
-        public override bool Equals(Utf8String leftStr, Utf8String rightStr)
+        public override bool Equals(Utf8String x, Utf8String y)
         {
-            if(object.ReferenceEquals(leftStr, rightStr))
+            if(object.ReferenceEquals(x, y))
             {
                 return true;
             }
 
-            if(leftStr is null
-               || rightStr is null)
+            if(x is null
+               || y is null)
             {
                 return false;
             }
 
-            if(leftStr.Length != rightStr.Length)
+            if(x.Length != y.Length)
             {
                 return false;
             }
 
             ReadOnlySequence<byte>.Enumerator leftEnumerator, rightEnumerator;
             ReadOnlySpan<byte> lSpan, rSpan, cl, cr;
-            int length = leftStr.Length;
+            int length = x.Length;
             int minLength;
 
-            leftEnumerator = leftStr._Buffer.GetEnumerator();
-            rightEnumerator = rightStr._Buffer.GetEnumerator();
+            leftEnumerator = x.Buffer.GetEnumerator();
+            rightEnumerator = y.Buffer.GetEnumerator();
 
             lSpan = rSpan = Span<byte>.Empty;
 
@@ -141,6 +141,6 @@ namespace ThePlague.Model.Core.Text
         }
 
         public override int GetHashCode([DisallowNull] Utf8String obj)
-            => (int)MurmurHash.Hash_x86_32(obj._Buffer);
+            => (int)MurmurHash.Hash_x86_32(obj.Buffer);
     }
 }

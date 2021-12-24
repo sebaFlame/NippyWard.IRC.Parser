@@ -1,3 +1,4 @@
+using System;
 using System.Buffers;
 using System.Runtime.CompilerServices;
 
@@ -9,9 +10,9 @@ namespace ThePlague.IRC.Parser
     {
         //Check if the token at the current position is a terminal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsTerminal
+        internal static bool IsTerminal
         (
-            Terminal terminal,
+            TokenType terminal,
             ref SequenceReader<byte> reader,
             out byte value
         )
@@ -25,17 +26,17 @@ namespace ThePlague.IRC.Parser
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsTerminal
+        internal static bool IsTerminal
         (
-            Terminal terminal,
+            TokenType terminal,
             byte value
         )
-            => (byte)terminal == value;
+            => (byte)terminal == value; //ensure only first byte gets used
 
         //Match a terminal and advance if found
         private static bool MatchTerminal
         (
-            Terminal terminal,
+            TokenType terminal,
             ref SequenceReader<byte> reader
         )
         {
@@ -48,18 +49,84 @@ namespace ThePlague.IRC.Parser
             return false;
         }
 
-        //Match one or more space and advance if found
-        private static bool MatchSpaces(ref SequenceReader<byte> reader)
+        //Match a terminal, advance and create a token for the terminal if found 
+        private static bool TryParseTerminal
+        (
+            TokenType terminal,
+            ref SequenceReader<byte> reader,
+            out Token token
+        )
         {
-            bool found = false;
+            SequencePosition startPosition = reader.Position;
 
-            while(MatchTerminal(Terminal.Space, ref reader))
+            if(IsTerminal(terminal, ref reader, out _))
             {
-                found = true;
-                continue;
+                reader.Advance(1);
+
+                //create a token for the terminal
+                token = new Token
+                (
+                    terminal,
+                    reader.Sequence.Slice(startPosition, reader.Position)
+                );
+
+                return true;
             }
 
-            return found;
+            token = null;
+            return false;
+        }
+
+        //Match one or more space and advance if found. It can produce a linked
+        //list of multiple space terminals
+        private static bool TryParseSpaces
+        (
+            ref SequenceReader<byte> reader,
+            out Token space
+        )
+        {
+            SequencePosition startPosition = reader.Position;
+            int count = 0;
+            Token previous = null, first = null;
+
+            while(MatchTerminal(TokenType.Space, ref reader))
+            {
+                count++;
+            }
+
+            if(count == 0)
+            {
+                space = null;
+                return false;
+            }
+
+            ReadOnlySequence<byte> sequence = reader.Sequence;
+            int offset = (int)sequence.GetOffset(startPosition);
+
+            for(int i = 0; i < count; i++)
+            {
+                //space is always a length of 1
+                space = new Token
+                (
+                    TokenType.Space,
+                    reader.Sequence.Slice(offset + i, 1)
+                );
+
+                if(first is null)
+                {
+                    first = space;
+                }
+                else
+                {
+                    Combine(previous, space);
+                }
+
+                previous = space;
+            }
+
+            space = first;
+
+            return true;
         }
 
         //check if the current byte is an alphanumeric
@@ -114,7 +181,7 @@ namespace ThePlague.IRC.Parser
 
         //match an UTF-8 byte excluding NUL, CR, LF, semicolon and space.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsUTF8WithoutNullCrLfSemiColonSpace
+        internal static bool IsUTF8WithoutNullCrLfSemiColonSpace
         (
             ref SequenceReader<byte> reader,
             out byte value
@@ -137,39 +204,19 @@ namespace ThePlague.IRC.Parser
             byte value
         )
             => IsUTF8WithoutNullCrLFBase(value)
-                || IsTerminal(Terminal.Bell, value)
-                || IsTerminal(Terminal.Comma, value)
-                || IsTerminal(Terminal.Colon, value)
-                || IsTerminal(Terminal.AtSign, value);
+                || IsTerminal(TokenType.Bell, value)
+                || IsTerminal(TokenType.Comma, value)
+                || IsTerminal(TokenType.Colon, value)
+                || IsTerminal(TokenType.AtSign, value)
+                || IsTerminal(TokenType.LeftSquareBracket, value)
+                || IsTerminal(TokenType.RightSquareBracket, value)
+                || IsTerminal(TokenType.Caret, value)
+                || IsTerminal(TokenType.Underscore, value)
+                || IsTerminal(TokenType.Accent, value)
+                || IsTerminal(TokenType.LeftCurlyBracket, value)
+                || IsTerminal(TokenType.VerticalBar, value)
+                || IsTerminal(TokenType.RightCurlyBracket, value);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsUTF8WithoutCTCPNullCrLFBase
-        (
-            ref SequenceReader<byte> reader,
-            out byte value
-        )
-        {
-            if(!reader.TryPeek(out value))
-            {
-                return false;
-            }
-
-            return IsUTF8WithoutCTCPNullCrLFBase(value);
-        }
-
-        //Match an UTF-8 byte excluding CTCP, NUL, CR and LF
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsUTF8WithoutCTCPNullCrLFBase(byte value)
-            => IsAlphaNumeric(value)
-                || IsUTF8WithoutAlphaNumericFormatCTCPNullCrLFBase(value)
-                || IsTerminal(Terminal.Bold, value)
-                || IsTerminal(Terminal.Color, value)
-                || IsTerminal(Terminal.HexColor, value)
-                || IsTerminal(Terminal.Reset, value)
-                || IsTerminal(Terminal.Monospace, value)
-                || IsTerminal(Terminal.Italics, value)
-                || IsTerminal(Terminal.Strikethrough, value)
-                || IsTerminal(Terminal.Underline, value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsUTF8WithoutNullCrLFBase
@@ -189,8 +236,17 @@ namespace ThePlague.IRC.Parser
         //check if a byte is an UTF-8 byte excluding NUL, CR and LF
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsUTF8WithoutNullCrLFBase(byte value)
-            => IsUTF8WithoutCTCPNullCrLFBase(value)
-                || IsTerminal(Terminal.CTCP, value);
+            => IsAlphaNumeric(value)
+                || IsUTF8WithoutAlphaNumericFormatCTCPNullCrLFBase(value)
+                || IsTerminal(TokenType.CTCP, value)
+                || IsTerminal(TokenType.Bold, value)
+                || IsTerminal(TokenType.Color, value)
+                || IsTerminal(TokenType.HexColor, value)
+                || IsTerminal(TokenType.Reset, value)
+                || IsTerminal(TokenType.Monospace, value)
+                || IsTerminal(TokenType.Italics, value)
+                || IsTerminal(TokenType.Strikethrough, value)
+                || IsTerminal(TokenType.Underline, value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsUTF8WithoutAlphaNumericFormatCTCPNullCrLFBase
@@ -208,26 +264,25 @@ namespace ThePlague.IRC.Parser
         }
 
         //check if a byte is a UTF-8 byte excluding alphanumeric, any format
-        //byte, NUL, CR, LF, CTCP, BEL, semicolon and at
+        //byte, NUL, CR, LF, CTCP, BEL, semicolon, at and special
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool
             IsUTF8WithoutAlphaNumericFormatCTCPNullCrLFBase(byte value)
             => IsNonPrintableWithoutNullLfCrBellFormatCTCP(value)
                 || IsNonASCII(value)
                 || IsUndefinedPunctuationMark(value)
-                || IsTerminal(Terminal.ExclamationMark, value)
-                || IsTerminal(Terminal.Percent, value)
-                || IsTerminal(Terminal.Plus, value)
-                || IsTerminal(Terminal.Minus, value)
-                || IsTerminal(Terminal.Period, value)
-                || IsTerminal(Terminal.Slash, value)
-                || IsTerminal(Terminal.EqualitySign, value)
-                || IsSpecial(value)
-                || IsTerminal(Terminal.Tilde, value)
-                || IsTerminal(Terminal.Asterisk, value)
-                || IsTerminal(Terminal.Number, value)
-                || IsTerminal(Terminal.Ampersand, value)
-                || IsTerminal(Terminal.Dollar, value);
+                || IsTerminal(TokenType.ExclamationMark, value)
+                || IsTerminal(TokenType.Percent, value)
+                || IsTerminal(TokenType.Plus, value)
+                || IsTerminal(TokenType.Minus, value)
+                || IsTerminal(TokenType.Period, value)
+                || IsTerminal(TokenType.Slash, value)
+                || IsTerminal(TokenType.EqualitySign, value)
+                || IsTerminal(TokenType.Tilde, value)
+                || IsTerminal(TokenType.Asterisk, value)
+                || IsTerminal(TokenType.Number, value)
+                || IsTerminal(TokenType.Ampersand, value)
+                || IsTerminal(TokenType.Dollar, value);
 
         //check if current byte is non pritable byte excluding NUL, CR, LF, any
         //format byte and CTCP
@@ -249,28 +304,30 @@ namespace ThePlague.IRC.Parser
         //check if a byte is non printable byte excluding NUL, CR, LF, any
         //format byte and CTCP
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool 
-            IsNonPrintableWithoutNullLfCrBellFormatCTCP(byte value)
-            => IsTerminal(Terminal.Enquiry, value)
-                || IsTerminal(Terminal.Acknowledge, value)
-                || IsTerminal(Terminal.Backspace, value)
-                || IsTerminal(Terminal.HorizontalTab, value)
-                || IsTerminal(Terminal.VerticalTab, value)
-                || IsTerminal(Terminal.FormFeed, value)
-                || IsTerminal(Terminal.ShiftOut, value)
-                || IsTerminal(Terminal.DataLinkEscape, value)
-                || IsTerminal(Terminal.DeviceControl2, value)
-                || IsTerminal(Terminal.DeviceControl3, value)
-                || IsTerminal(Terminal.DeviceControl4, value)
-                || IsTerminal(Terminal.NegativeAcknowledge, value)
-                || IsTerminal(Terminal.Synchronize, value)
-                || IsTerminal(Terminal.EndOfTransmissionBlock, value)
-                || IsTerminal(Terminal.Cancel, value)
-                || IsTerminal(Terminal.EndOfMedium, value)
-                || IsTerminal(Terminal.Substitute, value)
-                || IsTerminal(Terminal.Escape, value)
-                || IsTerminal(Terminal.FileSeparator, value)
-                || IsTerminal(Terminal.Delete, value);
+        private static bool IsNonPrintableWithoutNullLfCrBellFormatCTCP
+        (
+            byte value
+        )
+            => IsTerminal(TokenType.Enquiry, value)
+                || IsTerminal(TokenType.Acknowledge, value)
+                || IsTerminal(TokenType.Backspace, value)
+                || IsTerminal(TokenType.HorizontalTab, value)
+                || IsTerminal(TokenType.VerticalTab, value)
+                || IsTerminal(TokenType.FormFeed, value)
+                || IsTerminal(TokenType.ShiftOut, value)
+                || IsTerminal(TokenType.DataLinkEscape, value)
+                || IsTerminal(TokenType.DeviceControl2, value)
+                || IsTerminal(TokenType.DeviceControl3, value)
+                || IsTerminal(TokenType.DeviceControl4, value)
+                || IsTerminal(TokenType.NegativeAcknowledge, value)
+                || IsTerminal(TokenType.Synchronize, value)
+                || IsTerminal(TokenType.EndOfTransmissionBlock, value)
+                || IsTerminal(TokenType.Cancel, value)
+                || IsTerminal(TokenType.EndOfMedium, value)
+                || IsTerminal(TokenType.Substitute, value)
+                || IsTerminal(TokenType.Escape, value)
+                || IsTerminal(TokenType.FileSeparator, value)
+                || IsTerminal(TokenType.Delete, value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsUndefinedPunctuationMark
@@ -290,13 +347,13 @@ namespace ThePlague.IRC.Parser
         //check if a byte is a non-special/non-terminal punctuation mark
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsUndefinedPunctuationMark(byte value)
-            => IsTerminal(Terminal.DoubleQuote, value)
-                || IsTerminal(Terminal.SingleQuote, value)
-                || IsTerminal(Terminal.LeftParenthesis, value)
-                || IsTerminal(Terminal.RightParenthesis, value)
-                || IsTerminal(Terminal.LessThan, value)
-                || IsTerminal(Terminal.GreaterThan, value)
-                || IsTerminal(Terminal.QuestionMark, value);
+            => IsTerminal(TokenType.DoubleQuote, value)
+                || IsTerminal(TokenType.SingleQuote, value)
+                || IsTerminal(TokenType.LeftParenthesis, value)
+                || IsTerminal(TokenType.RightParenthesis, value)
+                || IsTerminal(TokenType.LessThan, value)
+                || IsTerminal(TokenType.GreaterThan, value)
+                || IsTerminal(TokenType.QuestionMark, value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsSpecial
@@ -316,15 +373,15 @@ namespace ThePlague.IRC.Parser
         //check if a byte is a special terminal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsSpecial(byte value)
-            => IsTerminal(Terminal.LeftSquareBracket, value)
-                || IsTerminal(Terminal.Backslash, value)
-                || IsTerminal(Terminal.RightSquareBracket, value)
-                || IsTerminal(Terminal.Caret, value)
-                || IsTerminal(Terminal.Underscore, value)
-                || IsTerminal(Terminal.Accent, value)
-                || IsTerminal(Terminal.LeftCurlyBracket, value)
-                || IsTerminal(Terminal.VerticalBar, value)
-                || IsTerminal(Terminal.RightCurlyBracket, value);
+            => IsTerminal(TokenType.LeftSquareBracket, value)
+                || IsTerminal(TokenType.Backslash, value)
+                || IsTerminal(TokenType.RightSquareBracket, value)
+                || IsTerminal(TokenType.Caret, value)
+                || IsTerminal(TokenType.Underscore, value)
+                || IsTerminal(TokenType.Accent, value)
+                || IsTerminal(TokenType.LeftCurlyBracket, value)
+                || IsTerminal(TokenType.VerticalBar, value)
+                || IsTerminal(TokenType.RightCurlyBracket, value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsNonASCII
@@ -344,7 +401,7 @@ namespace ThePlague.IRC.Parser
         //check if a byte is outside the ASCII range
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsNonASCII(byte value)
-            => value > (byte)Terminal.Delete;
+            => value > (byte)TokenType.Delete;
 
         //match a letter and advance
         private static bool MatchLetter
@@ -417,8 +474,8 @@ namespace ThePlague.IRC.Parser
         //check if a byte is a digit
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsDigit(byte value)
-            => value >= (byte)Terminal.Zero
-                && value <= (byte)Terminal.Nine;
+            => value is >= ((byte)TokenType.Zero)
+                and <= ((byte)TokenType.Nine);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsLowerCaseHexLetter
@@ -438,8 +495,8 @@ namespace ThePlague.IRC.Parser
         //check if a byte is considered a lowercase hex letter
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsLowerCaseHexLetter(byte value)
-            => value >= (byte)Terminal.a
-                && value <= (byte)Terminal.f;
+            => value is >= ((byte)TokenType.a)
+                and <= ((byte)TokenType.f);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsUpperCaseHexLetter
@@ -459,8 +516,8 @@ namespace ThePlague.IRC.Parser
         //check if a byte is considered a uppercase hex letter
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsUpperCaseHexLetter(byte value)
-            => value >= (byte)Terminal.A
-                && value <= (byte)Terminal.F;
+            => value is >= ((byte)TokenType.A)
+                and <= ((byte)TokenType.F);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsLowerCaseLetter
@@ -480,8 +537,8 @@ namespace ThePlague.IRC.Parser
         //check if a letter is a lowercase letter minus hex
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsLowerCaseLetter(byte value)
-            => value >= (byte)Terminal.g
-                && value <= (byte)Terminal.z;
+            => value is >= ((byte)TokenType.g)
+                and <= ((byte)TokenType.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsUpperCaseLetter
@@ -501,8 +558,8 @@ namespace ThePlague.IRC.Parser
         //check if a letter is a uppercase letter minus hex
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsUpperCaseLetter(byte value)
-            => value >= (byte)Terminal.G
-                && value <= (byte)Terminal.Z;
+            => value is >= ((byte)TokenType.G)
+                and <= ((byte)TokenType.Z);
 
         private static bool
             MatchUTF8WithoutAlphaNumericNullCrLfSpaceCommaColon
@@ -542,9 +599,10 @@ namespace ThePlague.IRC.Parser
             byte value
         )
             => IsUTF8WithoutAlphaNumericFormatCTCPNullCrLFBase(value)
-                || IsTerminal(Terminal.Bell, value)
-                || IsTerminal(Terminal.Semicolon, value)
-                || IsTerminal(Terminal.AtSign, value);
+                || IsTerminal(TokenType.Bell, value)
+                || IsTerminal(TokenType.Semicolon, value)
+                || IsTerminal(TokenType.AtSign, value)
+                || IsSpecial(value);
 
         private static bool MatchHexDigit(ref SequenceReader<byte> reader)
         {

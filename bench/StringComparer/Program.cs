@@ -3,56 +3,54 @@ using System.Collections.Generic;
 
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
-using BenchmarkDotNet.Reports;
-using BenchmarkDotNet.Diagnosers;
 
 using ThePlague.Model.Core.Text;
 
 namespace StringComparer
 {
-    class Program
+    public static class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
             => BenchmarkRunner.Run<StringComparerBenchmark>(args: args);
     }
 
-//    [EventPipeProfiler(EventPipeProfile.CpuSampling)]
+    //[EventPipeProfiler(EventPipeProfile.CpuSampling)]
     public class StringComparerBenchmark
     {
-//        [Benchmark(Baseline = true)]
-//        [ArgumentsSource(nameof(DataUtf16))]
-//        public int CoreFXCompare(string strA, string strB)
-//            => string.Compare(strA, strB, StringComparison.OrdinalIgnoreCase);
-//
-//        [Benchmark]
-//        [ArgumentsSource(nameof(DataUtf8))]
-//        public int FirstDecodeToUtf16Compare(Utf8String strA, Utf8String strB)
-//        {
-//            string utf16A = (string)strA;
-//            string utf16B = (string)strB;
-//
-//            return string.Compare
-//            (
-//                utf16A,
-//                utf16B,
-//                StringComparison.OrdinalIgnoreCase
-//            );
-//        }
-//
-//        [Benchmark]
-//        [ArgumentsSource(nameof(DataUtf8))]
-//        public int OrdinalCompare(Utf8String strA, Utf8String strB)
-//        {
-//            IComparer<Utf8String> comparer = Utf8StringComparer.Ordinal;
-//            return comparer.Compare(strA, strB);
-//        }
+        [Benchmark(Baseline = true)]
+        [ArgumentsSource(nameof(DataUtf16))]
+        public int CoreFXCompare(string strA, string strB)
+            => string.Compare(strA, strB, StringComparison.OrdinalIgnoreCase);
+
+        [Benchmark]
+        [ArgumentsSource(nameof(DataUtf8))]
+        public int FirstDecodeToUtf16Compare(Utf8String strA, Utf8String strB)
+        {
+            string utf16A = (string)strA;
+            string utf16B = (string)strB;
+
+            return string.Compare
+            (
+                utf16A,
+                utf16B,
+                StringComparison.OrdinalIgnoreCase
+            );
+        }
+
+        [Benchmark]
+        [ArgumentsSource(nameof(DataUtf8))]
+        public int OrdinalCompare(Utf8String strA, Utf8String strB)
+        {
+            IComparer<Utf8String> comparer = BaseUtf8StringComparer.Ordinal;
+            return comparer.Compare(strA, strB);
+        }
 
         [Benchmark]
         [ArgumentsSource(nameof(DataUtf8))]
         public int OrdinalIgnoreCaseCompare(Utf8String strA, Utf8String strB)
         {
             IComparer<Utf8String> comparer =
-                Utf8StringComparer.OrdinalIgnoreCase;
+                BaseUtf8StringComparer.OrdinalIgnoreCase;
             return comparer.Compare(strA, strB);
         }
 

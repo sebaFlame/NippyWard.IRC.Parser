@@ -5,7 +5,6 @@ using System.Text;
 using Xunit;
 using Xunit.Abstractions;
 
-using ThePlague.IRC.Parser;
 using ThePlague.IRC.Parser.Tokens;
 using ThePlague.Model.Core.Text;
 
@@ -13,7 +12,7 @@ namespace ThePlague.IRC.Parser.Tests
 {
     public class IRCMessageTests
     {
-        private ITestOutputHelper _output;
+        private readonly ITestOutputHelper _output;
 
         public IRCMessageTests(ITestOutputHelper testOutputHelper)
         {
@@ -258,7 +257,8 @@ namespace ThePlague.IRC.Parser.Tests
             message[^2] = 13;
             message[^1] = 10;
 
-            StringSequence segment = new StringSequence(message);
+            Utf8StringSequenceSegment segment
+                = new Utf8StringSequenceSegment(message);
             ReadOnlySequence<byte> utf8 = new ReadOnlySequence<byte>
             (
                 segment,
@@ -338,7 +338,9 @@ namespace ThePlague.IRC.Parser.Tests
             message[^2] = 13;
             message[^1] = 10;
 
-            StringSequence segment = new StringSequence(message);
+            Utf8StringSequenceSegment segment
+                = new Utf8StringSequenceSegment(message);
+
             ReadOnlySequence<byte> utf8 = new ReadOnlySequence<byte>
             (
                 segment,
@@ -1003,7 +1005,7 @@ namespace ThePlague.IRC.Parser.Tests
         [Fact]
         public void EscapedTagPrefixCommandTest()
         {
-            string message = @"@a=b\\\\and\\nk;c=72\\s45;d=gh\\:764 foo"
+            string message = @"@a=b\\and\nk;c=72\s45;d=gh\:764 foo"
                 + "\r\n";
 
             using(Token token = AssertParsed(message))
@@ -1027,7 +1029,7 @@ namespace ThePlague.IRC.Parser.Tests
                             (
                                 t,
                                 TokenType.TagValue,
-                                @"b\\\\and\\nk" //does not unescape
+                                "b\\and\nk"
                             );
                         },
                         (Token t) =>
@@ -1042,7 +1044,7 @@ namespace ThePlague.IRC.Parser.Tests
                             (
                                 t,
                                 TokenType.TagValue,
-                                @"72\\s45" //does not unescape
+                                @"72 45"
                             );
                         },
                         (Token t) =>
@@ -1057,7 +1059,7 @@ namespace ThePlague.IRC.Parser.Tests
                             (
                                 t,
                                 TokenType.TagValue,
-                                @"gh\\:764" //does not unescape
+                                @"gh;764"
                             );
                         }
                     }
@@ -1663,7 +1665,7 @@ namespace ThePlague.IRC.Parser.Tests
         [Fact]
         public void EscapedTagPrefixCommandTest_2()
         {
-            string message = @"@foo=\\\\\\\\\\:\\\\s\\s\\r\\n COMMAND"
+            string message = @"@foo=\\\\\:\\s\s\r\n COMMAND"
                 + "\r\n";
 
             using(Token token = AssertParsed(message))
@@ -1687,7 +1689,7 @@ namespace ThePlague.IRC.Parser.Tests
                             (
                                 t,
                                 TokenType.TagValue,
-                                @"\\\\\\\\\\:\\\\s\\s\\r\\n" //does not unescape
+                                "\\\\;\\s \r\n"
                             );
                         }
                     }
@@ -2037,7 +2039,7 @@ namespace ThePlague.IRC.Parser.Tests
             Assert.Equal
             (
                 (Utf8String)equalityComparer,
-                new Utf8String(foundToken.Sequence)
+                foundToken.ToUtf8String()
             );
         }
 
@@ -2062,7 +2064,7 @@ namespace ThePlague.IRC.Parser.Tests
             Assert.Equal
             (
                 new Utf8String(equalityComparer),
-                new Utf8String(foundToken.Sequence)
+                foundToken.ToUtf8String()
             );
         }
 
@@ -2100,7 +2102,8 @@ namespace ThePlague.IRC.Parser.Tests
             string message
         )
         {
-            ReadOnlySequenceSegment<byte> segment = new StringSequence(message);
+            ReadOnlySequenceSegment<byte> segment
+                = new Utf8StringSequenceSegment(message);
 
             return new ReadOnlySequence<byte>
             (
@@ -2110,6 +2113,7 @@ namespace ThePlague.IRC.Parser.Tests
                 segment.Memory.Length
             );
         }
+
         #endregion
     }
 }

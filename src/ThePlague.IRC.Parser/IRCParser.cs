@@ -1,8 +1,6 @@
 using System;
 using System.Buffers;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Threading;
 
 using ThePlague.IRC.Parser.Tokens;
 
@@ -23,27 +21,26 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            SequenceReader<byte> sequenceReader
-                = new SequenceReader<byte>(sequence);
-
-            //check reader if it might contain a message
-            ReadOnlySequence<byte> message;
-            if(!sequenceReader.TryReadTo
+            //check if sequence contains a LineFeed (a full message)
+            SequencePosition? lf = sequence.PositionOf
             (
-                out message,
-                (byte)Terminal.LineFeed,
-                true
-            ))
+                (byte)TokenType.LineFeed
+            );
+
+            if(!lf.HasValue)
             {
                 token = null;
                 return false;
             }
 
-            //initialize new reader alligned to the "message"
-            sequenceReader = new SequenceReader<byte>
+            ReadOnlySequence<byte> message = sequence.Slice
             (
-                sequence.Slice(sequence.Start, message.Length + 1)
+                0,
+                sequence.GetOffset(lf.Value) + 1 //slice WITH LineFeed included
             );
+
+            SequenceReader<byte> sequenceReader
+                = new SequenceReader<byte>(message);
 
             token = ParseMessage(ref sequenceReader);
             return true;
@@ -51,15 +48,23 @@ namespace ThePlague.IRC.Parser
 
         //combine 2 tokens as linked list and return currently added item
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static Token Combine(Token left, Token right)
+        public static Token Combine(Token left, Token right)
         {
             if(left is null)
             {
                 return right;
             }
 
-            left.Next = right;
-            right.Previous = left;
+            //TODO: verify
+            if(right is null)
+            {
+                return left;
+            }
+
+            Token leftToken = left.GetLastToken();
+
+            leftToken.Next = right;
+            right.Previous = leftToken;
 
             return right;
         }

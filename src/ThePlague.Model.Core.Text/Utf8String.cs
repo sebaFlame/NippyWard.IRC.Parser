@@ -6,11 +6,15 @@ namespace ThePlague.Model.Core.Text
 {
     public class Utf8String : IEquatable<Utf8String>
     {
-        public int Length => (int)this._Buffer.Length;
+        public ReadOnlySequence<byte> Buffer => this._buffer;
+        public int Length => (int)this._buffer.Length;
+        public bool IsEmpty => this._buffer.IsEmpty;
 
-        internal readonly ReadOnlySequence<byte> _Buffer;
+        public static readonly Utf8String Empty;
 
-        private static Encoding _Utf8Encoding;
+        private readonly ReadOnlySequence<byte> _buffer;
+
+        private static readonly Encoding _Utf8Encoding;
 
         [ThreadStatic]
         private static Encoder _Encoder;
@@ -21,11 +25,12 @@ namespace ThePlague.Model.Core.Text
         static Utf8String()
         {
             _Utf8Encoding = new UTF8Encoding(false, true);
+            Empty = new Utf8String(ReadOnlySequence<byte>.Empty);
         }
 
         public Utf8String(ReadOnlySequence<byte> str)
         {
-            this._Buffer = str;
+            this._buffer = str;
         }
 
         public Utf8String(ReadOnlyMemory<byte> str)
@@ -37,7 +42,10 @@ namespace ThePlague.Model.Core.Text
         { }
 
         public Utf8CodePointEnumerator GetEnumerator()
-            => new Utf8CodePointEnumerator(this._Buffer);
+            => new Utf8CodePointEnumerator(this._buffer);
+
+        public SequenceReader<byte> CreateSequenceReader()
+            => new SequenceReader<byte>(this._buffer);
 
         public override bool Equals(object obj)
         {
@@ -49,6 +57,12 @@ namespace ThePlague.Model.Core.Text
             return false;
         }
 
+        public Utf8String Slice(int start, int length)
+            => new Utf8String(this._buffer.Slice(start, length));
+
+        public Utf8String Slice(int start)
+            => new Utf8String(this._buffer.Slice(start));
+
 #nullable enable
         public bool Equals(Utf8String? other)
             => Utf8String.Equals(this, other);
@@ -57,7 +71,7 @@ namespace ThePlague.Model.Core.Text
             => Utf8String.Equals(this, other, stringComparison);
 
         public static bool Equals(Utf8String? left, Utf8String? right)
-            => Utf8StringComparer.Ordinal.Equals(left, right);
+            => BaseUtf8StringComparer.Ordinal.Equals(left, right);
 
         public static int Compare
         (
@@ -115,7 +129,7 @@ namespace ThePlague.Model.Core.Text
 #nullable disable
 
         public override int GetHashCode()
-            => Utf8StringComparer.Ordinal.GetHashCode(this);
+            => BaseUtf8StringComparer.Ordinal.GetHashCode(this);
 
         public override string ToString()
             => (string)this;
@@ -137,7 +151,7 @@ namespace ThePlague.Model.Core.Text
             decoder = _Decoder;
             decoder.Reset();
 
-            ReadOnlySequence<byte> sequence = str._Buffer;
+            ReadOnlySequence<byte> sequence = str._buffer;
 
             //should always be longer if multibyte
             char[] currentString = new char[sequence.Length];

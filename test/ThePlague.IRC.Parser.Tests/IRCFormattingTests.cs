@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Xunit;
-using Xunit.Abstractions;
 
-using ThePlague.IRC.Parser;
 using ThePlague.IRC.Parser.Tokens;
-using ThePlague.Model.Core.Text;
 
 namespace ThePlague.IRC.Parser.Tests
 {
@@ -74,30 +71,30 @@ namespace ThePlague.IRC.Parser.Tests
                 Assert.Equal(6, formats.Count);
 
                 int index = 0;
-                Assert.Equal(TokenType.Bold, formats[index++].Child.TokenType);
+                Assert.Equal(TokenType.BoldFormat, formats[index++].Child.TokenType);
                 Assert.Equal
                 (
-                    TokenType.Italics,
+                    TokenType.ItalicsFormat,
                     formats[index++].Child.TokenType
                 );
                 Assert.Equal
                 (
-                    TokenType.Monospace,
+                    TokenType.MonospaceFormat,
                     formats[index++].Child.TokenType
                 );
                 Assert.Equal
                 (
-                    TokenType.Underline,
+                    TokenType.UnderlineFormat,
                     formats[index++].Child.TokenType
                 );
                 Assert.Equal
                 (
-                    TokenType.Strikethrough,
+                    TokenType.StrikethroughFormat,
                     formats[index++].Child.TokenType
                 );
                 Assert.Equal
                 (
-                    TokenType.Reset,
+                    TokenType.ResetFormat,
                     formats[index++].Child.TokenType
                 );
             }

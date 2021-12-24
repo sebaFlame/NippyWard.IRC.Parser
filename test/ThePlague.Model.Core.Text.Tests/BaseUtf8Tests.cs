@@ -5,8 +5,6 @@ using System.Text;
 
 using Xunit;
 
-using ThePlague.Model.Core.Text;
-
 namespace ThePlague.Model.Core.Text.Tests
 {
     public abstract class BaseUtf8Tests
@@ -30,8 +28,6 @@ namespace ThePlague.Model.Core.Text.Tests
             Utf8String str = new Utf8String(this.LowerString);
 
             Assert.NotNull(str);
-
-            int index = 0;
 
             ReadOnlySpan<char> span = this.LowerString.AsSpan();
             Utf8CodePointEnumerator enumerator = str.GetEnumerator();
@@ -84,7 +80,7 @@ namespace ThePlague.Model.Core.Text.Tests
             Assert.NotNull(lStr);
             Assert.NotNull(rStr);
 
-            Utf8StringComparer comparer = Utf8StringComparer.OrdinalIgnoreCase;
+            BaseUtf8StringComparer comparer = BaseUtf8StringComparer.OrdinalIgnoreCase;
             Assert.True(comparer.Equals(lStr, rStr));
         }
 
@@ -97,7 +93,7 @@ namespace ThePlague.Model.Core.Text.Tests
             Assert.NotNull(lStr);
             Assert.NotNull(rStr);
 
-            Utf8StringComparer comparer = Utf8StringComparer.OrdinalIgnoreCase;
+            BaseUtf8StringComparer comparer = BaseUtf8StringComparer.OrdinalIgnoreCase;
             Assert.False(comparer.Equals(lStr, rStr));
         }
 
@@ -121,7 +117,7 @@ namespace ThePlague.Model.Core.Text.Tests
         public void HashingIgnoreCaseTest()
         {
             HashSet<Utf8String> hash =
-                new HashSet<Utf8String>(Utf8StringComparer.OrdinalIgnoreCase);
+                new HashSet<Utf8String>(BaseUtf8StringComparer.OrdinalIgnoreCase);
 
             Utf8String str = new Utf8String(this.LowerString);
 
@@ -228,7 +224,7 @@ namespace ThePlague.Model.Core.Text.Tests
             Assert.NotNull(lStr);
             Assert.NotNull(rStr);
 
-            Utf8StringComparer comparer = Utf8StringComparer.OrdinalIgnoreCase;
+            BaseUtf8StringComparer comparer = BaseUtf8StringComparer.OrdinalIgnoreCase;
             Assert.True(comparer.Equals(lStr, rStr));
         }
 
@@ -262,7 +258,7 @@ namespace ThePlague.Model.Core.Text.Tests
         public void HashingMultiSegmentIgnoreCaseTest()
         {
             HashSet<Utf8String> hash =
-                new HashSet<Utf8String>(Utf8StringComparer.OrdinalIgnoreCase);
+                new HashSet<Utf8String>(BaseUtf8StringComparer.OrdinalIgnoreCase);
 
             ReadOnlySequence<byte> lSeq = CreateSequence
             (

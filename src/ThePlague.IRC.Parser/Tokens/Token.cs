@@ -1,13 +1,16 @@
 using System;
 using System.Buffers;
 
+using ThePlague.Model.Core.Text;
+
 namespace ThePlague.IRC.Parser.Tokens
 {
     public class Token : IDisposable
     {
         public TokenType TokenType { get; private set; }
-        public bool IsEmpty => this.Sequence.IsEmpty;
-        public ReadOnlySequence<byte> Sequence { get; private set; }
+        public bool IsEmpty => this.Sequence.IsEmpty && this.Child is null;
+        public int Length => (int)this.Sequence.Length;
+        public ReadOnlySequence<byte> Sequence { get; internal set; }
 
         public Token Next { get; internal set; }
         public Token Previous { get; internal set; }
@@ -40,15 +43,51 @@ namespace ThePlague.IRC.Parser.Tokens
         public Token
         (
             TokenType tokenType,
+            in ReadOnlyMemory<byte> memory
+        )
+            : this(tokenType, new ReadOnlySequence<byte>(memory))
+        { }
+
+        public Token
+        (
+            TokenType tokenType,
             in ReadOnlySequence<byte> sequence,
-            Token children
+            Token child
         )
             : this(tokenType, sequence)
         {
-            this.Child = children;
+            this.Child = child;
+        }
+
+        internal Token
+        (
+            TokenType tokenType,
+            Token child
+        )
+            : this(tokenType, default, child)
+        { }
+
+        ~Token()
+        {
+            this.Dispose(false);
+        }
+
+        public Utf8String ToUtf8String()
+        {
+            if(this.TokenType == TokenType.TagValue)
+            {
+                return this.TagUnescape();
+            }
+            else
+            {
+                return new Utf8String(this.Sequence);
+            }
         }
 
         public void Dispose()
+            => this.Dispose(true);
+
+        public void Dispose(bool isDisposing)
         {
             this.Child?.Dispose();
             this.Next?.Dispose();

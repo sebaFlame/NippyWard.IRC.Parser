@@ -1,9 +1,8 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace ThePlague.Model.Core.Text
 {
-    public class Utf8OrdinalIgnoreCaseStringComparer : Utf8StringComparer
+    public class Utf8OrdinalIgnoreCaseStringComparer : BaseUtf8StringComparer
     {
         public static Utf8OrdinalIgnoreCaseStringComparer Instance => new();
 

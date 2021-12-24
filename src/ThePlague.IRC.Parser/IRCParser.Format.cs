@@ -47,21 +47,22 @@ namespace ThePlague.IRC.Parser
         private static bool TryParseBold
         (
             ref SequenceReader<byte> reader,
-            out Token bold
+            out Token boldFormat
         )
         {
             SequencePosition startPosition = reader.Position;
 
-            if(!MatchTerminal(Terminal.Bold, ref reader))
+            if(!TryParseTerminal(TokenType.Bold, ref reader, out Token bold))
             {
-                bold = null;
+                boldFormat = null;
                 return false;
             }
 
-            bold = new Token
+            boldFormat = new Token
             (
-                TokenType.Bold,
-                reader.Sequence.Slice(startPosition, reader.Position)
+                TokenType.BoldFormat,
+                reader.Sequence.Slice(startPosition, reader.Position),
+                bold
             );
 
             return true;
@@ -71,21 +72,27 @@ namespace ThePlague.IRC.Parser
         private static bool TryParseItalics
         (
             ref SequenceReader<byte> reader,
-            out Token italics
+            out Token italicsFormat
         )
         {
             SequencePosition startPosition = reader.Position;
 
-            if(!MatchTerminal(Terminal.Italics, ref reader))
+            if(!TryParseTerminal
+            (
+                TokenType.Italics,
+                ref reader,
+                out Token italics
+            ))
             {
-                italics = null;
+                italicsFormat = null;
                 return false;
             }
 
-            italics = new Token
+            italicsFormat = new Token
             (
-                TokenType.Italics,
-                reader.Sequence.Slice(startPosition, reader.Position)
+                TokenType.ItalicsFormat,
+                reader.Sequence.Slice(startPosition, reader.Position),
+                italics
             );
 
             return true;
@@ -95,21 +102,27 @@ namespace ThePlague.IRC.Parser
         private static bool TryParseUnderline
         (
             ref SequenceReader<byte> reader,
-            out Token underline
+            out Token underlineFormat
         )
         {
             SequencePosition startPosition = reader.Position;
 
-            if(!MatchTerminal(Terminal.Underline, ref reader))
+            if(!TryParseTerminal
+            (
+                TokenType.Underline,
+                ref reader,
+                out Token underline
+            ))
             {
-                underline = null;
+                underlineFormat = null;
                 return false;
             }
 
-            underline = new Token
+            underlineFormat = new Token
             (
-                TokenType.Underline,
-                reader.Sequence.Slice(startPosition, reader.Position)
+                TokenType.UnderlineFormat,
+                reader.Sequence.Slice(startPosition, reader.Position),
+                underline
             );
 
             return true;
@@ -119,21 +132,27 @@ namespace ThePlague.IRC.Parser
         private static bool TryParseStrikethrough
         (
             ref SequenceReader<byte> reader,
-            out Token strikethrough
+            out Token strikethroughFormat
         )
         {
             SequencePosition startPosition = reader.Position;
 
-            if(!MatchTerminal(Terminal.Strikethrough, ref reader))
+            if(!TryParseTerminal
+            (
+                TokenType.Strikethrough,
+                ref reader,
+                out Token strikethrough
+            ))
             {
-                strikethrough = null;
+                strikethroughFormat = null;
                 return false;
             }
 
-            strikethrough = new Token
+            strikethroughFormat = new Token
             (
-                TokenType.Strikethrough,
-                reader.Sequence.Slice(startPosition, reader.Position)
+                TokenType.StrikethroughFormat,
+                reader.Sequence.Slice(startPosition, reader.Position),
+                strikethrough
             );
 
             return true;
@@ -143,21 +162,26 @@ namespace ThePlague.IRC.Parser
         private static bool TryParseMonospace
         (
             ref SequenceReader<byte> reader,
-            out Token monospace
+            out Token monospaceFormat
         )
         {
             SequencePosition startPosition = reader.Position;
 
-            if(!MatchTerminal(Terminal.Monospace, ref reader))
+            if(!TryParseTerminal
+            (
+                TokenType.Monospace,
+                ref reader,
+                out Token monospace))
             {
-                monospace = null;
+                monospaceFormat = null;
                 return false;
             }
 
-            monospace = new Token
+            monospaceFormat = new Token
             (
-                TokenType.Monospace,
-                reader.Sequence.Slice(startPosition, reader.Position)
+                TokenType.MonospaceFormat,
+                reader.Sequence.Slice(startPosition, reader.Position),
+                monospace
             );
 
             return true;
@@ -167,21 +191,27 @@ namespace ThePlague.IRC.Parser
         private static bool TryParseReset
         (
             ref SequenceReader<byte> reader,
-            out Token reset
+            out Token resetFormat
         )
         {
             SequencePosition startPosition = reader.Position;
 
-            if(!MatchTerminal(Terminal.Reset, ref reader))
+            if(!TryParseTerminal
+            (
+                TokenType.Reset,
+                ref reader,
+                out Token reset
+            ))
             {
-                reset = null;
+                resetFormat = null;
                 return false;
             }
 
-            reset = new Token
+            resetFormat = new Token
             (
-                TokenType.Reset,
-                reader.Sequence.Slice(startPosition, reader.Position)
+                TokenType.ResetFormat,
+                reader.Sequence.Slice(startPosition, reader.Position),
+                reset
             );
 
             return true;
@@ -191,26 +221,28 @@ namespace ThePlague.IRC.Parser
         private static bool TryParseColorFormat
         (
             ref SequenceReader<byte> reader,
-            out Token color
+            out Token colorFormat
         )
         {
             SequencePosition startPosition = reader.Position;
 
             //atleast a single color terminal is needed
-            if(!MatchTerminal(Terminal.Color, ref reader))
+            if(!TryParseTerminal(TokenType.Color, ref reader, out Token color))
             {
-                color = null;
+                colorFormat = null;
                 return false;
             }
 
             //parse a color combination or return empty
             Token colorFormatSuffix = ParseColorCombination(ref reader);
 
-            color = new Token
+            Combine(color, colorFormatSuffix);
+
+            colorFormat = new Token
             (
                 TokenType.ColorFormat,
                 reader.Sequence.Slice(startPosition, reader.Position),
-                colorFormatSuffix
+                color
             );
 
             return true;
@@ -285,16 +317,18 @@ namespace ThePlague.IRC.Parser
             SequencePosition startPosition = reader.Position;
 
             //try to match a comma
-            if(MatchTerminal(Terminal.Comma, ref reader))
+            if(TryParseTerminal(TokenType.Comma, ref reader, out Token comma))
             {
                 //try parse backgroudn color
                 if(TryParseBackgroundColor(ref reader, out Token bg))
                 {
+                    Combine(comma, bg);
+
                     return new Token
                     (
                         TokenType.ColorCombinationSuffix,
                         reader.Sequence.Slice(startPosition, reader.Position),
-                        bg
+                        comma
                     );
                 }
                 //allow a comma (as text) after foreground color!
@@ -366,7 +400,7 @@ namespace ThePlague.IRC.Parser
 
                 color = new Token
                 (
-                    TokenType.Color,
+                    TokenType.ColorNumber,
                     reader.Sequence.Slice(startPosition, reader.Position),
                     colorSuffix
                 );
@@ -411,26 +445,33 @@ namespace ThePlague.IRC.Parser
         private static bool TryParseHexColorFormat
         (
             ref SequenceReader<byte> reader,
-            out Token color
+            out Token hexColorFormat
         )
         {
             SequencePosition startPosition = reader.Position;
 
             //match atleast a hexcolor terminal
-            if(!MatchTerminal(Terminal.HexColor, ref reader))
+            if(!TryParseTerminal
+            (
+                TokenType.HexColor,
+                ref reader,
+                out Token hexColor
+            ))
             {
-                color = null;
+                hexColorFormat = null;
                 return false;
             }
 
             //parse as hex color combination or return empty
-            Token colorFormatSuffix = ParseHexColorCombination(ref reader);
+            Token hexColorFormatSuffix = ParseHexColorCombination(ref reader);
 
-            color = new Token
+            Combine(hexColor, hexColorFormatSuffix);
+
+            hexColorFormat = new Token
             (
                 TokenType.HexColorFormat,
                 reader.Sequence.Slice(startPosition, reader.Position),
-                colorFormatSuffix
+                hexColor
             );
 
             return true;
@@ -504,15 +545,17 @@ namespace ThePlague.IRC.Parser
             SequencePosition startPosition = reader.Position;
 
             //match a comma
-            if(MatchTerminal(Terminal.Comma, ref reader))
+            if(TryParseTerminal(TokenType.Comma, ref reader, out Token comma))
             {
                 if(TryParseBackgroundHexColor(ref reader, out Token bg))
                 {
+                    Combine(comma, bg);
+
                     return new Token
                     (
                         TokenType.HexColorCombinationSuffix,
                         reader.Sequence.Slice(startPosition, reader.Position),
-                        bg
+                        comma
                     );
                 }
                 //allow a comma as text!
@@ -571,7 +614,7 @@ namespace ThePlague.IRC.Parser
         )
         {
             SequencePosition startPosition = reader.Position;
-            Token firstChild = null, previous = null, child;
+            Token firstChild, previous, child;
 
             //try to find atleast 1 hex decimal
             if(TryParseHexDecimal(ref reader, out child))
@@ -590,7 +633,7 @@ namespace ThePlague.IRC.Parser
 
                         color = new Token
                         (
-                            TokenType.HexColor,
+                            TokenType.HexColorTriplet,
                             reader.Sequence.Slice
                             (
                                 startPosition,

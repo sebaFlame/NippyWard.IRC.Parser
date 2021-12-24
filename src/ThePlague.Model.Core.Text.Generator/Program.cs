@@ -48,7 +48,7 @@ namespace ThePlague.Model.Core.Text.Generator
             using(StreamWriter bmpWriter =
                   new StreamWriter("BMPMapGenerated.cs", false, Encoding.UTF8))
             {
-            bmpGenerator.GenerateMap(bmpWriter);
+                bmpGenerator.GenerateMap(bmpWriter);
             }
             bmpGenerator.Validate(Console.Out);
 
@@ -57,7 +57,7 @@ namespace ThePlague.Model.Core.Text.Generator
             using(StreamWriter smpWriter =
                   new StreamWriter("SMPMapGenerated.cs", false, Encoding.UTF8))
             {
-          smpGenerator.GenerateMap(smpWriter);
+                smpGenerator.GenerateMap(smpWriter);
             }
             smpGenerator.Validate(Console.Out);
 

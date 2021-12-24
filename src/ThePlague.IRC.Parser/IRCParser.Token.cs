@@ -41,21 +41,28 @@ namespace ThePlague.IRC.Parser
         private static Token ParseTagPrefix(ref SequenceReader<byte> reader)
         {
             SequencePosition startPosition = reader.Position;
+            Token at, tags, space;
 
             //match the '@' as start of the tags
-            if(MatchTerminal(Terminal.AtSign, ref reader))
+            if(TryParseTerminal(TokenType.AtSign, ref reader, out at))
             {
                 //parse all tags
-                Token tags = ParseTags(ref reader);
+                tags = ParseTags(ref reader);
+
+                //create linked list
+                Combine(at, tags);
 
                 //parse trailing space(s)
-                if(MatchSpaces(ref reader))
+                if(TryParseSpaces(ref reader, out space))
                 {
+                    //add trailings space(s) to linked list
+                    Combine(tags, space);
+
                     return new Token
                     (
                         TokenType.TagPrefix,
                         reader.Sequence.Slice(startPosition, reader.Position),
-                        tags
+                        at
                     );
                 }
                 //if no spaces: parsing error!
@@ -128,13 +135,25 @@ namespace ThePlague.IRC.Parser
         )
         {
             SequencePosition startPosition = reader.Position;
-            Token previous = null, first = null;
+            Token previous = null, first = null, semicolon;
 
             //multiple tags are seperated by a semicolon
-            while(MatchTerminal(Terminal.Semicolon, ref reader))
+            while(TryParseTerminal
+            (
+                TokenType.Semicolon,
+                ref reader,
+                out semicolon
+            ))
             {
+                //add semicolon to linked list
+                previous = Combine(previous, semicolon);
+
                 //parse tag and add to children
-                previous = Combine(previous, ParseTag(ref reader));
+                previous = Combine
+                (
+                    previous,
+                    ParseTag(ref reader)
+                );
 
                 if(first is null)
                 {
@@ -180,31 +199,44 @@ namespace ThePlague.IRC.Parser
         }
 
         //parse a single tag key
-        private static Token ParseTagKey
+        internal static Token ParseTagKey
         (
             ref SequenceReader<byte> reader
         )
         {
             SequencePosition startPosition = reader.Position;
+            Token previous = null, first = null;
 
             /* It can start with a client prefix (+)
              * ignore if it doesn't */
-            MatchTerminal(Terminal.Plus, ref reader);
+            if(TryParseTerminal(TokenType.Plus, ref reader, out Token plus))
+            {
+                first = previous = plus;
+            }
 
             //parse atleast a single shortname
             Token shortName = ParseShortName(ref reader);
+
+            if(first is null)
+            {
+                first = previous = shortName;
+            }
+            else
+            {
+                previous = Combine(previous, shortName);
+            }
 
             //parse a possible suffix, if not empty, first shortname is the
             //vendor
             Token tagKeySuffix = ParseTagKeySuffix(ref reader);
 
-            Combine(shortName, tagKeySuffix);
+            Combine(previous, tagKeySuffix);
 
             return new Token
             (
                 TokenType.TagKey,
                 reader.Sequence.Slice(startPosition, reader.Position),
-                shortName
+                first
             );
         }
 
@@ -216,23 +248,31 @@ namespace ThePlague.IRC.Parser
         {
             SequencePosition startPosition = reader.Position;
 
-            //can be empty
-            if(!MatchTerminal(Terminal.Slash, ref reader))
-            {
-                return new Token
-                (
-                    TokenType.TagKeySuffix
-                );
-            }
-            else
+            if(TryParseTerminal
+            (
+                TokenType.Slash,
+                ref reader,
+                out Token slash))
             {
                 Token shortName = ParseShortName(ref reader);
+
+                //add shortName to linked list
+                Combine(slash, shortName);
 
                 return new Token
                 (
                     TokenType.TagKeySuffix,
                     reader.Sequence.Slice(startPosition, reader.Position),
-                    shortName
+                    slash
+                );
+
+            }
+            //can be empty
+            else
+            {
+                return new Token
+                (
+                    TokenType.TagKeySuffix
                 );
             }
         }
@@ -245,17 +285,37 @@ namespace ThePlague.IRC.Parser
         {
             SequencePosition startPosition = reader.Position;
 
+            //parse the shortname prefix
+            Token shortNamePrefix = ParseShortNamePrefix(ref reader);
+
+            //parse the shortname suffix
+            Token shortNameSuffix = ParseShortNameSuffix(ref reader);
+
+            //link prefix and suffix together
+            Combine(shortNamePrefix, shortNameSuffix);
+
+            return new Token
+            (
+                TokenType.ShortName,
+                reader.Sequence.Slice(startPosition, reader.Position),
+                shortNamePrefix
+            );
+        }
+
+        private static Token ParseShortNamePrefix
+        (
+            ref SequenceReader<byte> reader
+        )
+        {
+            SequencePosition startPosition = reader.Position;
+
             //a short name start with an alphanumeric
             if(MatchAlphaNumeric(ref reader))
             {
-                //parse the shortname suffix
-                Token shortNameSuffix = ParseShortNameSuffix(ref reader);
-
                 return new Token
                 (
-                    TokenType.ShortName,
-                    reader.Sequence.Slice(startPosition, reader.Position),
-                    shortNameSuffix
+                    TokenType.ShortNamePrefix,
+                    reader.Sequence.Slice(startPosition, reader.Position)
                 );
             }
             else
@@ -305,7 +365,7 @@ namespace ThePlague.IRC.Parser
 
             //Match 0-9, a-z, A-Z or hyphen and advance if found
             while(IsAlphaNumeric(ref reader, out value)
-               || IsTerminal(Terminal.Minus, value))
+               || IsTerminal(TokenType.Minus, value))
             {
                 found = true;
                 reader.Advance(1);
@@ -326,35 +386,42 @@ namespace ThePlague.IRC.Parser
             return true;
         }
 
-        //parse the tag suffix, which can contaref a value or empty
+        //parse the tag suffix, which can be an equaliyt signe followed by a
+        //value or empty
         private static Token ParseTagSuffix(ref SequenceReader<byte> reader)
         {
             SequencePosition startPosition = reader.Position;
 
+            if(TryParseTerminal
+            (
+                TokenType.EqualitySign,
+                ref reader,
+                out Token equality))
+            {
+                Token tagValue = ParseTagValue(ref reader);
+
+                Combine(equality, tagValue);
+
+                return new Token
+                (
+                    TokenType.TagSuffix,
+                    reader.Sequence.Slice(startPosition, reader.Position),
+                    equality
+                );
+
+            }
             //If it does not start with an equal sign, return empty
-            if(!MatchTerminal(Terminal.EqualitySign, ref reader))
+            else
             {
                 return new Token
                 (
                     TokenType.TagSuffix
                 );
             }
-            //or parse the value
-            else
-            {
-                Token tagValue = ParseTagValue(ref reader);
-
-                return new Token
-                (
-                    TokenType.TagSuffix,
-                    reader.Sequence.Slice(startPosition, reader.Position),
-                    tagValue
-                );
-            }
         }
 
         //try parse tag value or return empty
-        private static Token ParseTagValue(ref SequenceReader<byte> reader)
+        internal static Token ParseTagValue(ref SequenceReader<byte> reader)
         {
             SequencePosition startPosition = reader.Position;
 
@@ -387,13 +454,26 @@ namespace ThePlague.IRC.Parser
         {
             SequencePosition startPosition = reader.Position;
             bool found = false;
+            Token firstChild = null, previous = null, child;
 
-            //parse as long as it's UTF-8 excluding NUL, CR, LF, Semicolon and
-            //space
-            while(IsUTF8WithoutNullCrLfSemiColonSpace(ref reader, out _))
+            //parse as long as it's UTF-8 excluding NUL, CR, LF, Semicolon,
+            //space and backspace
+            while(TryParseUTF8WithoutNullCrLfSemiColonSpace
+            (
+                ref reader,
+                out child
+            ) || TryParseTagValueEscapeList(ref reader, out child))
             {
+                if(firstChild is null)
+                {
+                    firstChild = child;
+                }
+
+                Combine(previous, child);
+
+                previous = child;
+
                 found = true;
-                reader.Advance(1);
             }
 
             if(!found)
@@ -405,10 +485,175 @@ namespace ThePlague.IRC.Parser
             tagValuelist = new Token
             (
                 TokenType.TagValueList,
+                reader.Sequence.Slice(startPosition, reader.Position),
+                firstChild
+            );
+
+            return true;
+        }
+
+        internal static bool TryParseUTF8WithoutNullCrLfSemiColonSpace
+        (
+            ref SequenceReader<byte> reader,
+            out Token token
+        )
+        {
+            SequencePosition startPosition = reader.Position;
+            bool found = false;
+
+            while(IsUTF8WithoutNullCrLfSemiColonSpace(ref reader, out _))
+            {
+                reader.Advance(1);
+                found = true;
+            }
+
+            if(!found)
+            {
+                token = null;
+                return false;
+            }
+
+            token = new Token
+            (
+                TokenType.UTF8WithoutNullCrLfSemiColonSpace,
                 reader.Sequence.Slice(startPosition, reader.Position)
             );
 
             return true;
+        }
+
+        private static bool TryParseTagValueEscapeList
+        (
+            ref SequenceReader<byte> reader,
+            out Token tagValueEscapeList
+        )
+        {
+            SequencePosition startPosition = reader.Position;
+            bool found = false;
+            Token firstChild = null, previous = null, child;
+
+            while(TryParseTagValueEscape(ref reader, out child))
+            {
+                if(firstChild is null)
+                {
+                    firstChild = child;
+                }
+
+                Combine(previous, child);
+
+                previous = child;
+
+                found = true;
+            }
+
+            if(!found)
+            {
+                tagValueEscapeList = null;
+                return false;
+            }
+
+            tagValueEscapeList = new Token
+            (
+                TokenType.TagValueEscapeList,
+                reader.Sequence.Slice(startPosition, reader.Position),
+                firstChild
+            );
+
+            return true;
+        }
+
+        public static bool TryParseTagValueEscape
+        (
+            ref SequenceReader<byte> reader,
+            out Token tagValueEscape
+        )
+        {
+            SequencePosition startPosition = reader.Position;
+
+            if(!TryParseTerminal
+            (
+                TokenType.Backslash,
+                ref reader,
+                out Token backslash
+            ))
+            {
+                tagValueEscape = null;
+                return false;
+            }
+
+            Token tagValueEscapeSuffix = ParseTagValueEscapeSuffix
+            (
+                ref reader
+            );
+
+            Combine(backslash, tagValueEscapeSuffix);
+
+            tagValueEscape = new Token
+            (
+                TokenType.TagValueEscape,
+                reader.Sequence.Slice(startPosition, reader.Position),
+                backslash
+            );
+
+            return true;
+        }
+
+        private static Token ParseTagValueEscapeSuffix
+        (
+            ref SequenceReader<byte> reader
+        )
+        {
+            SequencePosition startPosition = reader.Position;
+            byte value;
+            TokenType tokenType;
+
+            if(IsTerminal(TokenType.N, ref reader, out value)
+                || IsTerminal(TokenType.n, value))
+            {
+                tokenType = TokenType.TagValueEscapeLf;
+            }
+            else if(IsTerminal(TokenType.R, value)
+                || IsTerminal(TokenType.r, value))
+            {
+                tokenType = TokenType.TagValueEscapeCr;
+            }
+            else if(IsTerminal(TokenType.S, value)
+                || IsTerminal(TokenType.s, value))
+            {
+                tokenType = TokenType.TagValueEscapeSpace;
+            }
+            else if(IsTerminal(TokenType.Colon, value))
+            {
+                tokenType = TokenType.TagValueEscapeSemicolon;
+            }
+            else if(IsTerminal(TokenType.Backslash, value))
+            {
+                tokenType = TokenType.TagValueEscapeBackslash;
+            }
+            //invalid slash (NOT IN GRAMMAR)
+            else
+            {
+                tokenType = TokenType.TagValueEscapeInvalid;
+            }
+
+            if(tokenType != TokenType.TagValueEscapeInvalid)
+            {
+                //advance the recognised terminal
+                reader.Advance(1);
+            }
+
+            Token child = new Token
+            (
+                tokenType,
+                reader.Sequence.Slice(startPosition, reader.Position)
+            );
+
+            return new Token
+            (
+                TokenType.TagValueEscapeSuffix,
+                reader.Sequence.Slice(startPosition, reader.Position),
+                child
+            );
         }
 
         //parse the source prefix, or return empty token
@@ -420,20 +665,32 @@ namespace ThePlague.IRC.Parser
             SequencePosition startPosition = reader.Position;
 
             //source prefix always starts with a colon
-            if(MatchTerminal(Terminal.Colon, ref reader))
+            if(TryParseTerminal
+            (
+                TokenType.Colon,
+                ref reader,
+                out Token colon))
             {
                 Token targetPrefixTarget = ParseSourcePrefixTarget(ref reader);
 
-                if(!MatchSpaces(ref reader))
+                Combine(colon, targetPrefixTarget);
+
+                if(!TryParseSpaces
+                (
+                    ref reader,
+                    out Token spaces
+                ))
                 {
                     throw new ParserException("Space expected");
                 }
+
+                Combine(targetPrefixTarget, spaces);
 
                 return new Token
                 (
                     TokenType.SourcePrefix,
                     reader.Sequence.Slice(startPosition, reader.Position),
-                    targetPrefixTarget
+                    colon
                 );
 
             }
@@ -448,7 +705,35 @@ namespace ThePlague.IRC.Parser
         }
 
         //parse the actual source prefix target
-        private static Token ParseSourcePrefixTarget
+        internal static Token ParseSourcePrefixTarget
+        (
+            ref SequenceReader<byte> reader
+        )
+        {
+            SequencePosition startPosition = reader.Position;
+
+            Token sourcePrefixTargetTargetPrefix =
+                ParseSourcePrefixTargetPrefix(ref reader);
+
+            Token sourcePrefixTargetTargetSuffix =
+                ParseSourcePrefixTargetSuffix(ref reader);
+
+            //link prefix and suffix together
+            Combine
+            (
+                sourcePrefixTargetTargetPrefix,
+                sourcePrefixTargetTargetSuffix
+            );
+
+            return new Token
+            (
+                TokenType.SourcePrefixTarget,
+                reader.Sequence.Slice(startPosition, reader.Position),
+                sourcePrefixTargetTargetPrefix
+            );
+        }
+
+        private static Token ParseSourcePrefixTargetPrefix
         (
             ref SequenceReader<byte> reader
         )
@@ -457,24 +742,20 @@ namespace ThePlague.IRC.Parser
             byte value;
 
             //parse atleast 1 alphanumeric or special byte
-            if(!(IsAlphaNumeric(ref reader, out value)
-                || IsSpecial(value)))
-            {
-                throw new ParserException("Alphanumeric or special expected"!);
-            }
-            else
+            if(IsAlphaNumeric(ref reader, out value)
+                || IsSpecial(value))
             {
                 reader.Advance(1);
             }
-
-            Token sourcePrefixTargetTargetSuffix =
-                ParseSourcePrefixTargetSuffix(ref reader);
+            else
+            {
+                throw new ParserException("Alphanumeric or special expected"!);
+            }
 
             return new Token
             (
-                TokenType.SourcePrefixTarget,
-                reader.Sequence.Slice(startPosition, reader.Position),
-                sourcePrefixTargetTargetSuffix
+                TokenType.SourcePrefixTargetPrefix,
+                reader.Sequence.Slice(startPosition, reader.Position)
             );
         }
 
@@ -522,11 +803,11 @@ namespace ThePlague.IRC.Parser
             //exclamationmark, at, minus or a period (host)
             while(IsAlphaNumeric(ref reader, out value)
                 || IsSpecial(value)
-                || IsTerminal(Terminal.ExclamationMark, value)
-                || IsTerminal(Terminal.AtSign, value)
-                || IsTerminal(Terminal.Minus, value)
-                || IsTerminal(Terminal.Period, value)
-                || IsTerminal(Terminal.Tilde, value))
+                || IsTerminal(TokenType.ExclamationMark, value)
+                || IsTerminal(TokenType.AtSign, value)
+                || IsTerminal(TokenType.Minus, value)
+                || IsTerminal(TokenType.Period, value)
+                || IsTerminal(TokenType.Tilde, value))
             {
                 found = true;
                 reader.Advance(1);
@@ -540,7 +821,7 @@ namespace ThePlague.IRC.Parser
 
             sourcePrefixList = new Token
             (
-                TokenType.SourcePrefixTarget,
+                TokenType.SourcePrefixList,
                 reader.Sequence.Slice(startPosition, reader.Position)
             );
 
@@ -606,7 +887,7 @@ namespace ThePlague.IRC.Parser
         }
 
         //parse a command name / continue a command name
-        private static bool TryParseCommandName
+        internal static bool TryParseCommandName
         (
             ref SequencePosition startPosition,
             ref SequenceReader<byte> reader,
@@ -637,7 +918,7 @@ namespace ThePlague.IRC.Parser
         }
 
         //parse a command code / continue a command code
-        private static bool TryParseCommandCode
+        internal static bool TryParseCommandCode
         (
             ref SequencePosition startPosition,
             ref SequenceReader<byte> reader,
@@ -701,18 +982,25 @@ namespace ThePlague.IRC.Parser
             SequencePosition startPosition = reader.Position;
 
             //match one or more spaces and advance
-            if(MatchSpaces(ref reader))
+            if(TryParseSpaces
+            (
+                ref reader,
+                out Token spaces
+            ))
             {
                 //get the parameter suffix containing one or more paramaters,
                 //the called method recurses back on the current to check for
                 //multiple paramaters
                 Token paramsSuffix = ParseParamsSuffix(ref reader);
 
+                //There can be multiple spaces
+                Combine(spaces, paramsSuffix);
+
                 paramsPrefix = new Token
                 (
                     TokenType.ParamsPrefix,
                     reader.Sequence.Slice(startPosition, reader.Position),
-                    paramsSuffix
+                    spaces
                 );
 
                 return true;
@@ -769,7 +1057,7 @@ namespace ThePlague.IRC.Parser
         }
 
         //try parse a middle
-        private static bool TryParseMiddle
+        internal static bool TryParseMiddle
         (
             ref SequenceReader<byte> reader,
             out Token middle
@@ -809,44 +1097,23 @@ namespace ThePlague.IRC.Parser
         )
         {
             SequencePosition startPosition = reader.Position;
-            Token firstMiddlePrefixBase = null, previous = null,
-                      middlePrefixBase;
+            Token first = null, previous = null,
+                      child;
             bool found = false;
             byte value;
 
-            while(true)
+            //first check for space of colon
+            while(!(IsTerminal(TokenType.Space, ref reader, out value)
+                    || IsTerminal(TokenType.Colon, value))
+                && (TryParseMiddlePrefixListTerminals(ref reader, out child)
+                    || TryParseMiddlePrefixListFormatBase(ref reader, out child)))
             {
-                if(IsTerminal(Terminal.Space, ref reader, out value)
-                   || IsTerminal(Terminal.Colon, value))
+                if(first is null)
                 {
-                    break;
+                    first = child;
                 }
-                //try match a digit, hex letter or comma
-                else if(IsDigit(value)
-                    || IsUpperCaseHexLetter(value)
-                    || IsLowerCaseHexLetter(value)
-                    || IsTerminal(Terminal.Comma, value))
-                {
-                    reader.Advance(1);
-                }
-                //try match format, UTF-8 without space, colon, NUL, CR, LF,
-                //hex letter, digit or comma
-                else if(TryParseMiddlePrefixBase
-                        (ref reader, out middlePrefixBase))
-                {
-                    if(firstMiddlePrefixBase is null)
-                    {
-                        firstMiddlePrefixBase = middlePrefixBase;
-                    }
 
-                    Combine(previous, middlePrefixBase);
-
-                    previous = middlePrefixBase;
-                }
-                else
-                {
-                    break;
-                }
+                previous = Combine(previous, child);
 
                 found = true;
             }
@@ -861,7 +1128,41 @@ namespace ThePlague.IRC.Parser
             (
                 TokenType.MiddlePrefixList,
                 reader.Sequence.Slice(startPosition, reader.Position),
-                firstMiddlePrefixBase
+                first
+            );
+
+            return true;
+        }
+
+        private static bool TryParseMiddlePrefixListTerminals
+        (
+            ref SequenceReader<byte> reader,
+            out Token midllePrefixListTerminals
+        )
+        {
+            SequencePosition startPosition = reader.Position;
+            bool found = false;
+            byte value;
+
+            while(IsDigit(ref reader, out value)
+                || IsUpperCaseHexLetter(value)
+                || IsLowerCaseHexLetter(value)
+                || IsTerminal(TokenType.Comma, value))
+            {
+                reader.Advance(1);
+                found = true;
+            }
+
+            if(!found)
+            {
+                midllePrefixListTerminals = null;
+                return false;
+            }
+
+            midllePrefixListTerminals = new Token
+            (
+                TokenType.MiddlePrefixListTerminals,
+                reader.Sequence.Slice(startPosition, reader.Position)
             );
 
             return true;
@@ -869,63 +1170,86 @@ namespace ThePlague.IRC.Parser
 
         //try match format, UTF-8 without space, colon, NUL, CR, LF,
         //hex letter, digit or comma
-        private static bool TryParseMiddlePrefixBase
+        private static bool TryParseMiddlePrefixListFormatBase
         (
             ref SequenceReader<byte> reader,
-            out Token middlePrefixBase
+            out Token middlePrefixListFormatBase
         )
         {
             SequencePosition startPosition = reader.Position;
             bool found = false;
-            Token firstChild = null, previous = null, child = null;
+            Token firstChild = null, previous = null, child;
             byte value;
 
-            while(true)
+            while(!(IsTerminal(TokenType.Space, ref reader, out value)
+                    || IsTerminal(TokenType.Colon, value))
+                && (TryParseMiddlePrefixListFormatBaseTerminals
+            (
+                ref reader,
+                out child
+            ) || TryParseFormat(ref reader, out child)))
             {
-                if(IsTerminal(Terminal.Space, ref reader, out value)
-                   || IsTerminal(Terminal.Colon, value))
+                if(firstChild is null)
                 {
-                    break;
+                    firstChild = child;
                 }
-                //try match a subset of UTF-8 with CTCP
-                else if(IsUTF8WithoutAlphaNumericNullCrLfSpaceCommaColon(value)
-                   || IsLowerCaseLetter(value)
-                   || IsUpperCaseLetter(value)
-                   || IsTerminal(Terminal.CTCP, value))
-                {
-                    reader.Advance(1);
-                }
-                //or try to match a format
-                else if(TryParseFormat(ref reader, out child))
-                {
-                    if(firstChild is null)
-                    {
-                        firstChild = child;
-                    }
 
-                    Combine(previous, child);
+                Combine(previous, child);
 
-                    previous = child;
-                }
-                else
-                {
-                    break;
-                }
+                previous = child;
 
                 found = true;
             }
 
             if(!found)
             {
-                middlePrefixBase = null;
+                middlePrefixListFormatBase = null;
                 return false;
             }
 
-            middlePrefixBase = new Token
+            middlePrefixListFormatBase = new Token
             (
-                TokenType.MiddlePrefixBaseList,
+                TokenType.MiddlePrefixListFormatBase,
                 reader.Sequence.Slice(startPosition, reader.Position),
                 firstChild
+            );
+
+            return true;
+        }
+
+        private static bool TryParseMiddlePrefixListFormatBaseTerminals
+        (
+            ref SequenceReader<byte> reader,
+            out Token midllePrefixListFormatBaseTerminals
+        )
+        {
+            SequencePosition startPosition = reader.Position;
+            bool found = false;
+            byte value;
+
+            while(IsUTF8WithoutAlphaNumericNullCrLfSpaceCommaColon
+            (
+                ref reader,
+                out value
+            )
+                   || IsLowerCaseLetter(value)
+                   || IsUpperCaseLetter(value)
+                   || IsTerminal(TokenType.CTCP, value))
+            {
+                reader.Advance(1);
+                found = true;
+            }
+
+            if(!found)
+            {
+                midllePrefixListFormatBaseTerminals = null;
+                return false;
+            }
+
+            midllePrefixListFormatBaseTerminals = new Token
+            (
+                TokenType.MiddlePrefixListFormatBaseTerminals,
+                reader.Sequence.Slice(startPosition, reader.Position)
             );
 
             return true;
@@ -969,36 +1293,18 @@ namespace ThePlague.IRC.Parser
         {
             SequencePosition startPosition = reader.Position;
             bool found = false;
-            Token firstChild = null, previous = null, child = null;
-            byte value;
+            Token firstChild = null, previous = null, child;
 
-            while(true)
+            while(!IsTerminal(TokenType.Space, ref reader, out _)
+                && (TryParseTerminal(TokenType.Colon, ref reader, out child)
+                    || TryParseMiddlePrefixList(ref reader, out child)))
             {
-                if(IsTerminal(Terminal.Space, ref reader, out value))
+                if(firstChild is null)
                 {
-                    break;
+                    firstChild = child;
                 }
-                //try match a subset of UTF-8 with CTCP
-                else if(IsTerminal(Terminal.Colon, value))
-                {
-                    reader.Advance(1);
-                }
-                else if(TryParseMiddlePrefixList
-                        (ref reader, out child))
-                {
-                    if(firstChild is null)
-                    {
-                        firstChild = child;
-                    }
 
-                    Combine(previous, child);
-
-                    previous = child;
-                }
-                else
-                {
-                    break;
-                }
+                previous = Combine(previous, child);
 
                 found = true;
             }
@@ -1017,7 +1323,6 @@ namespace ThePlague.IRC.Parser
             );
 
             return true;
-
         }
 
         //try parse trailing: middle prefixed with a colon and containing colon
@@ -1031,16 +1336,23 @@ namespace ThePlague.IRC.Parser
             SequencePosition startPosition = reader.Position;
 
             //trailing is always prefixed with a colon
-            if(MatchTerminal(Terminal.Colon, ref reader))
+            if(TryParseTerminal
+            (
+                TokenType.Colon,
+                ref reader,
+                out Token colon
+            ))
             {
                 //a trailing prefix can be empty
                 Token trailingPrefix = ParseTrailingPrefix(ref reader);
+
+                Combine(colon, trailingPrefix);
 
                 trailing = new Token
                 (
                     TokenType.Trailing,
                     reader.Sequence.Slice(startPosition, reader.Position),
-                    trailingPrefix
+                    colon
                 );
 
                 return true;
@@ -1053,7 +1365,7 @@ namespace ThePlague.IRC.Parser
         }
 
         //parse the trailing prefix or return empty
-        private static Token ParseTrailingPrefix
+        internal static Token ParseTrailingPrefix
         (
             ref SequenceReader<byte> reader
         )
@@ -1090,32 +1402,17 @@ namespace ThePlague.IRC.Parser
         {
             SequencePosition startPosition = reader.Position;
             bool found = false;
-            Token firstMiddlePrefix = null, previous = null,
-                  middlePrefixWithColon;
+            Token first = null, previous = null, child;
 
-            while(true)
+            while(TryParseTerminal(TokenType.Space, ref reader, out child)
+                || TryParseMiddlePrefixWithColonList(ref reader, out child))
             {
-                if(IsTerminal(Terminal.Space, ref reader, out _))
+                if(first is null)
                 {
-                    reader.Advance(1);
+                    first = child;
                 }
-                else if(TryParseMiddlePrefixWithColonList
-                    (ref reader, out middlePrefixWithColon))
-                {
-                    //else add the middlePrefixColonList to the children
-                    if(firstMiddlePrefix is null)
-                    {
-                        firstMiddlePrefix = middlePrefixWithColon;
-                    }
 
-                    Combine(previous, middlePrefixWithColon);
-
-                    previous = middlePrefixWithColon;
-                }
-                else
-                {
-                    break;
-                }
+                previous = Combine(previous, child);
 
                 found = true;
             }
@@ -1130,7 +1427,7 @@ namespace ThePlague.IRC.Parser
             (
                 TokenType.TrailingList,
                 reader.Sequence.Slice(startPosition, reader.Position),
-                firstMiddlePrefix
+                first
             );
 
             return true;
@@ -1140,15 +1437,27 @@ namespace ThePlague.IRC.Parser
         private static Token ParseCrLf(ref SequenceReader<byte> reader)
         {
             SequencePosition startPosition = reader.Position;
+            Token cr, lf;
 
-            if(MatchTerminal(Terminal.CarriageReturn, ref reader))
+            if(TryParseTerminal
+            (
+                TokenType.CarriageReturn,
+                ref reader,
+                out cr))
             {
-                if(MatchTerminal(Terminal.LineFeed, ref reader))
+                if(TryParseTerminal
+                (
+                    TokenType.LineFeed,
+                    ref reader,
+                    out lf))
                 {
+                    Combine(cr, lf);
+
                     return new Token
                     (
                         TokenType.CrLf,
-                        reader.Sequence.Slice(startPosition, reader.Position)
+                        reader.Sequence.Slice(startPosition, reader.Position),
+                        cr
                     );
                 }
                 else
@@ -1156,12 +1465,17 @@ namespace ThePlague.IRC.Parser
                     throw new ParserException("CR LF expected");
                 }
             }
-            else if(MatchTerminal(Terminal.LineFeed, ref reader))
+            else if(TryParseTerminal
+            (
+                TokenType.LineFeed,
+                ref reader,
+                out lf))
             {
                 return new Token
                 (
                     TokenType.CrLf,
-                    reader.Sequence.Slice(startPosition, reader.Position)
+                    reader.Sequence.Slice(startPosition, reader.Position),
+                    lf
                 );
             }
 
