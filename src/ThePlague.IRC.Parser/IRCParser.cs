@@ -46,6 +46,14 @@ namespace ThePlague.IRC.Parser
             return true;
         }
 
+        public static Token ParseUserHost(in ReadOnlySequence<byte> sequence)
+        {
+            SequenceReader<byte> sequenceReader
+                = new SequenceReader<byte>(sequence);
+
+            return ParseSourcePrefixTarget(ref sequenceReader);
+        }
+
         //combine 2 tokens as linked list and return currently added item
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Token Combine(Token left, Token right)

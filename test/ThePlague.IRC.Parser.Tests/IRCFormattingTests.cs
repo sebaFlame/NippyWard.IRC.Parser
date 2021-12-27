@@ -26,10 +26,10 @@ namespace ThePlague.IRC.Parser.Tests
                 + "\u000F"
                 + "\r\n";
 
-            using(Token token = IRCMessageTests.AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix
-                IRCMessageTests.AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -37,7 +37,7 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                IRCMessageTests.AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
@@ -46,7 +46,7 @@ namespace ThePlague.IRC.Parser.Tests
 
                 Token formattedMiddle = null;
 
-                IRCMessageTests.AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
@@ -54,7 +54,7 @@ namespace ThePlague.IRC.Parser.Tests
                     new Action<Token>[]
                     {
                         (Token t)
-                        => IRCMessageTests.AssertFirstOfTokenTypeIsEqualTo
+                        => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
@@ -112,10 +112,10 @@ namespace ThePlague.IRC.Parser.Tests
                 + "\u0003,"
                 + "\r\n";
 
-            using(Token token = IRCMessageTests.AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix
-                IRCMessageTests.AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -123,7 +123,7 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                IRCMessageTests.AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
@@ -132,7 +132,7 @@ namespace ThePlague.IRC.Parser.Tests
 
                 Token formattedTrailing = null;
 
-                IRCMessageTests.AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
@@ -140,7 +140,7 @@ namespace ThePlague.IRC.Parser.Tests
                     new Action<Token>[]
                     {
                         (Token t)
-                        => IRCMessageTests.AssertFirstOfTokenTypeIsEqualTo
+                        => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
@@ -163,7 +163,7 @@ namespace ThePlague.IRC.Parser.Tests
                     TokenType.ColorFormat,
                     formats[index].Child.TokenType
                 );
-                IRCMessageTests.AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     formats[index].Child,
                     TokenType.ColorCombination
@@ -176,13 +176,13 @@ namespace ThePlague.IRC.Parser.Tests
                     TokenType.ColorFormat,
                     formats[index].Child.TokenType
                 );
-                IRCMessageTests.AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     formats[index].Child,
                     TokenType.ForegroundColor,
                     "1"
                 );
-                IRCMessageTests.AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     formats[index].Child,
                     TokenType.ColorCombinationSuffix
@@ -195,13 +195,13 @@ namespace ThePlague.IRC.Parser.Tests
                     TokenType.ColorFormat,
                     formats[index].Child.TokenType
                 );
-                IRCMessageTests.AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     formats[index].Child,
                     TokenType.ForegroundColor,
                     "99"
                 );
-                IRCMessageTests.AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     formats[index].Child,
                     TokenType.ColorCombinationSuffix
@@ -214,13 +214,13 @@ namespace ThePlague.IRC.Parser.Tests
                     TokenType.ColorFormat,
                     formats[index].Child.TokenType
                 );
-                IRCMessageTests.AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     formats[index].Child,
                     TokenType.ForegroundColor,
                     "1"
                 );
-                IRCMessageTests.AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     formats[index].Child,
                     TokenType.BackgroundColor,
@@ -234,13 +234,13 @@ namespace ThePlague.IRC.Parser.Tests
                     TokenType.ColorFormat,
                     formats[index].Child.TokenType
                 );
-                IRCMessageTests.AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     formats[index].Child,
                     TokenType.ForegroundColor,
                     "99"
                 );
-                IRCMessageTests.AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     formats[index].Child,
                     TokenType.BackgroundColor,
@@ -254,7 +254,7 @@ namespace ThePlague.IRC.Parser.Tests
                     TokenType.ColorFormat,
                     formats[index].Child.TokenType
                 );
-                IRCMessageTests.AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     formats[index].Child,
                     TokenType.ColorCombination
@@ -274,10 +274,10 @@ namespace ThePlague.IRC.Parser.Tests
                 + "\u0004,"
                 + "\r\n";
 
-            using(Token token = IRCMessageTests.AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix
-                IRCMessageTests.AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -285,7 +285,7 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                IRCMessageTests.AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
@@ -294,7 +294,7 @@ namespace ThePlague.IRC.Parser.Tests
 
                 Token formattedTrailing = null;
 
-                IRCMessageTests.AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
@@ -302,7 +302,7 @@ namespace ThePlague.IRC.Parser.Tests
                     new Action<Token>[]
                     {
                         (Token t)
-                        => IRCMessageTests.AssertFirstOfTokenTypeIsEqualTo
+                        => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
@@ -325,7 +325,7 @@ namespace ThePlague.IRC.Parser.Tests
                     TokenType.HexColorFormat,
                     formats[index].Child.TokenType
                 );
-                IRCMessageTests.AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     formats[index].Child,
                     TokenType.HexColorCombination
@@ -338,13 +338,13 @@ namespace ThePlague.IRC.Parser.Tests
                     TokenType.HexColorFormat,
                     formats[index].Child.TokenType
                 );
-                IRCMessageTests.AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     formats[index].Child,
                     TokenType.ForegroundHexColor,
                     "000000"
                 );
-                IRCMessageTests.AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     formats[index].Child,
                     TokenType.HexColorCombinationSuffix
@@ -357,13 +357,13 @@ namespace ThePlague.IRC.Parser.Tests
                     TokenType.HexColorFormat,
                     formats[index].Child.TokenType
                 );
-                IRCMessageTests.AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     formats[index].Child,
                     TokenType.ForegroundHexColor,
                     "FFFFFF"
                 );
-                IRCMessageTests.AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     formats[index].Child,
                     TokenType.HexColorCombinationSuffix
@@ -376,13 +376,13 @@ namespace ThePlague.IRC.Parser.Tests
                     TokenType.HexColorFormat,
                     formats[index].Child.TokenType
                 );
-                IRCMessageTests.AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     formats[index].Child,
                     TokenType.ForegroundHexColor,
                     "09FA60"
                 );
-                IRCMessageTests.AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     formats[index].Child,
                     TokenType.HexColorCombinationSuffix
@@ -395,13 +395,13 @@ namespace ThePlague.IRC.Parser.Tests
                     TokenType.HexColorFormat,
                     formats[index].Child.TokenType
                 );
-                IRCMessageTests.AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     formats[index].Child,
                     TokenType.ForegroundHexColor,
                     "09FA60"
                 );
-                IRCMessageTests.AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     formats[index].Child,
                     TokenType.BackgroundHexColor,
@@ -415,7 +415,7 @@ namespace ThePlague.IRC.Parser.Tests
                     TokenType.HexColorFormat,
                     formats[index].Child.TokenType
                 );
-                IRCMessageTests.AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     formats[index].Child,
                     TokenType.HexColorCombination

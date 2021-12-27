@@ -1,5 +1,5 @@
 # TODO 
-# Not in modern IRC!
+# MsgTo (Not in modern IRC!)
 #   Username Percent Host
 #   Username At ServerName
 #   Username Percent Host At ServerName
@@ -43,7 +43,13 @@ HexColorCombinationSuffix -> 0x2C BackgroundHexColor | .
 HexColorTriplet -> HexDecimal HexDecimal HexDecimal .
 ForegroundHexColor -> HexColorTriplet .
 BackgroundHexColor -> HexColorTriplet .
+Nickname -> Letter NicknameSuffix | Special NicknameSuffix .
+NicknameSuffix -> Special NicknameSuffix | AlphaNumeric NicknameSuffix | Hyphen NicknameSuffix .
+Username -> UTF8WithoutNullCrLfSpaceAt Username .
+Host -> ShortName HostSuffix .
+HostSuffix -> Dot ShortName HostSuffix | .
 
+# Formatting
 CTCP -> 0x01 .
 BoldFormat -> 0x02 .
 ResetFormat -> 0x0F .
@@ -53,7 +59,7 @@ StrikethroughFormat -> 0x1E .
 UnderlineFormat -> 0x1F .
 Format -> BoldFormat | ItalicsFormat | UnderlineFormat | StrikethroughFormat | MonospaceFormat | ResetFormat | ColorFormat | HexColorFormat .
 
-# Tag escaping
+# Tag escaping. A single backslash should be ignored (NOT added into grammar)
 TagValueEscape -> 0x5C TagValueEscapeSuffix .
 TagValueEscapeSuffix -> TagValueEscapeBackslash | TagValueEscapeSemicolon | TagValueEscapeSpace | TagValueEscapeCr | TagValueEscapeLf .
 TagValueEscapeBackslash -> 0x5C .
@@ -72,6 +78,9 @@ UTF8WithoutAlphaNumericFormatCTCPNullCrLfSpaceCommaColon -> UTF8WithoutAlphaNume
 UTF8WithoutNullCrLFBase -> UTF8WithoutAlphaNumericFormatCTCPNullCrLFBase | AlphaNumeric | 0x01 | 0x02 | 0x03 | 0x04 | 0x0F | 0x11 | 0x1D | 0x1E | 0x1F .
 UTF8WithoutNullCrLfSemiColonSpace -> UTF8WithoutNullCrLFBase | 0x07 | 0x2C | 0x3A | 0x40 | 0x5B | 0x5D | 0x5E | 0x5F | 0x60 | 0x7B | 0x7C | 0x7D .
 
+# Username terminal collection
+UTF8WithoutNullCrLfSpaceAt -> UTF8WithoutNullCrLFBase | 0x07 | 0x2C | 0x3A | 0x3B | Special .
+
 # Command base
 MiddlePrefixListFormatBaseTerminals -> UTF8WithoutAlphaNumericFormatCTCPNullCrLfSpaceCommaColon MiddlePrefixListFormatBaseTerminals | LowerCaseLetter MiddlePrefixListFormatBaseTerminals | UpperCaseLetter MiddlePrefixListFormatBaseTerminals | 0x01 MiddlePrefixListFormatBaseTerminals .
 MiddlePrefixListFormatBase ->  Format MiddlePrefixListFormatBase | MiddlePrefixListFormatBaseTerminals MiddlePrefixListFormatBase .
@@ -79,6 +88,7 @@ MiddlePrefixListTerminals -> Digit MiddlePrefixListTerminals | UpperCaseHexLette
 MiddlePrefixList -> MiddlePrefixListFormatBase MiddlePrefixList | MiddlePrefixListTerminals MiddlePrefixList .
 MiddlePrefixWithColonList -> MiddlePrefixList MiddlePrefixWithColonList | 0x3A MiddlePrefixWithColonList .
 
+# Params base
 MiddleSuffix -> MiddlePrefixWithColonList | .
 Middle -> MiddlePrefixList MiddleSuffix .
 Trailing -> 0x3A TrailingPrefix .
@@ -107,9 +117,14 @@ TagValue -> TagValueList | .
 TagValueList -> UTF8WithoutNullCrLfSemiColonSpace TagValueList | TagValueEscapeList TagValueList .
 TagValueEscapeList -> TagValueEscape TagValueEscapeList .
 
-# Target prefix
-SourcePrefix -> 0x3A SourcePrefixList Spaces | .
+# Source prefix (Terminals are taken from ServerName & Nickname)
+SourcePrefix -> 0x3A SourcePrefixTarget Spaces | .
+SourcePrefixTargetTerminals -> SourcePrefixTargetPrefixPrefix | 0x2D | 0x2E .
 SourcePrefixTarget -> SourcePrefixTargetPrefix SourcePrefixTargetSuffix .
-SourcePrefixTargetPrefix -> AlphaNumeric | Special .
-SourcePrefixTargetSuffix -> SourcePrefixList | .
-SourcePrefixList -> AlphaNumeric SourcePrefixList | Special SourcePrefixList | 0x21 SourcePrefixList | 0x40 SourcePrefixList | 0x2D SourcePrefixList | 0x2E SourcePrefixList | 0x7E SourcePrefixList .
+SourcePrefixTargetPrefix -> SourcePrefixTargetPrefixPrefix SourcePrefixTargetPrefixSuffix .
+SourcePrefixTargetPrefixPrefix -> AlphaNumeric | Special .
+SourcePrefixTargetPrefixSuffix -> SourcePrefixTargetPrefixTargetList | .
+SourcePrefixTargetPrefixTargetList -> SourcePrefixTargetTerminals SourcePrefixTargetPrefixTargetList .
+SourcePrefixTargetSuffix -> SourcePrefixUsername SourcePrefixHostname .
+SourcePrefixUsername -> 0x21 Username | .
+SourcePrefixHostname -> 0x40 Host | .

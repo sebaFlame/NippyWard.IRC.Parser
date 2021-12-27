@@ -135,6 +135,9 @@ namespace ThePlague.IRC.Parser.Tokens
         Delete,                  //7F
         //next are non-terminals in 2nd byte
         Message = 1 << 8,
+        Username,
+        Host,
+        HostSuffix,
         TagPrefix,
         Tags,
         Tag,
@@ -157,8 +160,12 @@ namespace ThePlague.IRC.Parser.Tokens
         SourcePrefix,
         SourcePrefixTarget,
         SourcePrefixTargetPrefix,
+        SourcePrefixTargetPrefixPrefix,
+        SourcePrefixTargetPrefixSuffix,
+        SourcePrefixTargetPrefixTargetList,
         SourcePrefixTargetSuffix,
-        SourcePrefixList,
+        SourcePrefixUsername,
+        SourcePrefixHostname,
         Command,
         ErroneousMessage,
         CommandName,

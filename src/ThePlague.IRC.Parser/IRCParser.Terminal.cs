@@ -604,6 +604,33 @@ namespace ThePlague.IRC.Parser
                 || IsTerminal(TokenType.AtSign, value)
                 || IsSpecial(value);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsUTF8WithoutNullCrLfSpaceAt
+        (
+            ref SequenceReader<byte> reader,
+            out byte value
+        )
+        {
+            if(!reader.TryPeek(out value))
+            {
+                return false;
+            }
+
+            return IsUTF8WithoutNullCrLfSpaceAt(value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsUTF8WithoutNullCrLfSpaceAt
+        (
+            byte value
+        )
+            => IsUTF8WithoutNullCrLFBase(value)
+                || IsTerminal(TokenType.Bell, value)
+                || IsTerminal(TokenType.Comma, value)
+                || IsTerminal(TokenType.Semicolon, value)
+                || IsTerminal(TokenType.Colon, value)
+                || IsSpecial(value);
+
         private static bool MatchHexDigit(ref SequenceReader<byte> reader)
         {
             if(IsHexDigit(ref reader, out _))

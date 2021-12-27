@@ -26,10 +26,10 @@ namespace ThePlague.IRC.Parser.Tests
                + @" JupiterNET IRC Network seba!tkr@192.168.2.3"
                + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //check prefix
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -37,7 +37,7 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command code
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandCode,
@@ -45,20 +45,20 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //verify the parameters
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "seba"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.TrailingPrefix,
@@ -77,10 +77,10 @@ namespace ThePlague.IRC.Parser.Tests
                + @" :#bleh"
                + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //check prefix
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -88,7 +88,7 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
@@ -96,14 +96,14 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //verify the parameters
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.TrailingPrefix,
@@ -119,17 +119,17 @@ namespace ThePlague.IRC.Parser.Tests
         {
             string message = @"MODE seba :+iwx" + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix is empty
-                AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     token,
                     TokenType.SourcePrefix
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
@@ -137,20 +137,20 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //verify the parameters
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "seba"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.TrailingPrefix,
@@ -166,30 +166,30 @@ namespace ThePlague.IRC.Parser.Tests
         {
             string message = @"@url=;netsplit=tur,ty JOIN #bleh,#derp" + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix is empty
-                AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     token,
                     TokenType.SourcePrefix
                 );
 
                 //verify the tags
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Tags,
                     TokenType.Tag,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Tag,
                             "url="
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Tag,
@@ -199,7 +199,7 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
@@ -207,14 +207,14 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //verify the parameters
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
@@ -281,21 +281,21 @@ namespace ThePlague.IRC.Parser.Tests
             using(token)
             {
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "CMD"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
@@ -363,21 +363,21 @@ namespace ThePlague.IRC.Parser.Tests
             using(token)
             {
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "CMD"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.TrailingPrefix,
@@ -396,43 +396,43 @@ namespace ThePlague.IRC.Parser.Tests
         {
             string message = @"foo bar baz asdf" + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix is empty
-                AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     token,
                     TokenType.SourcePrefix
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "foo"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "bar"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "baz"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
@@ -448,10 +448,10 @@ namespace ThePlague.IRC.Parser.Tests
         {
             string message = @":coolguy foo bar baz asd" + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix is empty
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -459,33 +459,33 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "foo"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "bar"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "baz"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
@@ -501,43 +501,43 @@ namespace ThePlague.IRC.Parser.Tests
         {
             string message = @"foo bar baz :asdf quux" + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix is empty
-                AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     token,
                     TokenType.SourcePrefix
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "foo"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "bar"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "baz"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.TrailingPrefix,
@@ -553,43 +553,43 @@ namespace ThePlague.IRC.Parser.Tests
         {
             string message = @"foo bar baz :" + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix is empty
-                AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     token,
                     TokenType.SourcePrefix
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "foo"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "bar"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "baz"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEmpty
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                         (
                             t,
                             TokenType.TrailingPrefix
@@ -604,43 +604,43 @@ namespace ThePlague.IRC.Parser.Tests
         {
             string message = @"foo bar baz ::asdf" + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix is empty
-                AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     token,
                     TokenType.SourcePrefix
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "foo"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "bar"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "baz"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.TrailingPrefix,
@@ -656,10 +656,10 @@ namespace ThePlague.IRC.Parser.Tests
         {
             string message = @":coolguy foo bar baz :asdf quux" + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -667,33 +667,33 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "foo"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "bar"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "baz"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.TrailingPrefix,
@@ -709,10 +709,10 @@ namespace ThePlague.IRC.Parser.Tests
         {
             string message = @":coolguy foo bar baz :  asdf quux " + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -720,33 +720,33 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "foo"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "bar"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "baz"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.TrailingPrefix,
@@ -762,10 +762,10 @@ namespace ThePlague.IRC.Parser.Tests
         {
             string message = @":coolguy PRIVMSG bar :lol :) " + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -773,27 +773,27 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "PRIVMSG"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "bar"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.TrailingPrefix,
@@ -809,10 +809,10 @@ namespace ThePlague.IRC.Parser.Tests
         {
             string message = @":coolguy foo bar baz :" + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -820,33 +820,33 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "foo"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "bar"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "baz"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEmpty
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                         (
                             t,
                             TokenType.TrailingPrefix
@@ -861,10 +861,10 @@ namespace ThePlague.IRC.Parser.Tests
         {
             string message = @":coolguy foo bar baz :  " + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -872,33 +872,33 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "foo"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "bar"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "baz"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.TrailingPrefix,
@@ -914,9 +914,9 @@ namespace ThePlague.IRC.Parser.Tests
         {
             string message = @"@a=b;c=32;k;rt=ql7 foo" + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Tags,
@@ -925,13 +925,13 @@ namespace ThePlague.IRC.Parser.Tests
                     {
                         (Token t) =>
                         {
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagKey,
                                 "a"
                             );
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagValue,
@@ -940,13 +940,13 @@ namespace ThePlague.IRC.Parser.Tests
                         },
                         (Token t) =>
                         {
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagKey,
                                 "c"
                             );
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagValue,
@@ -955,13 +955,13 @@ namespace ThePlague.IRC.Parser.Tests
                         },
                         (Token t) =>
                         {
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagKey,
                                 "k"
                             );
-                            AssertFirstOfTokenTypeIsEmpty
+                            AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                             (
                                 t,
                                 TokenType.TagSuffix
@@ -969,13 +969,13 @@ namespace ThePlague.IRC.Parser.Tests
                         },
                         (Token t) =>
                         {
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagKey,
                                 "rt"
                             );
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagValue,
@@ -986,14 +986,14 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //Verify prefix
-                AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     token,
                     TokenType.SourcePrefix
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
@@ -1008,9 +1008,9 @@ namespace ThePlague.IRC.Parser.Tests
             string message = @"@a=b\\and\nk;c=72\s45;d=gh\:764 foo"
                 + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Tags,
@@ -1019,13 +1019,13 @@ namespace ThePlague.IRC.Parser.Tests
                     {
                         (Token t) =>
                         {
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagKey,
                                 "a"
                             );
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagValue,
@@ -1034,13 +1034,13 @@ namespace ThePlague.IRC.Parser.Tests
                         },
                         (Token t) =>
                         {
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagKey,
                                 "c"
                             );
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagValue,
@@ -1049,13 +1049,13 @@ namespace ThePlague.IRC.Parser.Tests
                         },
                         (Token t) =>
                         {
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagKey,
                                 "d"
                             );
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagValue,
@@ -1066,14 +1066,14 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //Verify prefix
-                AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     token,
                     TokenType.SourcePrefix
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
@@ -1087,9 +1087,9 @@ namespace ThePlague.IRC.Parser.Tests
         {
             string message = @"@c;h=;a=b :quux ab cd" + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Tags,
@@ -1098,13 +1098,13 @@ namespace ThePlague.IRC.Parser.Tests
                     {
                         (Token t) =>
                         {
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagKey,
                                 "c"
                             );
-                            AssertFirstOfTokenTypeIsEmpty
+                            AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                             (
                                 t,
                                 TokenType.TagSuffix
@@ -1112,13 +1112,13 @@ namespace ThePlague.IRC.Parser.Tests
                         },
                         (Token t) =>
                         {
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagKey,
                                 "h"
                             );
-                            AssertFirstOfTokenTypeIsEmpty
+                            AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                             (
                                 t,
                                 TokenType.TagValue
@@ -1126,13 +1126,13 @@ namespace ThePlague.IRC.Parser.Tests
                         },
                         (Token t) =>
                         {
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagKey,
                                 "a"
                             );
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagValue,
@@ -1143,7 +1143,7 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //Verify prefix
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -1151,21 +1151,21 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "ab"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
@@ -1182,10 +1182,10 @@ namespace ThePlague.IRC.Parser.Tests
         {
             string message = @":src JOIN #chan" + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -1193,21 +1193,21 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "JOIN"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
@@ -1223,10 +1223,10 @@ namespace ThePlague.IRC.Parser.Tests
         {
             string message = @":src JOIN :#chan" + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -1234,21 +1234,21 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "JOIN"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.TrailingPrefix,
@@ -1264,10 +1264,10 @@ namespace ThePlague.IRC.Parser.Tests
         {
             string message = @":src AWAY" + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -1275,14 +1275,14 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "AWAY"
                 );
 
-                AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     token,
                     TokenType.Params
@@ -1295,10 +1295,10 @@ namespace ThePlague.IRC.Parser.Tests
         {
             string message = @":src AWAY " + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -1306,14 +1306,14 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "AWAY"
                 );
 
-                AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     token,
                     TokenType.ParamsSuffix
@@ -1332,10 +1332,10 @@ namespace ThePlague.IRC.Parser.Tests
                 + " :param3 param3"
                 + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Tags,
@@ -1344,13 +1344,13 @@ namespace ThePlague.IRC.Parser.Tests
                     {
                         (Token t) =>
                         {
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagKey,
                                 "tag1"
                             );
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagValue,
@@ -1359,13 +1359,13 @@ namespace ThePlague.IRC.Parser.Tests
                         },
                         (Token t) =>
                         {
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagKey,
                                 "tag2"
                             );
-                            AssertFirstOfTokenTypeIsEmpty
+                            AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                             (
                                 t,
                                 TokenType.TagSuffix
@@ -1373,13 +1373,13 @@ namespace ThePlague.IRC.Parser.Tests
                         },
                         (Token t) =>
                         {
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagKey,
                                 "vendor1/tag3"
                             );
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagValue,
@@ -1388,13 +1388,13 @@ namespace ThePlague.IRC.Parser.Tests
                         },
                         (Token t) =>
                         {
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagKey,
                                 "vendor2/tag4"
                             );
-                            AssertFirstOfTokenTypeIsEmpty
+                            AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                             (
                                 t,
                                 TokenType.TagValue
@@ -1404,7 +1404,7 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //Verify prefix
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -1412,33 +1412,33 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "COMMAND"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "param1"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "param2"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.TrailingPrefix,
@@ -1456,10 +1456,10 @@ namespace ThePlague.IRC.Parser.Tests
                 + " :param3 param3"
                 + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -1467,33 +1467,33 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "COMMAND"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "param1"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "param2"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.TrailingPrefix,
@@ -1511,10 +1511,10 @@ namespace ThePlague.IRC.Parser.Tests
                 + ";vendor2/tag4 COMMAND param1 param2 :param3 param3"
                 + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Tags,
@@ -1523,13 +1523,13 @@ namespace ThePlague.IRC.Parser.Tests
                     {
                         (Token t) =>
                         {
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagKey,
                                 "tag1"
                             );
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagValue,
@@ -1538,13 +1538,13 @@ namespace ThePlague.IRC.Parser.Tests
                         },
                         (Token t) =>
                         {
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagKey,
                                 "tag2"
                             );
-                            AssertFirstOfTokenTypeIsEmpty
+                            AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                             (
                                 t,
                                 TokenType.TagSuffix
@@ -1552,13 +1552,13 @@ namespace ThePlague.IRC.Parser.Tests
                         },
                         (Token t) =>
                         {
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagKey,
                                 "vendor1/tag3"
                             );
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagValue,
@@ -1567,13 +1567,13 @@ namespace ThePlague.IRC.Parser.Tests
                         },
                         (Token t) =>
                         {
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagKey,
                                 "vendor2/tag4"
                             );
-                            AssertFirstOfTokenTypeIsEmpty
+                            AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                             (
                                 t,
                                 TokenType.TagSuffix
@@ -1583,40 +1583,40 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //Verify prefix
-                AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     token,
                     TokenType.SourcePrefix
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "COMMAND"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "param1"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "param2"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.TrailingPrefix,
@@ -1632,29 +1632,29 @@ namespace ThePlague.IRC.Parser.Tests
         {
             string message = @"COMMAND" + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
-                AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     token,
                     TokenType.TagPrefix
                 );
 
-                AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     token,
                     TokenType.SourcePrefix
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "COMMAND"
                 );
 
-                AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     token,
                     TokenType.Params
@@ -1668,9 +1668,9 @@ namespace ThePlague.IRC.Parser.Tests
             string message = @"@foo=\\\\\:\\s\s\r\n COMMAND"
                 + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Tags,
@@ -1679,13 +1679,13 @@ namespace ThePlague.IRC.Parser.Tests
                     {
                         (Token t) =>
                         {
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagKey,
                                 "foo"
                             );
-                            AssertFirstOfTokenTypeIsEqualTo
+                            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                             (
                                 t,
                                 TokenType.TagValue,
@@ -1696,14 +1696,14 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //Verify prefix
-                AssertFirstOfTokenTypeIsEmpty
+                AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                 (
                     token,
                     TokenType.SourcePrefix
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
@@ -1719,10 +1719,10 @@ namespace ThePlague.IRC.Parser.Tests
                 + " :Erroneous Nickname: Illegal characters"
                 + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -1730,27 +1730,27 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandCode,
                     "432"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "#momo"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.TrailingPrefix,
@@ -1767,10 +1767,10 @@ namespace ThePlague.IRC.Parser.Tests
             string message = ":gravel.mozilla.org MODE #tckk +n "
                 + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -1778,33 +1778,33 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "MODE"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "#tckk"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "+n"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEmpty
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                         (
                             t,
                             TokenType.ParamsSuffix
@@ -1820,10 +1820,10 @@ namespace ThePlague.IRC.Parser.Tests
             string message = @":services.esper.net MODE #foo-bar +o foobar  "
                 + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -1831,39 +1831,39 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "MODE"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "#foo-bar"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "+o"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "foobar"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEmpty
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEmpty
                         (
                             t,
                             TokenType.ParamsSuffix
@@ -1881,10 +1881,10 @@ namespace ThePlague.IRC.Parser.Tests
             string message = @":SomeOp MODE #channel :+i"
                 + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -1892,27 +1892,27 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "MODE"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "#channel"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.TrailingPrefix,
@@ -1929,10 +1929,10 @@ namespace ThePlague.IRC.Parser.Tests
             string message = @":SomeOp MODE #channel +oo SomeUser :AnotherUser"
                 + "\r\n";
 
-            using(Token token = AssertParsed(message))
+            using(Token token = AssertHelpers.AssertParsed(message))
             {
                 //Verify prefix
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.SourcePrefixTarget,
@@ -1940,39 +1940,39 @@ namespace ThePlague.IRC.Parser.Tests
                 );
 
                 //check command name
-                AssertFirstOfTokenTypeIsEqualTo
+                AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                 (
                     token,
                     TokenType.CommandName,
                     "MODE"
                 );
 
-                AssertInNthChildOfTokenTypeInTokenType
+                AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
                     token,
                     TokenType.Params,
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "#channel"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "+oo"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.Middle,
                             "SomeUser"
                         ),
-                        (Token t) => AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
                         (
                             t,
                             TokenType.TrailingPrefix,
@@ -1984,135 +1984,6 @@ namespace ThePlague.IRC.Parser.Tests
         }
 
         #region helper methods
-        internal static Token AssertParsed(string message)
-        {
-            Assert.True
-            (
-                IRCParser.TryParse
-                (
-                    CreateReadOnlySequence(message),
-                    out Token token
-                )
-            );
-
-            Assert.NotNull(token);
-
-            return token;
-        }
-
-        internal static void AssertFirstOfTokenTypeIsEmpty
-        (
-            Token token,
-            TokenType tokenType
-        )
-        {
-            Assert.True
-            (
-                token.TryGetFirstTokenOfType
-                (
-                    tokenType,
-                    out Token foundToken
-                )
-            );
-
-            Assert.True(foundToken.IsEmpty);
-        }
-
-        internal static void AssertFirstOfTokenTypeIsEqualTo
-        (
-            Token token,
-            TokenType tokenType,
-            string equalityComparer
-        )
-        {
-            Assert.True
-            (
-                token.TryGetFirstTokenOfType
-                (
-                    tokenType,
-                    out Token foundToken
-                )
-            );
-
-            Assert.False(foundToken.IsEmpty);
-
-            Assert.Equal
-            (
-                (Utf8String)equalityComparer,
-                foundToken.ToUtf8String()
-            );
-        }
-
-        internal static void AssertFirstOfTokenTypeIsEqualTo
-        (
-            Token token,
-            TokenType tokenType,
-            ReadOnlyMemory<byte> equalityComparer
-        )
-        {
-            Assert.True
-            (
-                token.TryGetFirstTokenOfType
-                (
-                    tokenType,
-                    out Token foundToken
-                )
-            );
-
-            Assert.False(foundToken.IsEmpty);
-
-            Assert.Equal
-            (
-                new Utf8String(equalityComparer),
-                foundToken.ToUtf8String()
-            );
-        }
-
-        internal static void AssertInNthChildOfTokenTypeInTokenType
-        (
-            Token token,
-            TokenType parentTokenType,
-            TokenType childTokenType,
-            params Action<Token>[] verify
-        )
-        {
-            Assert.True
-            (
-                token.TryGetFirstTokenOfType
-                (
-                    parentTokenType,
-                    out Token foundToken
-                )
-            );
-
-            Assert.False(foundToken.IsEmpty);
-
-            int childCount = 0;
-            foreach(Token t
-                    in foundToken.GetAllTokensOfType(childTokenType))
-            {
-                verify[childCount++](t);
-            }
-
-            Assert.Equal(childCount, verify.Length);
-        }
-
-        internal static ReadOnlySequence<byte> CreateReadOnlySequence
-        (
-            string message
-        )
-        {
-            ReadOnlySequenceSegment<byte> segment
-                = new Utf8StringSequenceSegment(message);
-
-            return new ReadOnlySequence<byte>
-            (
-                segment,
-                0,
-                segment,
-                segment.Memory.Length
-            );
-        }
 
         #endregion
     }

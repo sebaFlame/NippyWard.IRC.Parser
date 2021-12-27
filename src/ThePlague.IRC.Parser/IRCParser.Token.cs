@@ -739,6 +739,33 @@ namespace ThePlague.IRC.Parser
         )
         {
             SequencePosition startPosition = reader.Position;
+
+            Token targetPrefixPrefix = ParseSourcePrefixTargetPrefixPrefix
+            (
+                ref reader
+            );
+
+            Token TargetPrefixSuffix = ParseSourcePrefixTargetPrefixSuffix
+            (
+                ref reader
+            );
+
+            Combine(targetPrefixPrefix, TargetPrefixSuffix);
+
+            return new Token
+            (
+                TokenType.SourcePrefixTargetPrefix,
+                reader.Sequence.Slice(startPosition, reader.Position),
+                targetPrefixPrefix
+            );
+        }
+
+        private static Token ParseSourcePrefixTargetPrefixPrefix
+        (
+             ref SequenceReader<byte> reader
+        )
+        {
+            SequencePosition startPosition = reader.Position;
             byte value;
 
             //parse atleast 1 alphanumeric or special byte
@@ -754,13 +781,14 @@ namespace ThePlague.IRC.Parser
 
             return new Token
             (
-                TokenType.SourcePrefixTargetPrefix,
+                TokenType.SourcePrefixTargetPrefixPrefix,
                 reader.Sequence.Slice(startPosition, reader.Position)
             );
         }
 
+
         //parse rest of the source prefix target or return empty
-        private static Token ParseSourcePrefixTargetSuffix
+        private static Token ParseSourcePrefixTargetPrefixSuffix
         (
             ref SequenceReader<byte> reader
         )
@@ -768,11 +796,15 @@ namespace ThePlague.IRC.Parser
             SequencePosition startPosition = reader.Position;
 
             //try parse sourcePrefixList
-            if(TryParseSourcePrefixList(ref reader, out Token sourcePrefixList))
+            if(TryParseSourcePrefixTargetPrefixTargetList
+            (
+                ref reader,
+                out Token sourcePrefixList
+            ))
             {
                 return new Token
                 (
-                    TokenType.SourcePrefixTargetSuffix,
+                    TokenType.SourcePrefixTargetPrefixSuffix,
                     reader.Sequence.Slice(startPosition, reader.Position),
                     sourcePrefixList
                 );
@@ -782,14 +814,14 @@ namespace ThePlague.IRC.Parser
             {
                 return new Token
                 (
-                    TokenType.SourcePrefixTargetSuffix
+                    TokenType.SourcePrefixTargetPrefixSuffix
                 );
             }
         }
 
         //parse a list of terminals valid for 2nd to nth byte of the source
         //prefix target
-        private static bool TryParseSourcePrefixList
+        private static bool TryParseSourcePrefixTargetPrefixTargetList
         (
             ref SequenceReader<byte> reader,
             out Token sourcePrefixList
@@ -799,15 +831,10 @@ namespace ThePlague.IRC.Parser
             byte value;
             bool found = false;
 
-            //check if the current byte is alphanumeric, special,
-            //exclamationmark, at, minus or a period (host)
             while(IsAlphaNumeric(ref reader, out value)
                 || IsSpecial(value)
-                || IsTerminal(TokenType.ExclamationMark, value)
-                || IsTerminal(TokenType.AtSign, value)
                 || IsTerminal(TokenType.Minus, value)
-                || IsTerminal(TokenType.Period, value)
-                || IsTerminal(TokenType.Tilde, value))
+                || IsTerminal(TokenType.Period, value))
             {
                 found = true;
                 reader.Advance(1);
@@ -821,11 +848,205 @@ namespace ThePlague.IRC.Parser
 
             sourcePrefixList = new Token
             (
-                TokenType.SourcePrefixList,
+                TokenType.SourcePrefixTargetPrefixTargetList,
                 reader.Sequence.Slice(startPosition, reader.Position)
             );
 
             return true;
+        }
+
+        private static Token ParseSourcePrefixTargetSuffix
+        (
+            ref SequenceReader<byte> reader
+        )
+        {
+            SequencePosition startPosition = reader.Position;
+
+            Token sourcePrefixUsername =
+                ParseSourcePrefixUsername(ref reader);
+
+            Token sourcePrefixHostname =
+                ParseSourcePrefixHostname(ref reader);
+
+            //link prefix and suffix together
+            Combine
+            (
+                sourcePrefixUsername,
+                sourcePrefixHostname
+            );
+
+            return new Token
+            (
+                TokenType.SourcePrefixTargetSuffix,
+                reader.Sequence.Slice(startPosition, reader.Position),
+                sourcePrefixUsername
+            );
+
+        }
+
+        private static Token ParseSourcePrefixUsername
+        (
+            ref SequenceReader<byte> reader
+        )
+        {
+            SequencePosition startPosition = reader.Position;
+
+            //username start with an exclamation mark
+            if(TryParseTerminal
+            (
+                TokenType.ExclamationMark,
+                ref reader,
+                out Token exclamation
+            ))
+            {
+                Token username = ParseUsername(ref reader);
+
+                Combine(exclamation, username);
+
+                return new Token
+                (
+                    TokenType.SourcePrefixUsername,
+                    reader.Sequence.Slice(startPosition, reader.Position),
+                    exclamation
+                );
+            }
+            //return empty
+            else
+            {
+                return new Token
+                (
+                    TokenType.SourcePrefixUsername
+                );
+            }
+        }
+
+        //parse a username
+        private static Token ParseUsername
+        (
+            ref SequenceReader<byte> reader
+        )
+        {
+            SequencePosition startPosition = reader.Position;
+
+            while(IsUTF8WithoutNullCrLfSpaceAt(ref reader, out _))
+            {
+                reader.Advance(1);
+            }
+
+            return new Token
+            (
+                TokenType.Username,
+                reader.Sequence.Slice(startPosition, reader.Position)
+            );
+        }
+
+        private static Token ParseSourcePrefixHostname
+        (
+            ref SequenceReader<byte> reader
+        )
+        {
+            SequencePosition startPosition = reader.Position;
+
+            //username start with an exclamation mark
+            if(TryParseTerminal
+            (
+                TokenType.AtSign,
+                ref reader,
+                out Token at
+            ))
+            {
+                Token host = ParseHost(ref reader);
+
+                Combine(at, host);
+
+                return new Token
+                (
+                    TokenType.SourcePrefixHostname,
+                    reader.Sequence.Slice(startPosition, reader.Position),
+                    at
+                );
+            }
+            //return empty
+            else
+            {
+                return new Token
+                (
+                    TokenType.SourcePrefixHostname
+                );
+            }
+        }
+
+        private static Token ParseHost
+        (
+            ref SequenceReader<byte> reader
+        )
+        {
+            SequencePosition startPosition = reader.Position;
+
+            Token shortName = ParseShortName(ref reader);
+
+            Token hostSuffix = ParseHostSuffix(ref reader);
+
+            Combine(shortName, hostSuffix);
+
+            return new Token
+            (
+                TokenType.Host,
+                reader.Sequence.Slice(startPosition, reader.Position),
+                shortName
+            );
+        }
+
+        private static Token ParseHostSuffix
+        (
+            ref SequenceReader<byte> reader
+        )
+        {
+            SequencePosition startPosition = reader.Position;
+            Token previous = null, first = null, period;
+            bool found = false;
+
+            //multiple tags are seperated by a semicolon
+            while(TryParseTerminal
+            (
+                TokenType.Period,
+                ref reader,
+                out period
+            ))
+            {
+                //add semicolon to linked list
+                previous = Combine(previous, period);
+
+                //parse tag and add to children
+                previous = Combine
+                (
+                    previous,
+                    ParseShortName(ref reader)
+                );
+
+                if(first is null)
+                {
+                    first = previous;
+                }
+
+                found = true;
+            }
+
+            //can return an empty lsit
+            if(!found)
+            {
+                return new Token
+                (
+                    TokenType.HostSuffix
+                );
+            }
+
+            return new Token
+            (
+                TokenType.HostSuffix,
+                reader.Sequence.Slice(startPosition, reader.Position),
+                first
+            );
         }
 
         //parse a command or return empty

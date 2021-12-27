@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 
+//keep this file in sync with TokenType!
+//TODO: create source generator
+
 namespace ThePlague.IRC.Parser.Tokens
 {
     public abstract class BaseTokenVisitor : IDisposable
@@ -104,6 +107,15 @@ namespace ThePlague.IRC.Parser.Tokens
                 case TokenType.Message:
                     this.VisitMessageToken(token);
                     break;
+                case TokenType.Username:
+                    this.VisitUsername(token);
+                    break;
+                case TokenType.Host:
+                    this.VisitHost(token);
+                    break;
+                case TokenType.HostSuffix:
+                    this.VisitHostSuffix(token);
+                    break;
                 case TokenType.TagPrefix:
                     this.VisitTagPrefix(token);
                     break;
@@ -170,11 +182,24 @@ namespace ThePlague.IRC.Parser.Tokens
                 case TokenType.SourcePrefixTargetPrefix:
                     this.VisitSourcePrefixTargetPrefix(token);
                     break;
+                case TokenType.SourcePrefixTargetPrefixPrefix:
+                    this.VisitSourcePrefixTargetPrefixPrefix(token);
+                    break;
+                case TokenType.SourcePrefixTargetPrefixSuffix:
+                    this.VisitSourcePrefixTargetPrefixSuffix(token);
+                    break;
+                case TokenType.SourcePrefixTargetPrefixTargetList:
+                    this.VisitSourcePrefixTargetPrefixTargetList(token);
+                    break;
+
                 case TokenType.SourcePrefixTargetSuffix:
                     this.VisitSourcePrefixTargetSuffix(token);
                     break;
-                case TokenType.SourcePrefixList:
-                    this.VisitSourcePrefixList(token);
+                case TokenType.SourcePrefixUsername:
+                    this.VisitSourcePrefixUsername(token);
+                    break;
+                case TokenType.SourcePrefixHostname:
+                    this.VisitSourcePrefixHostname(token);
                     break;
                 case TokenType.Command:
                     this.VisitCommand(token);
@@ -319,6 +344,33 @@ namespace ThePlague.IRC.Parser.Tokens
                     break;
             }
         }
+
+        protected virtual void VisitSourcePrefixHostname(Token token)
+            => this.VisitTokenDefault(token);
+
+        protected virtual void VisitSourcePrefixUsername(Token token)
+            => this.VisitTokenDefault(token);
+
+        protected virtual void VisitSourcePrefixTargetPrefixTargetList
+        (
+            Token token
+        )
+            => this.VisitTokenDefault(token);
+
+        protected virtual void VisitSourcePrefixTargetPrefixSuffix(Token token)
+            => this.VisitTokenDefault(token);
+
+        protected virtual void VisitSourcePrefixTargetPrefixPrefix(Token token)
+            => this.VisitTokenDefault(token);
+
+        protected virtual void VisitHostSuffix(Token token)
+            => this.VisitTokenDefault(token);
+
+        protected virtual void VisitHost(Token token)
+            => this.VisitTokenDefault(token);
+
+        protected virtual void VisitUsername(Token token)
+            => this.VisitTokenDefault(token);
 
         protected virtual void VisitMiddlePrefixListFormatBaseTerminals
         (
@@ -489,9 +541,6 @@ namespace ThePlague.IRC.Parser.Tokens
             => this.VisitTokenDefault(token);
 
         protected virtual void VisitCommand(Token token)
-            => this.VisitTokenDefault(token);
-
-        protected virtual void VisitSourcePrefixList(Token token)
             => this.VisitTokenDefault(token);
 
         protected virtual void VisitSourcePrefixTargetPrefix(Token token)
