@@ -72,7 +72,6 @@ namespace ThePlague.IRC.Parser
             Token leftToken = left.GetLastToken();
 
             leftToken.Next = right;
-            right.Previous = leftToken;
 
             return right;
         }

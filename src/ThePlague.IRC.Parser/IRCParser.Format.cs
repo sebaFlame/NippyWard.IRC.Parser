@@ -236,7 +236,7 @@ namespace ThePlague.IRC.Parser
             //parse a color combination or return empty
             Token colorFormatSuffix = ParseColorCombination(ref reader);
 
-            Combine(color, colorFormatSuffix);
+            color.Combine(colorFormatSuffix);
 
             colorFormat = new Token
             (
@@ -263,7 +263,7 @@ namespace ThePlague.IRC.Parser
                 Token combinationSuffix =
                     ParseColorCombinationSuffix(ref reader);
 
-                Combine(fg, combinationSuffix);
+                fg.Combine(combinationSuffix);
 
                 return new Token
                 (
@@ -322,7 +322,7 @@ namespace ThePlague.IRC.Parser
                 //try parse backgroudn color
                 if(TryParseBackgroundColor(ref reader, out Token bg))
                 {
-                    Combine(comma, bg);
+                    comma.Combine(bg);
 
                     return new Token
                     (
@@ -465,7 +465,7 @@ namespace ThePlague.IRC.Parser
             //parse as hex color combination or return empty
             Token hexColorFormatSuffix = ParseHexColorCombination(ref reader);
 
-            Combine(hexColor, hexColorFormatSuffix);
+            hexColor.Combine(hexColorFormatSuffix);
 
             hexColorFormat = new Token
             (
@@ -491,7 +491,7 @@ namespace ThePlague.IRC.Parser
                 //try parse as hex color suffix or return empty
                 Token suffix = ParseHexColorCombinationSuffix(ref reader);
 
-                Combine(fg, suffix);
+                fg.Combine(suffix);
 
                 return new Token
                 (
@@ -549,7 +549,7 @@ namespace ThePlague.IRC.Parser
             {
                 if(TryParseBackgroundHexColor(ref reader, out Token bg))
                 {
-                    Combine(comma, bg);
+                    comma.Combine(bg);
 
                     return new Token
                     (
@@ -624,12 +624,12 @@ namespace ThePlague.IRC.Parser
                 //if found the next 2 are mandatory
                 if(TryParseHexDecimal(ref reader, out child))
                 {
-                    Combine(firstChild, child);
+                    firstChild.Combine(child);
                     previous = child;
 
                     if(TryParseHexDecimal(ref reader, out child))
                     {
-                        Combine(previous, child);
+                        previous.Combine(child);
 
                         color = new Token
                         (

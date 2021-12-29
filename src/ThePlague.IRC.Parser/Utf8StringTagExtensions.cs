@@ -114,7 +114,7 @@ namespace ThePlague.IRC.Parser
                     firstChild = child;
                 }
 
-                IRCParser.Combine(previous, child);
+                previous.Combine(child);
 
                 previous = child;
 
@@ -191,7 +191,7 @@ namespace ThePlague.IRC.Parser
                     firstChild = child;
                 }
 
-                IRCParser.Combine(previous, child);
+                previous.Combine(child);
 
                 //could be multpile tokens
                 previous = child.GetLastToken();
@@ -250,7 +250,7 @@ namespace ThePlague.IRC.Parser
                 )
             );
 
-            IRCParser.Combine(firstBackslash, tagValueEscapeSuffix);
+            firstBackslash.Combine(tagValueEscapeSuffix);
 
             tagValueEscape = new Token
             (

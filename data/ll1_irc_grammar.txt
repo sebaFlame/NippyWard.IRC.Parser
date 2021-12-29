@@ -1,3 +1,5 @@
+# LL(1) grammar for an IRC parser
+#
 # TODO 
 # MsgTo (Not in modern IRC!)
 #   Username Percent Host

@@ -309,7 +309,7 @@ namespace ThePlague.IRC.Parser
                     EqualsSign
                 );
 
-                IRCParser.Combine(equal, tagValueToken);
+                equal.Combine(tagValueToken);
 
                 //create tagsuffix with the tag value
                 tagSuffix = new Token
@@ -320,11 +320,7 @@ namespace ThePlague.IRC.Parser
             }
 
             //add tagSuffix with possible value
-            IRCParser.Combine
-            (
-                tagKeyToken,
-                tagSuffix
-            );
+            tagKeyToken.Combine(tagSuffix);
 
             //create new tag with tag key and its suffix
             tag = new Token
@@ -479,7 +475,7 @@ namespace ThePlague.IRC.Parser
             Token paramsSuffix = new Token(TokenType.ParamsSuffix);
 
             //link space and suffix together to form the parameter
-            IRCParser.Combine(space, paramsSuffix);
+            space.Combine(paramsSuffix);
 
             Token paramsPrefix = new Token
             (
@@ -501,7 +497,7 @@ namespace ThePlague.IRC.Parser
                 //provide an empty trailing prefix
                 Token trailingPrefix = new Token(TokenType.TrailingPrefix);
 
-                IRCParser.Combine(colon, trailingPrefix);
+                colon.Combine(trailingPrefix);
 
                 paramsSuffix.Child = new Token
                 (
@@ -532,7 +528,7 @@ namespace ThePlague.IRC.Parser
                         ref reader
                     );
 
-                    IRCParser.Combine(colon, trailingPrefix);
+                    colon.Combine(trailingPrefix);
 
                     paramsSuffix.Child = new Token
                     (
@@ -631,23 +627,10 @@ namespace ThePlague.IRC.Parser
             Token oldMessage = this._message?.GetLastToken();
             Token tagPrefix = new Token(TokenType.TagPrefix);
 
-            IRCParser.Combine
-            (
-                IRCParser.Combine
-                (
-                    IRCParser.Combine
-                    (
-                        tagPrefix,
-                        new Token(TokenType.SourcePrefix)
-                    ),
-                    new Token(TokenType.Command)
-                ),
-                new Token
-                (
-                    TokenType.CrLf,
-                    CrLf
-                )
-            );
+            tagPrefix
+                .Combine(new Token(TokenType.SourcePrefix))
+                .Combine(new Token(TokenType.Command))
+                .Combine(new Token(TokenType.CrLf, CrLf));
 
             Token newMessage = new Token
             (
@@ -655,12 +638,14 @@ namespace ThePlague.IRC.Parser
                 tagPrefix
             );
 
+            //if first message, return it
             if(oldMessage is null)
             {
                 return newMessage;
             }
 
-            IRCParser.Combine(oldMessage, newMessage);
+            //else combine with first message
+            oldMessage.Combine(newMessage);
 
             if(this._keepTags
                && oldMessage.TryGetFirstTokenOfType
@@ -818,11 +803,7 @@ namespace ThePlague.IRC.Parser
             }
 
             //add tagSuffix with possible value
-            IRCParser.Combine
-            (
-                tagKey,
-                tagSuffix
-            );
+            tagKey.Combine(tagSuffix);
 
             //create new tag with tag key and its suffix
             tag = new Token
@@ -939,7 +920,7 @@ namespace ThePlague.IRC.Parser
             );
 
             //first link a colon and the target together
-            IRCParser.Combine(colon, sourcePrefixTarget);
+            colon.Combine(sourcePrefixTarget);
 
             Token space = new Token
             (
@@ -948,7 +929,7 @@ namespace ThePlague.IRC.Parser
             );
 
             //then add a trailing space
-            IRCParser.Combine(sourcePrefixTarget, space);
+            sourcePrefixTarget.Combine(space);
 
             //add new child to source prefix
             sourcePrefix.Child = colon;
@@ -983,7 +964,7 @@ namespace ThePlague.IRC.Parser
                 );
 
                 //link in the new tag with a semicolon
-                IRCParser.Combine(semiColon, tag);
+                semiColon.Combine(tag);
 
                 if(tagsList.Child is null)
                 {
@@ -991,11 +972,7 @@ namespace ThePlague.IRC.Parser
                 }
                 else
                 {
-                    IRCParser.Combine
-                    (
-                        tagsList.Child.GetLastToken(),
-                        semiColon
-                    );
+                    tagsList.Child.Combine(semiColon);
                 }
             }
             else
@@ -1006,11 +983,7 @@ namespace ThePlague.IRC.Parser
                 tagsSuffix = new Token(TokenType.TagsSuffix);
 
                 //add an empty TagsSuffix to the tags
-                IRCParser.Combine
-                (
-                    tag,
-                    tagsSuffix
-                );
+                tag.Combine(tagsSuffix);
 
                 //create tags token
                 Token tags = new Token
@@ -1027,7 +1000,7 @@ namespace ThePlague.IRC.Parser
                 );
 
                 //link in the tag(s)
-                IRCParser.Combine(at, tags);
+                at.Combine(tags);
 
                 //add trailing space
                 Token space = new Token
@@ -1035,7 +1008,8 @@ namespace ThePlague.IRC.Parser
                     TokenType.Space,
                     Space
                 );
-                IRCParser.Combine(tags, space);
+
+                tags.Combine(space);
 
                 //add new child to tag prefix
                 tagPrefix.Child = at;
@@ -1051,7 +1025,7 @@ namespace ThePlague.IRC.Parser
         {
             //create empty parameters
             Token parameters = new Token(TokenType.Params);
-            IRCParser.Combine(verb, parameters);
+            verb.Combine(parameters);
 
             //create actual command
             Token realCommand = new Token(commandType)
@@ -1080,11 +1054,7 @@ namespace ThePlague.IRC.Parser
             ))
             {
                 //should be the next of the child, which can only be middle
-                IRCParser.Combine
-                (
-                    lastParamsSuffix.Child,
-                    paramsPrefix
-                );
+                lastParamsSuffix.Child.Combine(paramsPrefix);
             }
             else
             {

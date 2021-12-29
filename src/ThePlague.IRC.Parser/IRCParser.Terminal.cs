@@ -118,7 +118,7 @@ namespace ThePlague.IRC.Parser
                 }
                 else
                 {
-                    Combine(previous, space);
+                    previous.Combine(space);
                 }
 
                 previous = space;

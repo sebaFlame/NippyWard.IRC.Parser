@@ -15,19 +15,13 @@ namespace ThePlague.IRC.Parser
             //parse the tag prefix
             Token tagPrefix = ParseTagPrefix(ref reader);
 
-            Combine //parse CRL/LF as message end and add to children
-            (
-                Combine //parse the command and add to children
-                (
-                    Combine //parse the target prefix and add to children
-                    (
-                        tagPrefix,
-                        ParseSourcePrefix(ref reader)
-                    ),
-                    ParseCommand(ref reader)
-                ),
-                ParseCrLf(ref reader)
-            );
+            /* parse the target prefix and add to children
+             * parse the command and add to children
+             * parse CRL/LF as message end and add to children */
+            tagPrefix
+                .Combine(ParseSourcePrefix(ref reader))
+                .Combine(ParseCommand(ref reader))
+                .Combine(ParseCrLf(ref reader));
 
             return new Token
             (
@@ -50,13 +44,13 @@ namespace ThePlague.IRC.Parser
                 tags = ParseTags(ref reader);
 
                 //create linked list
-                Combine(at, tags);
+                at.Combine(tags);
 
                 //parse trailing space(s)
                 if(TryParseSpaces(ref reader, out space))
                 {
                     //add trailings space(s) to linked list
-                    Combine(tags, space);
+                    tags.Combine(space);
 
                     return new Token
                     (
@@ -93,7 +87,7 @@ namespace ThePlague.IRC.Parser
             Token tagsSuffix = ParseTagsSuffix(ref reader);
 
             //combine the children
-            Combine(tag, tagsSuffix);
+            tag.Combine(tagsSuffix);
 
             return new Token
             (
@@ -146,14 +140,10 @@ namespace ThePlague.IRC.Parser
             ))
             {
                 //add semicolon to linked list
-                previous = Combine(previous, semicolon);
+                previous = previous.Combine(semicolon);
 
                 //parse tag and add to children
-                previous = Combine
-                (
-                    previous,
-                    ParseTag(ref reader)
-                );
+                previous = previous.Combine(ParseTag(ref reader));
 
                 if(first is null)
                 {
@@ -188,7 +178,7 @@ namespace ThePlague.IRC.Parser
             //parse the value or return empty
             Token tagSuffix = ParseTagSuffix(ref reader);
 
-            Combine(tagKey, tagSuffix);
+            tagKey.Combine(tagSuffix);
 
             return new Token
             (
@@ -223,14 +213,14 @@ namespace ThePlague.IRC.Parser
             }
             else
             {
-                previous = Combine(previous, shortName);
+                previous = previous.Combine(shortName);
             }
 
             //parse a possible suffix, if not empty, first shortname is the
             //vendor
             Token tagKeySuffix = ParseTagKeySuffix(ref reader);
 
-            Combine(previous, tagKeySuffix);
+            previous.Combine(tagKeySuffix);
 
             return new Token
             (
@@ -257,7 +247,7 @@ namespace ThePlague.IRC.Parser
                 Token shortName = ParseShortName(ref reader);
 
                 //add shortName to linked list
-                Combine(slash, shortName);
+                slash.Combine(shortName);
 
                 return new Token
                 (
@@ -292,7 +282,7 @@ namespace ThePlague.IRC.Parser
             Token shortNameSuffix = ParseShortNameSuffix(ref reader);
 
             //link prefix and suffix together
-            Combine(shortNamePrefix, shortNameSuffix);
+            shortNamePrefix.Combine(shortNameSuffix);
 
             return new Token
             (
@@ -400,7 +390,7 @@ namespace ThePlague.IRC.Parser
             {
                 Token tagValue = ParseTagValue(ref reader);
 
-                Combine(equality, tagValue);
+                equality.Combine(tagValue);
 
                 return new Token
                 (
@@ -469,7 +459,7 @@ namespace ThePlague.IRC.Parser
                     firstChild = child;
                 }
 
-                Combine(previous, child);
+                previous.Combine(child);
 
                 previous = child;
 
@@ -539,7 +529,7 @@ namespace ThePlague.IRC.Parser
                     firstChild = child;
                 }
 
-                Combine(previous, child);
+                previous.Combine(child);
 
                 previous = child;
 
@@ -586,7 +576,7 @@ namespace ThePlague.IRC.Parser
                 ref reader
             );
 
-            Combine(backslash, tagValueEscapeSuffix);
+            backslash.Combine(tagValueEscapeSuffix);
 
             tagValueEscape = new Token
             (
@@ -673,7 +663,7 @@ namespace ThePlague.IRC.Parser
             {
                 Token targetPrefixTarget = ParseSourcePrefixTarget(ref reader);
 
-                Combine(colon, targetPrefixTarget);
+                colon.Combine(targetPrefixTarget);
 
                 if(!TryParseSpaces
                 (
@@ -684,7 +674,7 @@ namespace ThePlague.IRC.Parser
                     throw new ParserException("Space expected");
                 }
 
-                Combine(targetPrefixTarget, spaces);
+                targetPrefixTarget.Combine(spaces);
 
                 return new Token
                 (
@@ -719,9 +709,8 @@ namespace ThePlague.IRC.Parser
                 ParseSourcePrefixTargetSuffix(ref reader);
 
             //link prefix and suffix together
-            Combine
+            sourcePrefixTargetTargetPrefix.Combine
             (
-                sourcePrefixTargetTargetPrefix,
                 sourcePrefixTargetTargetSuffix
             );
 
@@ -750,7 +739,7 @@ namespace ThePlague.IRC.Parser
                 ref reader
             );
 
-            Combine(targetPrefixPrefix, TargetPrefixSuffix);
+            targetPrefixPrefix.Combine(TargetPrefixSuffix);
 
             return new Token
             (
@@ -869,9 +858,8 @@ namespace ThePlague.IRC.Parser
                 ParseSourcePrefixHostname(ref reader);
 
             //link prefix and suffix together
-            Combine
+            sourcePrefixUsername.Combine
             (
-                sourcePrefixUsername,
                 sourcePrefixHostname
             );
 
@@ -901,7 +889,7 @@ namespace ThePlague.IRC.Parser
             {
                 Token username = ParseUsername(ref reader);
 
-                Combine(exclamation, username);
+                exclamation.Combine(username);
 
                 return new Token
                 (
@@ -957,7 +945,7 @@ namespace ThePlague.IRC.Parser
             {
                 Token host = ParseHost(ref reader);
 
-                Combine(at, host);
+                at.Combine(host);
 
                 return new Token
                 (
@@ -987,7 +975,7 @@ namespace ThePlague.IRC.Parser
 
             Token hostSuffix = ParseHostSuffix(ref reader);
 
-            Combine(shortName, hostSuffix);
+            shortName.Combine(hostSuffix);
 
             return new Token
             (
@@ -1015,12 +1003,11 @@ namespace ThePlague.IRC.Parser
             ))
             {
                 //add semicolon to linked list
-                previous = Combine(previous, period);
+                previous = previous.Combine(period);
 
                 //parse tag and add to children
-                previous = Combine
+                previous = previous.Combine
                 (
-                    previous,
                     ParseShortName(ref reader)
                 );
 
@@ -1095,7 +1082,7 @@ namespace ThePlague.IRC.Parser
             //parse the message parameters and add to children
             Token par = ParseParams(ref reader);
 
-            Combine(cmd, par);
+            cmd.Combine(par);
 
             message = new Token
             (
@@ -1215,7 +1202,7 @@ namespace ThePlague.IRC.Parser
                 Token paramsSuffix = ParseParamsSuffix(ref reader);
 
                 //There can be multiple spaces
-                Combine(spaces, paramsSuffix);
+                spaces.Combine(paramsSuffix);
 
                 paramsPrefix = new Token
                 (
@@ -1258,7 +1245,7 @@ namespace ThePlague.IRC.Parser
                 //try get next parameter only when a new middle is found
                 if(TryParseParamsPrefix(ref reader, out Token paramsPrefix))
                 {
-                    Combine(middle, paramsPrefix);
+                    middle.Combine(paramsPrefix);
                 }
 
                 return new Token
@@ -1291,7 +1278,7 @@ namespace ThePlague.IRC.Parser
             {
                 Token middleSuffix = ParseMiddleSuffix(ref reader);
 
-                Combine(middlePrefix, middleSuffix);
+                middlePrefix.Combine(middleSuffix);
 
                 middle = new Token
                 (
@@ -1334,7 +1321,7 @@ namespace ThePlague.IRC.Parser
                     first = child;
                 }
 
-                previous = Combine(previous, child);
+                previous = previous.Combine(child);
 
                 found = true;
             }
@@ -1415,7 +1402,7 @@ namespace ThePlague.IRC.Parser
                     firstChild = child;
                 }
 
-                Combine(previous, child);
+                previous.Combine(child);
 
                 previous = child;
 
@@ -1525,7 +1512,7 @@ namespace ThePlague.IRC.Parser
                     firstChild = child;
                 }
 
-                previous = Combine(previous, child);
+                previous = previous.Combine(child);
 
                 found = true;
             }
@@ -1567,7 +1554,7 @@ namespace ThePlague.IRC.Parser
                 //a trailing prefix can be empty
                 Token trailingPrefix = ParseTrailingPrefix(ref reader);
 
-                Combine(colon, trailingPrefix);
+                colon.Combine(trailingPrefix);
 
                 trailing = new Token
                 (
@@ -1633,7 +1620,7 @@ namespace ThePlague.IRC.Parser
                     first = child;
                 }
 
-                previous = Combine(previous, child);
+                previous = previous.Combine(child);
 
                 found = true;
             }
@@ -1672,7 +1659,7 @@ namespace ThePlague.IRC.Parser
                     ref reader,
                     out lf))
                 {
-                    Combine(cr, lf);
+                    cr.Combine(lf);
 
                     return new Token
                     (

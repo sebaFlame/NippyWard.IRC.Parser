@@ -13,7 +13,6 @@ namespace ThePlague.IRC.Parser.Tokens
         public ReadOnlySequence<byte> Sequence { get; internal set; }
 
         public Token Next { get; internal set; }
-        public Token Previous { get; internal set; }
         public Token Child { get; internal set; }
 
         private Token()
@@ -84,6 +83,18 @@ namespace ThePlague.IRC.Parser.Tokens
             }
         }
 
+        public void ReplaceChild(Token newChild)
+        {
+            Token oldChild = this.Child;
+
+            this.Child = newChild;
+
+            if(oldChild is not null)
+            {
+                oldChild.Dispose();
+            }
+        }
+
         public void Dispose()
             => this.Dispose(true);
 
@@ -94,7 +105,6 @@ namespace ThePlague.IRC.Parser.Tokens
 
             this.Child = null;
             this.Next = null;
-            this.Previous = null;
             this.Sequence = default;
         }
     }

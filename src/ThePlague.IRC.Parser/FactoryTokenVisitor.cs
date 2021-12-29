@@ -74,11 +74,7 @@ namespace ThePlague.IRC.Parser
             //can not be both
             if(this._previousFactoryToken is not null)
             {
-                IRCParser.Combine
-                (
-                    this._previousFactoryToken,
-                    factoryToken
-                );
+                this._previousFactoryToken.Combine(factoryToken);
             }
             else if(this._parentFactoryToken is not null)
             {
@@ -145,7 +141,7 @@ namespace ThePlague.IRC.Parser
             }
             else
             {
-                IRCParser.Combine(this._message, factoryToken);
+                this._message.Combine(factoryToken);
             }
 
             this.VisitFactoryNext(token, factoryToken);
