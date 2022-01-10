@@ -6,7 +6,7 @@ using ThePlague.Model.Core.Text;
 
 namespace ThePlague.IRC.Parser
 {
-    internal class TagUnescapeVisitor : BaseTokenVisitor
+    internal class TagUnescapeVisitor : BaseTokenVisitorByType
     {
 
         private static readonly byte[] _UnescapeValues = new byte[]

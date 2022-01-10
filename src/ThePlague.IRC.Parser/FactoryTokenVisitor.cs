@@ -5,7 +5,7 @@ using ThePlague.Model.Core.Text;
 
 namespace ThePlague.IRC.Parser
 {
-    internal class FactoryTokenVisitor : BaseTokenVisitor
+    internal class FactoryTokenVisitor : BaseTokenVisitorByType
     {
         private Token _message;
         //tail of the current utf-8 linked list

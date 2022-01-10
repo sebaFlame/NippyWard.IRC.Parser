@@ -193,7 +193,6 @@ namespace ThePlague.IRC.Parser
             }
 
             return IsUTF8WithoutNullCrLfSemiColonSpace(value);
-
         }
 
         //check if a byte is  an UTF-8 byte excluding NUL, CR, LF, semicolon and
@@ -246,7 +245,8 @@ namespace ThePlague.IRC.Parser
                 || IsTerminal(TokenType.Monospace, value)
                 || IsTerminal(TokenType.Italics, value)
                 || IsTerminal(TokenType.Strikethrough, value)
-                || IsTerminal(TokenType.Underline, value);
+                || IsTerminal(TokenType.Underline, value)
+                || IsTerminal(TokenType.DoubleQuote, value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsUTF8WithoutAlphaNumericFormatCTCPNullCrLFBase
@@ -347,8 +347,7 @@ namespace ThePlague.IRC.Parser
         //check if a byte is a non-special/non-terminal punctuation mark
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsUndefinedPunctuationMark(byte value)
-            => IsTerminal(TokenType.DoubleQuote, value)
-                || IsTerminal(TokenType.SingleQuote, value)
+            => IsTerminal(TokenType.SingleQuote, value)
                 || IsTerminal(TokenType.LeftParenthesis, value)
                 || IsTerminal(TokenType.RightParenthesis, value)
                 || IsTerminal(TokenType.LessThan, value)
@@ -602,6 +601,7 @@ namespace ThePlague.IRC.Parser
                 || IsTerminal(TokenType.Bell, value)
                 || IsTerminal(TokenType.Semicolon, value)
                 || IsTerminal(TokenType.AtSign, value)
+                || IsTerminal(TokenType.DoubleQuote, value)
                 || IsSpecial(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -663,5 +663,156 @@ namespace ThePlague.IRC.Parser
             => IsDigit(value)
                 || IsLowerCaseHexLetter(value)
                 || IsUpperCaseHexLetter(value);
+
+        private static bool IsUpperCaseOrDigit
+        (
+            ref SequenceReader<byte> reader,
+            out byte value
+        )
+        {
+            if(!reader.TryPeek(out value))
+            {
+                return false;
+            }
+
+            return IsUpperCaseOrDigit(value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsUpperCaseOrDigit(byte value)
+            => IsDigit(value)
+                || IsUpperCaseHexLetter(value)
+                || IsUpperCaseLetter(value);
+
+        private static bool IsUTF8WithoutNullBellCrLfSpaceCommaAndColon
+        (
+            ref SequenceReader<byte> reader,
+            out byte value
+        )
+        {
+            if(!reader.TryPeek(out value))
+            {
+                return false;
+            }
+
+            return IsUTF8WithoutNullBellCrLfSpaceCommaAndColon(value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsUTF8WithoutNullBellCrLfSpaceCommaAndColon
+        (
+            byte value
+        )
+            => IsUTF8WithoutNullCrLFBase(value)
+                || IsTerminal(TokenType.Semicolon, value)
+                || IsTerminal(TokenType.AtSign, value)
+                || IsSpecial(value);
+
+        private static bool IsUTF8WithoutNullCrLfSpaceAndComma
+        (
+            ref SequenceReader<byte> reader,
+            out byte value
+        )
+        {
+            if(!reader.TryPeek(out value))
+            {
+                return false;
+            }
+
+            return IsUTF8WithoutNullCrLfSpaceAndComma(value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsUTF8WithoutNullCrLfSpaceAndComma
+        (
+            byte value
+        )
+            => IsUTF8WithoutNullCrLFBase(value)
+               || IsTerminal(TokenType.Bell, value)
+               || IsTerminal(TokenType.Semicolon, value)
+               || IsTerminal(TokenType.AtSign, value);
+
+        private static bool IsValidISupportValueItemTerminal
+        (
+            ref SequenceReader<byte> reader,
+            out byte value
+        )
+        {
+            if(!reader.TryPeek(out value))
+            {
+                return false;
+            }
+
+            return IsValidISupportValueItemTerminal(value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsValidISupportValueItemTerminal
+        (
+            byte value
+        )
+            => IsAlphaNumeric(value)
+                || (value >= (byte)TokenType.ExclamationMark
+                    && value <= (byte)TokenType.Slash)
+                || (value >= (byte)TokenType.Colon
+                    && value <= (byte)TokenType.AtSign)
+                || (value >= (byte)TokenType.RightCurlyBracket
+                    && value <= (byte)TokenType.Tilde);
+
+        private static bool IsValidDCCFileNameTerminalBase
+        (
+            ref SequenceReader<byte> reader,
+            out byte value
+        )
+        {
+            if(!reader.TryPeek(out value))
+            {
+                return false;
+            }
+
+            return IsValidDCCFileNameTerminalBase(value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsValidDCCFileNameTerminalBase
+        (
+            byte value
+        )
+            => IsAlphaNumeric(value)
+                || IsUTF8WithoutAlphaNumericFormatCTCPNullCrLFBase(value)
+                || IsTerminal(TokenType.CTCP, value)
+                || IsTerminal(TokenType.Bold, value)
+                || IsTerminal(TokenType.Color, value)
+                || IsTerminal(TokenType.HexColor, value)
+                || IsTerminal(TokenType.Reset, value)
+                || IsTerminal(TokenType.Monospace, value)
+                || IsTerminal(TokenType.Italics, value)
+                || IsTerminal(TokenType.Strikethrough, value)
+                || IsTerminal(TokenType.Underline, value)
+                || IsTerminal(TokenType.AtSign, value)
+                || IsTerminal(TokenType.Semicolon, value)
+                || IsSpecial(value);
+
+        private static bool IsValidDCCFileNameTerminal
+        (
+            ref SequenceReader<byte> reader,
+            out byte value
+        )
+        {
+            if(!reader.TryPeek(out value))
+            {
+                return false;
+            }
+
+            return IsValidDCCFileNameTerminal(value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsValidDCCFileNameTerminal
+        (
+            byte value
+        )
+            => IsValidDCCFileNameTerminalBase(value)
+                || IsTerminal(TokenType.Space, value);
     }
 }

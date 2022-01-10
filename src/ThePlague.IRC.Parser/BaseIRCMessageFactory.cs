@@ -340,8 +340,7 @@ namespace ThePlague.IRC.Parser
         //add a command or a code
         public BaseIRCMessageFactory Verb
         (
-            Utf8String verb,
-            TokenType tokenType = TokenType.ErroneousMessage
+            Utf8String verb
         )
         {
             CheckIfConstructed(this);
@@ -359,7 +358,7 @@ namespace ThePlague.IRC.Parser
 
             if(!message.TryGetFirstTokenOfType
             (
-                TokenType.Command,
+                TokenType.Verb,
                 out Token command
             ))
             {
@@ -421,7 +420,7 @@ namespace ThePlague.IRC.Parser
                 );
             }
 
-            LinkConstructedVerb(command, tokenType, commandNameOrCode);
+            LinkConstructedVerb(command, commandNameOrCode);
 
             return this;
         }
@@ -629,7 +628,8 @@ namespace ThePlague.IRC.Parser
 
             tagPrefix
                 .Combine(new Token(TokenType.SourcePrefix))
-                .Combine(new Token(TokenType.Command))
+                .Combine(new Token(TokenType.Verb))
+                .Combine(new Token(TokenType.Params))
                 .Combine(new Token(TokenType.CrLf, CrLf));
 
             Token newMessage = new Token
@@ -691,7 +691,7 @@ namespace ThePlague.IRC.Parser
             //verify if a verb has been set
             if(oldMessage.TryGetFirstTokenOfType
             (
-                TokenType.Command,
+                TokenType.Verb,
                 out Token oldCommand
             )
                 && !oldCommand.IsEmpty)
@@ -714,11 +714,9 @@ namespace ThePlague.IRC.Parser
                     );
                 }
 
-                //TODO: is the command "implementation" always first child?
                 AddVerb
                 (
                     newMessage,
-                    oldCommand.Child.TokenType,
                     commandNameOrCode
                 );
             }
@@ -728,7 +726,7 @@ namespace ThePlague.IRC.Parser
                 return newMessage;
             }
 
-            //Params can only be set when command has been set
+            //verify if params have been set
             if(this._keepParamsCount > 0
                 && oldMessage.TryGetFirstTokenOfType
                 (
@@ -841,13 +839,12 @@ namespace ThePlague.IRC.Parser
         private static void AddVerb
         (
             Token newMessage,
-            TokenType commandType,
             Token oldVerb
         )
         {
             newMessage.TryGetFirstTokenOfType
             (
-                TokenType.Command,
+                TokenType.Verb,
                 out Token command
             );
 
@@ -860,7 +857,6 @@ namespace ThePlague.IRC.Parser
             LinkConstructedVerb
             (
                 command,
-                commandType,
                 newVerb
             );
         }
@@ -1019,23 +1015,9 @@ namespace ThePlague.IRC.Parser
         private static void LinkConstructedVerb
         (
             Token command,
-            TokenType commandType,
             Token verb
         )
-        {
-            //create empty parameters
-            Token parameters = new Token(TokenType.Params);
-            verb.Combine(parameters);
-
-            //create actual command
-            Token realCommand = new Token(commandType)
-            {
-                Child = verb
-            };
-
-            //add child to command
-            command.Child = realCommand;
-        }
+            => command.Child = verb;
 
         private static void LinkConstructedParameter
         (

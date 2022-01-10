@@ -53,27 +53,5 @@ namespace ThePlague.IRC.Parser
 
             return ParseSourcePrefixTarget(ref sequenceReader);
         }
-
-        //combine 2 tokens as linked list and return currently added item
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Token Combine(Token left, Token right)
-        {
-            if(left is null)
-            {
-                return right;
-            }
-
-            //TODO: verify
-            if(right is null)
-            {
-                return left;
-            }
-
-            Token leftToken = left.GetLastToken();
-
-            leftToken.Next = right;
-
-            return right;
-        }
     }
 }

@@ -240,7 +240,10 @@ namespace ThePlague.IRC.Parser.Tests
 
             //add middle param
             int index = 4;
-            for(int i = 0; i < 256; i++)
+
+            //go from high to low to guarantee a Middle and not a CTCPMessage
+            //(starts with 0x01)
+            for(int i = 255; i >= 0; i--)
             {
                 //full utf-8 without NUL, CR, LF, SPACE
                 if(i is 0
