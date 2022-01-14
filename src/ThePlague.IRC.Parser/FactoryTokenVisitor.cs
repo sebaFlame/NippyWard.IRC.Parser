@@ -10,10 +10,8 @@ namespace ThePlague.IRC.Parser
         private Token _message;
         //tail of the current utf-8 linked list
         private Utf8StringSequenceSegment _segment;
-        //private Token _currentFactoryToken;
         private Token _parentFactoryToken;
         private Token _previousFactoryToken;
-
 
         public FactoryTokenVisitor()
         { }
@@ -157,7 +155,6 @@ namespace ThePlague.IRC.Parser
         public override void Reset()
         {
             this._message = null;
-            //this._currentFactoryToken = null;
             this._segment = null;
 
             base.Reset();

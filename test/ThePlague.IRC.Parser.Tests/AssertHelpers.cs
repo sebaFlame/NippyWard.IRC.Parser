@@ -1,5 +1,6 @@
 using System;
 using System.Buffers;
+using System.Collections.Generic;
 
 using Xunit;
 
@@ -139,6 +140,5 @@ namespace ThePlague.IRC.Parser.Tests
                 segment.Memory.Length
             );
         }
-
     }
 }

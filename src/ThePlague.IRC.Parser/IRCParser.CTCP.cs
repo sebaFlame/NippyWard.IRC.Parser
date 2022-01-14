@@ -335,14 +335,11 @@ namespace ThePlague.IRC.Parser
         )
         {
             SequencePosition startPosition = reader.Position;
-            int count = 0;
 
             while(IsValidDCCFileNameTerminalBase(ref reader, out _))
             {
-                count++;
+                reader.Advance(1);
             }
-
-            reader.Advance(count);
 
             return new Token
             (
@@ -406,21 +403,17 @@ namespace ThePlague.IRC.Parser
         )
         {
             SequencePosition startPosition = reader.Position;
-            int count = 0;
 
             while(IsValidDCCFileNameTerminal(ref reader, out _))
             {
-                count++;
+                reader.Advance(1);
             }
-
-            reader.Advance(count);
 
             return new Token
             (
                 TokenType.DCCFilenameSpaceList,
                 reader.Sequence.Slice(startPosition, reader.Position)
             );
-
         }
     }
 }

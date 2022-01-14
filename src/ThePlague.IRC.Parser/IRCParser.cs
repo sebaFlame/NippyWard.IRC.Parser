@@ -33,12 +33,22 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            ReadOnlySequence<byte> message = sequence.Slice
+            //compute position including LF
+            SequencePosition start = sequence.Start;
+            SequencePosition end = sequence.GetPosition
             (
-                0,
-                sequence.GetOffset(lf.Value) + 1 //slice WITH LineFeed included
+                1,
+                lf.Value
             );
 
+            //create a slice
+            ReadOnlySequence<byte> message = sequence.Slice
+            (
+                start,
+                end
+            );
+
+            //create a reader from the sliced sequence
             SequenceReader<byte> sequenceReader
                 = new SequenceReader<byte>(message);
 

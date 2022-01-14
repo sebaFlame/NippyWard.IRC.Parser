@@ -101,15 +101,17 @@ namespace ThePlague.IRC.Parser
             }
 
             ReadOnlySequence<byte> sequence = reader.Sequence;
-            int offset = (int)sequence.GetOffset(startPosition);
+            SequencePosition position;
 
             for(int i = 0; i < count; i++)
             {
+                position = sequence.GetPosition(i, startPosition);
+
                 //space is always a length of 1
                 space = new Token
                 (
                     TokenType.Space,
-                    reader.Sequence.Slice(offset + i, 1)
+                    sequence.Slice(position, 1)
                 );
 
                 if(first is null)
@@ -708,7 +710,7 @@ namespace ThePlague.IRC.Parser
                 || IsTerminal(TokenType.AtSign, value)
                 || IsSpecial(value);
 
-        private static bool IsUTF8WithoutNullCrLfSpaceAndComma
+        private static bool IsUTF8WithoutNullCrLfCommaSpaceListTerminal
         (
             ref SequenceReader<byte> reader,
             out byte value
@@ -719,18 +721,20 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            return IsUTF8WithoutNullCrLfSpaceAndComma(value);
+            return IsUTF8WithoutNullCrLfCommaListTerminal(value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsUTF8WithoutNullCrLfSpaceAndComma
+        private static bool IsUTF8WithoutNullCrLfCommaListTerminal
         (
             byte value
         )
             => IsUTF8WithoutNullCrLFBase(value)
                || IsTerminal(TokenType.Bell, value)
+               || IsTerminal(TokenType.Colon, value)
                || IsTerminal(TokenType.Semicolon, value)
-               || IsTerminal(TokenType.AtSign, value);
+               || IsTerminal(TokenType.AtSign, value)
+               || IsSpecial(value);
 
         private static bool IsValidISupportValueItemTerminal
         (
@@ -753,6 +757,8 @@ namespace ThePlague.IRC.Parser
         )
             => IsAlphaNumeric(value)
                 || (value >= (byte)TokenType.ExclamationMark
+                    && value <= (byte)TokenType.Plus)
+                || (value >= (byte)TokenType.Minus
                     && value <= (byte)TokenType.Slash)
                 || (value >= (byte)TokenType.Colon
                     && value <= (byte)TokenType.AtSign)

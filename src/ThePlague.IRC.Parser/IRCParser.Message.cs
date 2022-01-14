@@ -143,13 +143,13 @@ namespace ThePlague.IRC.Parser
                 //add semicolon to linked list
                 previous = previous.Combine(semicolon);
 
-                //parse tag and add to children
-                previous = previous.Combine(ParseTag(ref reader));
-
                 if(first is null)
                 {
                     first = previous;
                 }
+
+                //parse tag and add to children
+                previous = previous.Combine(ParseTag(ref reader));
             }
 
             //did not find a semicolon
@@ -206,7 +206,7 @@ namespace ThePlague.IRC.Parser
             }
 
             //parse atleast a single shortname
-            Token shortName = ParseShortName(ref reader);
+            Token shortName = ParseHost(ref reader);
 
             if(first is null)
             {
@@ -892,8 +892,6 @@ namespace ThePlague.IRC.Parser
             int recognizedCount = 0
         )
         {
-            //TODO: compute recognizedcount from SequencePosition
-
             //parse 3 digits
             for(int i = 0; i < 3 - recognizedCount; i++)
             {

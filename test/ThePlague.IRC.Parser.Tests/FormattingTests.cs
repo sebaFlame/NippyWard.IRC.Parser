@@ -8,7 +8,7 @@ using ThePlague.IRC.Parser.Tokens;
 
 namespace ThePlague.IRC.Parser.Tests
 {
-    public class IRCFormattingTests
+    public class FormattingTests
     {
         [Fact]
         public void FormattingMiddleTest()

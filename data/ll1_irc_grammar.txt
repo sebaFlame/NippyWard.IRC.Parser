@@ -43,7 +43,7 @@ HexColorTriplet -> HexDecimal HexDecimal HexDecimal .
 ForegroundHexColor -> HexColorTriplet .
 BackgroundHexColor -> HexColorTriplet .
 Host -> ShortName HostSuffix .
-HostSuffix -> Dot ShortName HostSuffix | .
+HostSuffix -> 0x2E ShortName HostSuffix | .
 ServerName -> Host .
 Timestamp -> Integer .
 
@@ -81,8 +81,8 @@ UTF8WithoutNullCrLfSpaceAt -> UTF8WithoutNullCrLFBase | 0x07 | 0x2C | 0x3A | 0x3
 # Channel terminal collectino
 UTF8WithoutNullBellCrLfSpaceCommaAndColon -> UTF8WithoutNullCrLFBase | 0x3B | 0x40 | Special .
 
-# ElistCond terminal collection
-UTF8WithoutNullCrLfSpaceAndComma -> UTF8WithoutNullCrLFBase | 0x07 | 0x3B | 0x40 .
+# Comma seperated middle list (key)
+UTF8WithoutNullCrLfCommaSpaceListTerminal -> UTF8WithoutNullCrLFBase | 0x07 | 0x3A | 0x3B | 0x40 | Special .
 
 # DCC Filename
 DCCFileNameTerminalsBase -> UTF8WithoutAlphaNumericFormatCTCPNullCrLFBase | AlphaNumeric | 0x01 | 0x02 | 0x03 | 0x04 | 0x0F | 0x11 | 0x1D | 0x1E | 0x1F | 0x07 | 0x3B | 0x40 | Special .
@@ -121,7 +121,7 @@ TagsSuffix -> TagsList | .
 TagsList -> 0x3B Tag TagsList .
 Tag -> TagKey TagSuffix .
 TagSuffix -> 0x3D TagValue | .
-TagKey -> 0x2B ShortName TagKeySuffix | ShortName TagKeySuffix .
+TagKey -> 0x2B Host TagKeySuffix | Host TagKeySuffix .
 TagKeySuffix ->  0x2F ShortName | .
 TagValue -> TagValueList | .
 TagValueList -> UTF8WithoutNullCrLfSemiColonSpace TagValueList | TagValueEscapeList TagValueList .
@@ -168,10 +168,11 @@ Mode -> Letter .
 PlusMinus -> 0x2B | 0x2D .
 
 # Channel join (trailing) key list
-KeyList -> Key KeyListSuffix .
+KeyList -> KeyListItem KeyListSuffix .
 KeyListSuffix -> KeyListItems | .
-KeyListItems -> 0x2C Key KeyListItems .
-Key -> UTF8WithoutNullBellCrLfSpaceCommaAndColon Key .
+KeyListItems -> 0x2C KeyItem KeyListItems .
+KeyListItem -> Key | .
+Key -> UTF8WithoutNullCrLfCommaSpaceListTerminal Key .
 
 # Target lists
 NicknameSpaceList -> Nickname NicknameSpaceListSuffix .
@@ -182,10 +183,15 @@ ChannelCommaListSuffix -> ChannelCommaListItems | .
 ChannelCommaListItems -> 0x2C Channel ChannelCommaListItems .
 
 # Elistcond
-ElistCond -> UTF8WithoutNullCrLfSpaceAndComma ElistCond .
+ElistCond -> UTF8WithoutNullCrLfCommaSpaceListTerminal ElistCond .
 ElistCondList -> ElistCond ElistCondListSuffix .
 ElistCondListSuffix -> ElistCondListItems | .
 ElistCondListItems -> 0x2C ElistCond ElistCondListItems .
+
+# Space delimited channel membership list
+ChannelMembershipSpaceList -> MsgToChannel ChannelMembershipSpaceListItems .
+ChannelMembershipSpaceListSuffix -> ChannelMembershipSpaceListItems | .
+ChannelMembershipSpaceListItems -> 0x20 MsgToChannel ChannelMembershipSpaceListItems .
 
 # Message target (PRIVMSG and NOTICE)
 MsgTarget -> MsgTo MsgTargetItems .
@@ -193,23 +199,19 @@ MsgTargetSuffix -> MsgTargetItems | .
 MsgTargetItems -> 0x2C MsgTo MsgTargetItems .
 MsgTo -> MsgToNickname | MsgToChannel | MsgToTargetMask .
 MsgToTargetMask ->  0x24 MsgToTargetMaskLetters .
-MsgToTargetMaskLetters -> UTF8WithoutNullCrLfSpaceAndComma MsgToTargetMaskLetters .
+MsgToTargetMaskLetters -> UTF8WithoutNullCrLfCommaSpaceListTerminal MsgToTargetMaskLetters .
 # This allows only a subset of usernames (!)
 MsgToNickname -> Nickname MsgToNicknameSuffix .
 MsgToNicknameSuffix -> MsgToUserHost MsgToUserHostServer | UserHostUsername UserHostHostname .
 MsgToUserHost -> 0x25 Host | .
 MsgToUserHostServer -> 0x40 ServerName | .
-MsgToChannel -> MsgToChannelPrefix ChannelString .
-MsgToChannelPrefix -> MsgToChannelChannelPrefixMembership | ChannelMembershipPrefixWithoutChannelPrefix ChannelPrefixWithoutMembership | ChannelPrefixWithoutMembership .
+MsgToChannel -> MsgToChannelPrefix ChannelString ChannelSuffix .
+MsgToChannelPrefix -> MsgToChannelChannelPrefixMembership | ChannelMembershipPrefixWithoutChannelPrefix MsgToChannelPrefixChannelPrefixSuffix | ChannelPrefixWithoutMembership .
+MsgToChannelPrefixChannelPrefixSuffix -> MsgToChannelChannelPrefixMembership | ChannelPrefixWithoutMembership .
 # For &channel & &&channel ('&' or '+' in '&channel' of '+channel')
 MsgToChannelChannelPrefixMembership -> 0x26 MsgToChannelPrefix | 0x2B MsgToChannelPrefix .
 ChannelMembershipPrefixWithoutChannelPrefix -> 0x7E | 0x40 | 0x25 .
 ChannelMembershipPrefix -> ChannelMembershipPrefixWithoutChannelPrefix | 0x26 | 0x2B .
-
-# RPL_MYINFO (004)
-MyInfoReply -> ServerName Spaces Version Spaces ModeCharsList Spaces ModeCharsList MyInfoReplySuffix .
-Version -> Middle .
-MyInfoReplySuffix -> Spaces ModeCharsList | .
 
 # RPL_ISUPPORT (005 or 105)
 ISupport -> ISupportToken ISupportSuffix .
@@ -238,7 +240,7 @@ CapListSuffix -> CapListItems | .
 CapListItems -> 0x20 CapListItem CapListItems .
 CapListItem -> CapListItemKey CapListItemSuffix .
 CapListItemSuffix -> 0x3D CapListItemValueList | .
-CapListItemKey -> ShortName CapListItemKeySuffix .
+CapListItemKey -> Host CapListItemKeySuffix .
 CapListItemKeySuffix ->  0x2F ShortName | .
 CapListItemValueList -> CapListItemValueListItem CapListItemValueListSuffix .
 CapListItemValueListSuffix -> CapListItemValueListItems | .
@@ -252,11 +254,6 @@ NicknameMembershipSpaceList -> NicknameMembership NicknameMembershipSpaceListSuf
 NicknameMembershipSpaceListSuffix -> NicknameMembershipSpaceListItems | .
 NicknameMembershipSpaceListItems -> 0x20 NicknameMembership NicknameMembershipSpaceListItems .
 NicknameMembership -> ChannelMembershipPrefix Nickname | Nickname .
-
-# RPL_WHOISCHANNELS (319)
-ChannelMembershipSpaceList -> MsgToChannel ChannelMembershipSpaceListItems .
-ChannelMembershipSpaceListSuffix -> ChannelMembershipSpaceListItems | .
-ChannelMembershipSpaceListItems -> 0x20 MsgToChannel ChannelMembershipSpaceListItems .
 
 # RPL_USERHOST (302)
 UserHostList -> UserHostListItem UserHostListSuffix .
@@ -277,24 +274,6 @@ WhoReplyFlags -> WhoReplyAway WhoReplyFlagsOp WhoReplyChannelMembership ModeChar
 WhoReplyAway -> 0x47 | 0x48 .
 WhoReplyFlagsOp -> 0x2A | .
 WhoReplyChannelMembership -> ChannelMembershipPrefix | .
-
-# RPL_WHOISUSER (311)
-WhoIsUserReply -> Nickname Spaces Username Spaces Host Spaces 0x2A Spaces WhoIsRealName .
-WhoIsRealName -> Trailing .
-
-# RPL_WHOISSERVER (312)
-WhoIsServerReply -> Nickname Spaces ServerName Spaces ServerInfo .
-ServerInfo -> Trailing .
-
-# RPL_WHOWASUSER (314)
-WhoWasReply -> WhoIsUserReply .
-
-# RPL_WHOISIDLE (317)
-WhoIsIdleReply -> Nickname Spaces Integer Spaces Timestamp Spaces Trailing .
-
-# RPL_LIST (322)
-ListReply -> Channel Spaces ClientCount Spaces Topic .
-Topic -> Trailing .
 
 # CTCP
 CTCPMessage -> 0x01 CTCPCommand CTCPParams CTCPMessageSuffix .

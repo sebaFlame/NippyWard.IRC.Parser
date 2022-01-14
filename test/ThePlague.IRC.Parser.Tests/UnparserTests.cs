@@ -7,11 +7,15 @@ using ThePlague.Model.Core.Text;
 
 namespace ThePlague.IRC.Parser.Tests
 {
-    public class IRCUnparserTests : IDisposable
+    //TODO:
+    // - max message length
+    // - max tag length
+    // - max paramters
+    public class UnparserTests : IDisposable
     {
         private readonly GeneralIRCMessageFactory _factory;
 
-        public IRCUnparserTests()
+        public UnparserTests()
         {
             this._factory = new GeneralIRCMessageFactory();
         }

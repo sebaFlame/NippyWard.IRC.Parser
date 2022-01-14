@@ -154,7 +154,7 @@ namespace ThePlague.IRC.Parser
             SequencePosition startPosition = reader.Position;
 
             //can return empty if no value found
-            if(TryParseISupportValueItem(ref reader, out Token first))
+            if(!TryParseISupportValueItem(ref reader, out Token first))
             {
                 return new Token
                 (
@@ -240,7 +240,7 @@ namespace ThePlague.IRC.Parser
             return valueItem;
         }
 
-        private static bool TryParseISupportValueItemTerminals
+        public static bool TryParseISupportValueItemTerminals
         (
             ref SequenceReader<byte> reader,
             out Token terminals
@@ -255,6 +255,7 @@ namespace ThePlague.IRC.Parser
                 out _
             ))
             {
+                reader.Advance(1);
                 count++;
             }
 
@@ -263,8 +264,6 @@ namespace ThePlague.IRC.Parser
                 terminals = null;
                 return false;
             }
-
-            reader.Advance(count);
 
             terminals = new Token
             (

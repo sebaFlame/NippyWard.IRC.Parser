@@ -100,7 +100,31 @@ namespace ThePlague.IRC.Parser.Tokens
             return false;
         }
 
-        public static bool TryGetLastOfTokenType
+        public static bool TryGetTokenAtIndexOfType
+        (
+            this Token token,
+            int index,
+            TokenType tokenType,
+            out Token result
+        )
+        {
+            int idx = index;
+
+            foreach(Token t in VisitTokenInternal(token))
+            {
+                if(t.TokenType == tokenType
+                   && idx-- == 0)
+                {
+                    result = t;
+                    return true;
+                }
+            }
+
+            result = null;
+            return false;
+        }
+
+        public static bool TryGetLastOfType
         (
             this Token token,
             TokenType tokenType,
@@ -120,6 +144,27 @@ namespace ThePlague.IRC.Parser.Tokens
             return result is not null;
         }
 
+        public static bool TryGetFirstTokenOfMask
+        (
+            this Token token,
+            int tokenMask,
+            out Token result)
+        {
+            int tokenType;
+            foreach(Token t in VisitTokenInternal(token))
+            {
+                tokenType = (int)t.TokenType;
+                if((tokenType & tokenMask) == tokenType)
+                {
+                    result = t;
+                    return true;
+                }
+            }
+
+            result = null;
+            return false;
+        }
+
         public static IEnumerable<Token> GetAllTokensOfType
         (
             this Token token,
@@ -130,6 +175,24 @@ namespace ThePlague.IRC.Parser.Tokens
             foreach(Token t in VisitTokenInternal(token))
             {
                 if(t.TokenType == tokenType)
+                {
+                    yield return t;
+                }
+            }
+        }
+
+        public static IEnumerable<Token> GetAllTokensOfMask
+        (
+            this Token token,
+            int tokenMask
+        )
+        {
+            int tokenType;
+            foreach(Token t in VisitTokenInternal(token))
+            {
+                tokenType = (int)t.TokenType;
+
+                if((tokenType & tokenMask) == tokenType)
                 {
                     yield return t;
                 }

@@ -72,8 +72,6 @@ namespace ThePlague.IRC.Parser
             this._defaultKeepParamsCount = keepParamsCount;
             this._defaultKeepSourcePrefix = keepSourcePrefx;
             this._defaultKeepTags = keepTags;
-
-            this.Reset();
         }
 
         public BaseIRCMessageFactory()
@@ -364,7 +362,7 @@ namespace ThePlague.IRC.Parser
             {
                 throw new InvalidOperationException
                 (
-                    "No command token found!"
+                    "No verb token found!"
                 );
             }
 
@@ -372,7 +370,7 @@ namespace ThePlague.IRC.Parser
             {
                 throw new ArgumentException
                 (
-                    "Command has already been defined"
+                    "Verb has already been defined"
                 );
             }
 
@@ -697,7 +695,7 @@ namespace ThePlague.IRC.Parser
                 && !oldCommand.IsEmpty)
             {
                 Token commandNameOrCode;
-                if(!(oldCommand.TryGetLastOfTokenType
+                if(!(oldCommand.TryGetLastOfType
                 (
                     TokenType.CommandName,
                     out commandNameOrCode
@@ -1029,7 +1027,7 @@ namespace ThePlague.IRC.Parser
             {
                 parameters.Child = paramsPrefix;
             }
-            else if(parameters.TryGetLastOfTokenType
+            else if(parameters.TryGetLastOfType
             (
                 TokenType.ParamsSuffix,
                 out Token lastParamsSuffix
@@ -1051,6 +1049,9 @@ namespace ThePlague.IRC.Parser
         public virtual BaseIRCMessageFactory Reset()
         {
             this._message?.Dispose();
+
+            this._message = null;
+
             this._message = this.CreateNewConstructedMessage();
 
             this._keepParamsCount = this._defaultKeepParamsCount;
@@ -1083,6 +1084,7 @@ namespace ThePlague.IRC.Parser
                 _FactoryTokenVisitor = new FactoryTokenVisitor();
             }
 
+            _FactoryTokenVisitor.Reset();
             return _FactoryTokenVisitor;
         }
 
@@ -1093,6 +1095,7 @@ namespace ThePlague.IRC.Parser
                 _MessageLengthVisitor = new MessageLengthVisitor();
             }
 
+            _MessageLengthVisitor.Reset();
             return _MessageLengthVisitor;
         }
 

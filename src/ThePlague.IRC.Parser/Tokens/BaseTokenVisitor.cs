@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
 
-//keep this file in sync with TokenType!
-//TODO: create source generator
-
 namespace ThePlague.IRC.Parser.Tokens
 {
     public abstract class BaseTokenVisitor : IDisposable

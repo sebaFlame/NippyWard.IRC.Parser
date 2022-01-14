@@ -69,7 +69,7 @@ namespace ThePlague.IRC.Parser
 
                 return new Token
                 (
-                    TokenType.Username,
+                    TokenType.Nickname,
                     reader.Sequence.Slice(startPosition, reader.Position),
                     first
                 );
@@ -543,17 +543,17 @@ namespace ThePlague.IRC.Parser
             //ChannelId consists of 5 digits or uppercase
             for(; i <= 5; i++)
             {
-                if(!IsUpperCaseOrDigit(ref reader, out _))
+                if(IsUpperCaseOrDigit(ref reader, out _))
+                {
+                    reader.Advance(1);
+                }
+                else
                 {
                     break;
                 }
             }
 
-            if(i == 5)
-            {
-                reader.Advance(i);
-            }
-            else
+            if(i != 6)
             {
                 channelId = null;
                 return false;

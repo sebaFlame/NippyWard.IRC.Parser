@@ -10,11 +10,11 @@ using ThePlague.Model.Core.Text;
 
 namespace ThePlague.IRC.Parser.Tests
 {
-    public class IRCMessageTests
+    public class MessageTests
     {
         private readonly ITestOutputHelper _output;
 
-        public IRCMessageTests(ITestOutputHelper testOutputHelper)
+        public MessageTests(ITestOutputHelper testOutputHelper)
         {
             this._output = testOutputHelper;
         }
@@ -310,7 +310,7 @@ namespace ThePlague.IRC.Parser.Tests
         }
 
         [Fact]
-        public void ValidTrailingParamCharacterTest()
+        public void ValidCharactersTrailingParamTest()
         {
             byte[] message = new byte[256 - 3 + 3 + 1 + 1 + 2];
             Span<byte> cmd = new Span<byte>(message, 0, 3);
@@ -380,11 +380,20 @@ namespace ThePlague.IRC.Parser.Tests
                     TokenType.ParamsPrefix,
                     new Action<Token>[]
                     {
-                        (Token t) => AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
+                        (Token t) => Assert.True
                         (
-                            t,
-                            TokenType.TrailingPrefix,
-                            new Memory<byte>(message, 5, message.Length - 5 - 2)
+                            t.Sequence.SequenceEquals
+                            (
+                                new ReadOnlySequence<byte>
+                                (
+                                    new Memory<byte>
+                                    (
+                                        message,
+                                        3,
+                                        message.Length - 3 - 2
+                                    )
+                                )
+                            )
                         )
                     }
                 );

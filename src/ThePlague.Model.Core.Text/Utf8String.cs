@@ -28,11 +28,17 @@ namespace ThePlague.Model.Core.Text
             Empty = new Utf8String(ReadOnlySequence<byte>.Empty);
         }
 
+        /// <summary>
+        /// <paramref name="str" /> contains a valid (!) UTF-8 string
+        /// </summary>
         public Utf8String(ReadOnlySequence<byte> str)
         {
             this._buffer = str;
         }
 
+        /// <summary>
+        /// <paramref name="str" /> contains a valid (!) UTF-8 string
+        /// </summary>
         public Utf8String(ReadOnlyMemory<byte> str)
             : this(new ReadOnlySequence<byte>(str))
         { }

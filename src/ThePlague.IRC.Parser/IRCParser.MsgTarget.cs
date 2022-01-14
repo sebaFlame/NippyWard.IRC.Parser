@@ -84,8 +84,11 @@ namespace ThePlague.IRC.Parser
 
             //parse the channel string
             Token channelString = ParseChannelString(ref reader);
-
             prefix.Combine(channelString);
+
+            //try to parse a channel suffix
+            Token channelSuffix = ParseChannelSuffix(ref reader);
+            channelString.Combine(channelSuffix);
 
             channel = new Token
             (
@@ -130,17 +133,11 @@ namespace ThePlague.IRC.Parser
                 out channelPrefix
             ))
             {
-                //try parse a channel prefix of '#' or '!A1A1A'
-                if(!TryParseChannelPrefixWithoutMembership
-                (
-                    ref reader,
-                    out Token prefixWithoutMembership
-                ))
-                {
-                    throw new ParserException("Channel prefix expected");
-                }
 
-                channelPrefix.Combine(prefixWithoutMembership);
+                channelPrefix.Combine
+                (
+                    MsgToChannelPrefixChannelPrefixSuffix(ref reader)
+                );
 
                 prefix = new Token
                 (
@@ -172,6 +169,37 @@ namespace ThePlague.IRC.Parser
                 prefix = null;
                 return false;
             }
+        }
+
+        private static Token MsgToChannelPrefixChannelPrefixSuffix
+        (
+            ref SequenceReader<byte> reader
+        )
+        {
+            SequencePosition startPosition = reader.Position;
+            Token prefixWithoutMembership;
+
+            //try parse a channel prefix of '#' or '!A1A1A'
+            //or try to parse a prefix of '&' or '+'
+            if(!(TryParseChannelPrefixWithoutMembership
+            (
+                ref reader,
+                out prefixWithoutMembership
+            ) || TryParseMsgToChannelChannelPrefixMembership
+            (
+                ref reader,
+                out prefixWithoutMembership
+            )))
+            {
+                throw new ParserException("Channel prefix expected");
+            }
+
+            return new Token
+            (
+                TokenType.MsgToChannelPrefixChannelPrefixSuffix,
+                reader.Sequence.Slice(startPosition, reader.Position),
+                prefixWithoutMembership
+            );
         }
 
         private static bool TryParseMsgToChannelChannelPrefixMembership
@@ -336,7 +364,7 @@ namespace ThePlague.IRC.Parser
             SequencePosition startPosition = reader.Position;
 
             //check valid key terminals
-            while(IsUTF8WithoutNullCrLfSpaceAndComma
+            while(IsUTF8WithoutNullCrLfCommaSpaceListTerminal
             (
                 ref reader,
                 out _

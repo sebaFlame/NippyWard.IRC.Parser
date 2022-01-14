@@ -5,12 +5,13 @@ using ThePlague.IRC.Parser.Tokens;
 
 namespace ThePlague.IRC.Parser
 {
-    internal delegate Token ParseToken(ref SequenceReader<byte> reader);
+    public delegate Token ParseToken(ref SequenceReader<byte> reader);
 
     public static partial class IRCParser
     {
         //pin certain item parse method to prevent excessive GC
-        private static readonly ParseToken _ParseKey = new ParseToken(ParseKey);
+        private static readonly ParseToken _ParseKeyListItem
+            = new ParseToken(ParseKeyListItem);
         private static readonly ParseToken _ParseNickname
             = new ParseToken(ParseNickname);
         private static readonly ParseToken _ParseChannel
@@ -66,7 +67,7 @@ namespace ThePlague.IRC.Parser
 
             return new Token
             (
-                TokenType.HostSuffix,
+                TokenType.ServerName,
                 reader.Sequence.Slice(startPosition, reader.Position),
                 host
             );
@@ -167,7 +168,7 @@ namespace ThePlague.IRC.Parser
             }
         }
 
-        private static bool TryParseModeCharsList
+        public static bool TryParseModeCharsList
         (
             ref SequenceReader<byte> reader,
             out Token modeCharsList
@@ -230,118 +231,6 @@ namespace ThePlague.IRC.Parser
             return false;
         }
 
-        //parse RPL_MYINFO (004)
-        public static Token ParseMyInfoReply
-        (
-            ref SequenceReader<byte> reader
-        )
-        {
-            SequencePosition startPosition = reader.Position;
-            Token spaces, modeChars;
-
-            Token servername = ParseServerName(ref reader);
-
-            if(!TryParseSpaces(ref reader, out spaces))
-            {
-                throw new ParserException("Space(s) expected");
-            }
-            servername.Combine(spaces);
-
-            Token version = ParseVersion(ref reader);
-            spaces.Combine(version);
-
-            if(!TryParseSpaces(ref reader, out spaces))
-            {
-                throw new ParserException("Space(s) expected");
-            }
-            servername.Combine(spaces);
-
-            //parse available user modes
-            if(!TryParseModeCharsList(ref reader, out modeChars))
-            {
-                throw new ParserException("Mode chars expected");
-            }
-            spaces.Combine(modeChars);
-
-            if(!TryParseSpaces(ref reader, out spaces))
-            {
-                throw new ParserException("Space(s) expected");
-            }
-            servername.Combine(spaces);
-
-            //parse available channel modes
-            if(!TryParseModeCharsList(ref reader, out modeChars))
-            {
-                throw new ParserException("Mode chars expected");
-            }
-            spaces.Combine(modeChars);
-
-            Token suffix = ParseMyInfoReplySuffix(ref reader);
-            modeChars.Combine(suffix);
-
-            return new Token
-            (
-                TokenType.MyInfoReply,
-                reader.Sequence.Slice(startPosition, reader.Position),
-                servername
-            );
-        }
-
-        //parse server version
-        private static Token ParseVersion
-        (
-            ref SequenceReader<byte> reader
-        )
-        {
-            SequencePosition startPosition = reader.Position;
-
-            if(!TryParseMiddle(ref reader, out Token middle))
-            {
-                throw new ParserException("Middle expected");
-            }
-
-            return new Token
-            (
-                TokenType.Version,
-                reader.Sequence.Slice(startPosition, reader.Position),
-                middle
-            );
-        }
-
-        //parse modes with a paramter or return empty
-        private static Token ParseMyInfoReplySuffix
-        (
-            ref SequenceReader<byte> reader
-        )
-        {
-            SequencePosition startPosition = reader.Position;
-            Token spaces, modeChars;
-
-            //if no space(s) return empty
-            if(!TryParseSpaces(ref reader, out spaces))
-            {
-                return new Token
-                (
-                    TokenType.MyInfoReplySuffix
-                );
-            }
-
-            //parse available modes with a parameter
-            if(!TryParseModeCharsList(ref reader, out modeChars))
-            {
-                throw new ParserException("Mode chars expected");
-            }
-
-            spaces.Combine(modeChars);
-
-            return new Token
-            (
-                TokenType.MyInfoReplySuffix,
-                reader.Sequence.Slice(startPosition, reader.Position),
-                spaces
-            );
-        }
-
         //parse a list of 1 or more keys (eg for JOIN command)
         public static Token ParseKeyList
         (
@@ -350,14 +239,14 @@ namespace ThePlague.IRC.Parser
         {
             SequencePosition startPosition = reader.Position;
 
-            Token first = ParseKey(ref reader);
+            Token first = ParseKeyListItem(ref reader);
 
             //try to parse the rest of a key list or return empty
             first.Combine
             (
                 ParseListSuffix
                 (
-                    _ParseKey,
+                    _ParseKeyListItem,
                     TokenType.Comma,
                     TokenType.KeyListSuffix,
                     TokenType.KeyListItems,
@@ -423,8 +312,8 @@ namespace ThePlague.IRC.Parser
             bool found = false;
             Token previous = null, first = null, seperator;
 
-            //a comma denotes a next key
-            while(!TryParseTerminal
+            //a comma denotes a next item
+            while(TryParseTerminal
             (
                 seperatorType,
                 ref reader,
@@ -459,29 +348,67 @@ namespace ThePlague.IRC.Parser
             return true;
         }
 
-        //parse a single key
-        private static Token ParseKey
+        //try to parse a key or return empty
+        public static Token ParseKeyListItem
         (
             ref SequenceReader<byte> reader
         )
         {
             SequencePosition startPosition = reader.Position;
 
+            //can return empty
+            if(!TryParseKey(ref reader, out Token key))
+            {
+                return new Token
+                (
+                    TokenType.KeyListItem
+                );
+            }
+            else
+            {
+                return new Token
+                (
+                    TokenType.KeyListItem,
+                    reader.Sequence.Slice(startPosition, reader.Position),
+                    key
+                );
+            }
+        }
+
+        //parse a single key
+        public static bool TryParseKey
+        (
+            ref SequenceReader<byte> reader,
+            out Token key
+        )
+        {
+            SequencePosition startPosition = reader.Position;
+            bool found = false;
+
             //check valid key terminals
-            while(IsUTF8WithoutNullBellCrLfSpaceCommaAndColon
+            while(IsUTF8WithoutNullCrLfCommaSpaceListTerminal
             (
                 ref reader,
                 out _
             ))
             {
                 reader.Advance(1);
+                found = true;
             }
 
-            return new Token
+            if(!found)
+            {
+                key = null;
+                return false;
+            }
+
+            key = new Token
             (
                 TokenType.Key,
                 reader.Sequence.Slice(startPosition, reader.Position)
             );
+
+            return true;
         }
 
         //parse a space seperated list of nicknames
@@ -587,7 +514,7 @@ namespace ThePlague.IRC.Parser
             SequencePosition startPosition = reader.Position;
 
             //check valid key terminals
-            while(IsUTF8WithoutNullCrLfSpaceAndComma
+            while(IsUTF8WithoutNullCrLfCommaSpaceListTerminal
             (
                 ref reader,
                 out _
@@ -662,7 +589,7 @@ namespace ThePlague.IRC.Parser
         {
             SequencePosition startPosition = reader.Position;
 
-            Token shortName = ParseShortName(ref reader);
+            Token shortName = ParseHost(ref reader);
 
             shortName.Combine(ParseCapListItemKeySuffix(ref reader));
 
@@ -804,7 +731,6 @@ namespace ThePlague.IRC.Parser
             channelType.Combine(spaces);
 
             Token channel = ParseChannel(ref reader);
-
             spaces.Combine(channel);
 
             //next token should be space(s)
@@ -812,7 +738,6 @@ namespace ThePlague.IRC.Parser
             {
                 throw new ParserException("Space(s) expected");
             }
-
             channel.Combine(spaces);
 
             //next token should be a colon
@@ -827,7 +752,6 @@ namespace ThePlague.IRC.Parser
             }
 
             spaces.Combine(colon);
-
             colon.Combine(ParseNicknameMembershipSpaceList(ref reader));
 
             return new Token
@@ -953,7 +877,6 @@ namespace ThePlague.IRC.Parser
 
             Token first = ParseMsgToChannel(ref reader);
 
-            //try to parse the rest of a nickname list or return empty
             first.Combine
             (
                 ParseListSuffix
@@ -1114,7 +1037,7 @@ namespace ThePlague.IRC.Parser
             {
                 return new Token
                 (
-                    TokenType.UserHostListOp,
+                    TokenType.UserHostListAway,
                     reader.Sequence.Slice(startPosition, reader.Position),
                     away
                 );
@@ -1148,14 +1071,11 @@ namespace ThePlague.IRC.Parser
         )
         {
             SequencePosition startPosition = reader.Position;
-            int count = 0;
 
             while(IsUTF8WithoutNullCrLfSpaceAt(ref reader, out _))
             {
-                count++;
+                reader.Advance(1);
             }
-
-            reader.Advance(count);
 
             return new Token
             (
@@ -1216,67 +1136,57 @@ namespace ThePlague.IRC.Parser
             {
                 throw new ParserException("Space(s) expected");
             }
-
             prefix.Combine(spaces);
 
             Token username = ParseUsername(ref reader);
-
             spaces.Combine(username);
 
             if(!TryParseSpaces(ref reader, out spaces))
             {
                 throw new ParserException("Space(s) expected");
             }
-
             username.Combine(spaces);
 
             Token hostname = ParseHost(ref reader);
-
             spaces.Combine(hostname);
 
             if(!TryParseSpaces(ref reader, out spaces))
             {
                 throw new ParserException("Space(s) expected");
             }
-
             hostname.Combine(spaces);
 
             Token servername = ParseServerName(ref reader);
-
             spaces.Combine(servername);
 
             if(!TryParseSpaces(ref reader, out spaces))
             {
                 throw new ParserException("Space(s) expected");
             }
-
             servername.Combine(spaces);
 
             Token nickname = ParseNickname(ref reader);
+            spaces.Combine(nickname);
 
             if(!TryParseSpaces(ref reader, out spaces))
             {
                 throw new ParserException("Space(s) expected");
             }
-
             nickname.Combine(spaces);
 
             Token flags = ParseWhoReplyFlags(ref reader);
-
             spaces.Combine(flags);
 
             if(!TryParseSpaces(ref reader, out spaces))
             {
                 throw new ParserException("Space(s) expected");
             }
-
             flags.Combine(spaces);
 
             if(!TryParseTrailing(ref reader, out Token trailing))
             {
                 throw new ParserException("Trailing expected");
             }
-
             spaces.Combine(trailing);
 
             return new Token
@@ -1429,276 +1339,6 @@ namespace ThePlague.IRC.Parser
                     TokenType.WhoReplyChannelMembership
                 );
             }
-        }
-
-        //parse RPL_WHOISUSER (311)
-        public static Token ParseWhoIsUserReply
-        (
-            ref SequenceReader<byte> reader
-        )
-        {
-            SequencePosition startPosition = reader.Position;
-            Token spaces;
-
-            Token nickname = ParseNickname(ref reader);
-
-            if(!TryParseSpaces(ref reader, out spaces))
-            {
-                throw new ParserException("Space(s) expected");
-            }
-            nickname.Combine(spaces);
-
-            Token username = ParseUsername(ref reader);
-            spaces.Combine(username);
-
-            if(!TryParseSpaces(ref reader, out spaces))
-            {
-                throw new ParserException("Space(s) expected");
-            }
-            username.Combine(spaces);
-
-            Token hostname = ParseHost(ref reader);
-            spaces.Combine(hostname);
-
-            if(!TryParseSpaces(ref reader, out spaces))
-            {
-                throw new ParserException("Space(s) expected");
-            }
-            hostname.Combine(spaces);
-
-            if(!TryParseTerminal
-            (
-                TokenType.Asterisk,
-                ref reader,
-                out Token asterisk
-            ))
-            {
-                throw new ParserException("Asterisk expected");
-            }
-            spaces.Combine(asterisk);
-
-            if(!TryParseSpaces(ref reader, out spaces))
-            {
-                throw new ParserException("Space(s) expected");
-            }
-            asterisk.Combine(spaces);
-
-            Token realname = ParseWhoIsRealName(ref reader);
-            spaces.Combine(realname);
-
-            return new Token
-            (
-                TokenType.WhoIsUserReply,
-                reader.Sequence.Slice(startPosition, reader.Position),
-                nickname
-            );
-        }
-
-        private static Token ParseWhoIsRealName
-        (
-            ref SequenceReader<byte> reader
-        )
-        {
-            SequencePosition startPosition = reader.Position;
-
-            if(!TryParseTrailing(ref reader, out Token trailing))
-            {
-                throw new ParserException("Trailing expected");
-            }
-
-            return new Token
-            (
-                TokenType.WhoIsRealName,
-                reader.Sequence.Slice(startPosition, reader.Position),
-                trailing
-            );
-        }
-
-        //parse RPL_WHOISSERVER (312)
-        public static Token ParseWhoIsServerReply
-        (
-            ref SequenceReader<byte> reader
-        )
-        {
-            SequencePosition startPosition = reader.Position;
-            Token spaces;
-
-            Token nickname = ParseNickname(ref reader);
-
-            if(!TryParseSpaces(ref reader, out spaces))
-            {
-                throw new ParserException("Space(s) expected");
-            }
-            nickname.Combine(spaces);
-
-            Token servername = ParseServerName(ref reader);
-            spaces.Combine(servername);
-
-            if(!TryParseSpaces(ref reader, out spaces))
-            {
-                throw new ParserException("Space(s) expected");
-            }
-            servername.Combine(spaces);
-
-            Token serverinfo = ParseServerInfo(ref reader);
-            spaces.Combine(serverinfo);
-
-            return new Token
-            (
-                TokenType.WhoIsServerReply,
-                reader.Sequence.Slice(startPosition, reader.Position),
-                nickname
-            );
-        }
-
-        private static Token ParseServerInfo
-        (
-            ref SequenceReader<byte> reader
-        )
-        {
-            SequencePosition startPosition = reader.Position;
-
-            if(!TryParseTrailing(ref reader, out Token trailing))
-            {
-                throw new ParserException("Trailing expected");
-            }
-
-            return new Token
-            (
-                TokenType.ServerInfo,
-                reader.Sequence.Slice(startPosition, reader.Position),
-                trailing
-            );
-        }
-
-        //parse RPL_WHOWASUSER (314)
-        public static Token ParseWhoWasReply
-        (
-            ref SequenceReader<byte> reader
-        )
-        {
-            SequencePosition startPosition = reader.Position;
-
-            Token whoIsReply = ParseWhoIsUserReply(ref reader);
-
-            return new Token
-            (
-                TokenType.WhoWasReply,
-                reader.Sequence.Slice(startPosition, reader.Position),
-                whoIsReply
-            );
-        }
-
-        //parse RPL_WHOISIDLE (317)
-        public static Token ParseWhoIsIdleReply
-        (
-            ref SequenceReader<byte> reader
-        )
-        {
-            SequencePosition startPosition = reader.Position;
-            Token spaces;
-
-            Token nickname = ParseNickname(ref reader);
-
-            if(!TryParseSpaces(ref reader, out spaces))
-            {
-                throw new ParserException("Space(s) expected");
-            }
-            nickname.Combine(spaces);
-
-            if(!TryParseInteger(ref reader, out Token idleSeconds))
-            {
-                throw new ParserException("Integer expected");
-            }
-            idleSeconds.Combine(spaces);
-
-            if(!TryParseSpaces(ref reader, out spaces))
-            {
-                throw new ParserException("Space(s) expected");
-            }
-            idleSeconds.Combine(spaces);
-
-            Token timestamp = ParseTimestamp(ref reader);
-            spaces.Combine(timestamp);
-
-            if(!TryParseSpaces(ref reader, out spaces))
-            {
-                throw new ParserException("Space(s) expected");
-            }
-            timestamp.Combine(spaces);
-
-            if(!TryParseTrailing(ref reader, out Token trailing))
-            {
-                throw new ParserException("Trailing expected");
-            }
-            spaces.Combine(trailing);
-
-            return new Token
-            (
-                TokenType.WhoIsIdleReply,
-                reader.Sequence.Slice(startPosition, reader.Position),
-                nickname
-            );
-        }
-
-        //parse RPL_LIST
-        public static Token ParseListReply
-        (
-            ref SequenceReader<byte> reader
-        )
-        {
-            SequencePosition startPosition = reader.Position;
-            Token spaces;
-
-            Token channel = ParseChannel(ref reader);
-
-            if(!TryParseSpaces(ref reader, out spaces))
-            {
-                throw new ParserException("Space(s) expected");
-            }
-            channel.Combine(spaces);
-
-            if(!TryParseInteger(ref reader, out Token clientCount))
-            {
-                throw new ParserException("Integer expected");
-            }
-            clientCount.Combine(spaces);
-
-            if(!TryParseSpaces(ref reader, out spaces))
-            {
-                throw new ParserException("Space(s) expected");
-            }
-            clientCount.Combine(spaces);
-
-            Token middle = ParseTopic(ref reader);
-            spaces.Combine(middle);
-
-            return new Token
-            (
-                TokenType.WhoIsIdleReply,
-                reader.Sequence.Slice(startPosition, reader.Position),
-                channel
-            );
-        }
-
-        private static Token ParseTopic
-        (
-            ref SequenceReader<byte> reader
-        )
-        {
-            SequencePosition startPosition = reader.Position;
-
-            if(!TryParseTrailing(ref reader, out Token trailing))
-            {
-                throw new ParserException("Trailing expected");
-            }
-
-            return new Token
-            (
-                TokenType.Topic,
-                reader.Sequence.Slice(startPosition, reader.Position),
-                trailing
-            );
         }
     }
 }

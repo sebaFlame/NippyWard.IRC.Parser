@@ -77,6 +77,10 @@ namespace ThePlague.IRC.Parser.Tokens
             {
                 return this.TagUnescape();
             }
+            else if(this.TokenType == TokenType.ISupportValueItem)
+            {
+                return this.ISupportUnescape();
+            }
             else
             {
                 return new Utf8String(this.Sequence);

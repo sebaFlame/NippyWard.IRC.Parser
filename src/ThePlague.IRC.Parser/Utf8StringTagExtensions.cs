@@ -50,6 +50,7 @@ namespace ThePlague.IRC.Parser
                 _TagUnescapeVisitor = new TagUnescapeVisitor();
             }
 
+            _TagUnescapeVisitor.Reset();
             return _TagUnescapeVisitor;
         }
 
