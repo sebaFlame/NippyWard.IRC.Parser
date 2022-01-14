@@ -43,7 +43,7 @@ HexColorTriplet -> HexDecimal HexDecimal HexDecimal .
 ForegroundHexColor -> HexColorTriplet .
 BackgroundHexColor -> HexColorTriplet .
 Host -> ShortName HostSuffix .
-HostSuffix -> 0x2E ShortName HostSuffix | .
+HostSuffix -> 0x2E ShortName HostSuffix | 0x3A ShortName HostSuffix | .
 ServerName -> Host .
 Timestamp -> Integer .
 

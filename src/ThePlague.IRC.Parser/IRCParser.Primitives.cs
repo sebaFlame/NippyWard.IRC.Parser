@@ -268,7 +268,7 @@ namespace ThePlague.IRC.Parser
         )
         {
             SequencePosition startPosition = reader.Position;
-            Token previous = null, first = null, period;
+            Token previous = null, first = null, seperator;
             bool found = false;
 
             //multiple tags are seperated by a semicolon
@@ -276,11 +276,16 @@ namespace ThePlague.IRC.Parser
             (
                 TokenType.Period,
                 ref reader,
-                out period
+                out seperator
+            ) || TryParseTerminal
+            (
+                TokenType.Colon,
+                ref reader,
+                out seperator
             ))
             {
                 //add semicolon to linked list
-                previous = previous.Combine(period);
+                previous = previous.Combine(seperator);
 
                 //parse tag and add to children
                 previous = previous.Combine
