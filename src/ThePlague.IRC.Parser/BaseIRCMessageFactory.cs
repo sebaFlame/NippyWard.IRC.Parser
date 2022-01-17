@@ -19,8 +19,8 @@ namespace ThePlague.IRC.Parser
         private readonly bool _defaultKeepTags;
 
         //max message lengths
-        private const int _MaxMessageLength = 512;
-        private const int _MaxTagsLength = 8192;
+        public const int _MaxMessageLength = 512;
+        public const int _MaxTagsLength = 8192;
         private const int _MaxParameters = 15;
         private const int _AverageWordLength = 16;
 
@@ -99,7 +99,7 @@ namespace ThePlague.IRC.Parser
         {
             CheckIfFirstMessage(this, this.GetMessage());
 
-            if(count > _MaxParameters / 2)
+            if(count > _MaxParameters - 1)
             {
                 throw new InvalidOperationException
                 (
@@ -190,7 +190,6 @@ namespace ThePlague.IRC.Parser
             }
 
             MessageLengthVisitor lengthVisitor = GetMessageLengthVisitor();
-
             int messageLength = lengthVisitor.ComputeTokenLength
             (
                 message
@@ -228,10 +227,18 @@ namespace ThePlague.IRC.Parser
             //check if the message has already been constructed
             CheckIfConstructed(this);
 
-            if((tagKey is null || tagKey.IsEmpty)
-               && (tagValue is null || tagValue.IsEmpty))
+            if(tagKey is null
+               || tagKey.IsEmpty)
             {
-                return this;
+                throw new ArgumentException
+                (
+                    "Tag key is mandatory"
+                );
+            }
+
+            if(tagValue is null)
+            {
+                tagValue = Utf8String.Empty;
             }
 
             Token message = this.GetMessage();
@@ -260,25 +267,29 @@ namespace ThePlague.IRC.Parser
                 tagPrefix
             );
 
+            //parse and escape the tag value, escape here so it gets computed
+            //into length
+            Token tagValueEscaped = tagValue.TagEscape();
+
             if(TagsWillExceedMaxLength
             (
                 tagLength,
-                tagValue.IsEmpty
+                tagValueEscaped.IsEmpty
                     ? tagKey.Length
                     :
                     (
                         (tagsSuffix is null || tagsSuffix.IsEmpty)
                             ? tagKey.Length
-                                + tagValue.Length + 1 //plus '='
+                                + tagValueEscaped.Length + 1 //plus '='
                             : tagKey.Length
-                                + tagValue.Length + 2 //plus '=' and ';'
+                                + tagValueEscaped.Length + 2 //plus '=' and ';'
                     ),
-                 out _
+                 out int extraLength
             ))
             {
                 throw new ArgumentOutOfRangeException
                 (
-                    $"Tags exceed {_MaxTagsLength} bytes"
+                    $"Tags exceed {_MaxTagsLength} bytes by {-extraLength}"
                 );
             }
 
@@ -297,9 +308,6 @@ namespace ThePlague.IRC.Parser
             }
             else
             {
-                //parse and escape the tag value
-                Token tagValueToken = tagValue.TagEscape();
-
                 //add an equality sign for the value
                 Token equal = new Token
                 (
@@ -307,7 +315,7 @@ namespace ThePlague.IRC.Parser
                     EqualsSign
                 );
 
-                equal.Combine(tagValueToken);
+                equal.Combine(tagValueEscaped);
 
                 //create tagsuffix with the tag value
                 tagSuffix = new Token
@@ -552,7 +560,7 @@ namespace ThePlague.IRC.Parser
             {
                 paramsPrefix.Dispose();
 
-                throw new InvalidProgramException
+                throw new ArgumentException
                 (
                     "A trailing parameter has already been defined"
                 );
@@ -576,6 +584,13 @@ namespace ThePlague.IRC.Parser
             return this;
         }
 
+        //add a new message, using same source/tags if configured
+        public BaseIRCMessageFactory NewMessage()
+        {
+            this.CreateNewConstructedMessage();
+            return this;
+        }
+
         protected abstract BaseIRCMessageFactory TooManyParameters
         (
             Utf8String parameter
@@ -586,7 +601,6 @@ namespace ThePlague.IRC.Parser
             Utf8String parameter,
             int extraLength //should be negative
         );
-
 
         protected BaseIRCMessageFactory AddParameterToNewMessage
         (
@@ -786,15 +800,23 @@ namespace ThePlague.IRC.Parser
             }
             else
             {
+                Token equalSign = new Token
+                (
+                    TokenType.EqualitySign,
+                    EqualsSign
+                );
+
+                //re-parse the value
+                SequenceReader<byte> reader
+                    = new SequenceReader<byte>(oldTagValue.Sequence);
+                Token tagValue = IRCParser.ParseTagValue(ref reader);
+                equalSign.Combine(tagValue);
+
                 //create tagsuffix with the tag value
                 tagSuffix = new Token
                 (
                     TokenType.TagSuffix,
-                    new Token
-                    (
-                        TokenType.TagValue,
-                        oldTagValue.Sequence
-                    )
+                    equalSign
                 );
             }
 
@@ -871,6 +893,12 @@ namespace ThePlague.IRC.Parser
                 out Token parameters
             );
 
+            Token space = new Token
+            (
+                TokenType.Space,
+                Space
+            );
+
             Token parameter;
             if(oldParamsSuffix.IsEmpty)
             {
@@ -878,20 +906,20 @@ namespace ThePlague.IRC.Parser
             }
             else
             {
-                //actual parameter should always be first child
-                parameter = new Token
-                (
-                    TokenType.ParamsSuffix,
-                    oldParamsSuffix.Child.Sequence
-                );
+                //actual parameter should always be first child, so the rest of
+                //the linked list gets skipped (there should not be a linked
+                //list yet!). This ensures new Token instances get created.
+                SequenceReader<byte> reader
+                    = new SequenceReader<byte>(oldParamsSuffix.Child.Sequence);
 
-                //next child can be null or a ParamsPrefix
+                parameter = IRCParser.ParseParamsSuffix(ref reader);
             }
 
+            space.Combine(parameter);
             Token parameterPrefix = new Token
             (
                 TokenType.ParamsPrefix,
-                parameter
+                space
             );
 
             LinkConstructedParameter
@@ -1148,7 +1176,7 @@ namespace ThePlague.IRC.Parser
             Token parameters
         )
         {
-            //account for the extra parameter
+            //account for the parameter which is going to get added
             int count = 1;
 
             foreach(Token t
@@ -1208,7 +1236,7 @@ namespace ThePlague.IRC.Parser
             }
             else
             {
-                sequence = str.Buffer;
+                sequence = buffer;
             }
 
             SequenceReader<byte> reader = new SequenceReader<byte>(sequence);
@@ -1222,14 +1250,13 @@ namespace ThePlague.IRC.Parser
 
             if(position.Equals(default))
             {
-                firstSequence = sequence;
+                firstSequence = buffer.Slice(0, maxParamterLength);
                 secondSequence = buffer.Slice(maxParamterLength);
             }
             else
             {
-                long length = buffer.GetOffset(position) + 1;
-                firstSequence = buffer.Slice(0, length);
-                secondSequence = buffer.Slice(length);
+                firstSequence = buffer.Slice(0, position);
+                secondSequence = buffer.Slice(position);
             }
 
             firstStr = new Utf8String(firstSequence);

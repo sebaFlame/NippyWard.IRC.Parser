@@ -17,7 +17,8 @@ namespace ThePlague.IRC.Parser
         {
             this.Reset();
 
-            this.VisitToken(token);
+            //only visit the child(ren) of the current token
+            this.VisitChild(token);
 
             return this._length;
         }

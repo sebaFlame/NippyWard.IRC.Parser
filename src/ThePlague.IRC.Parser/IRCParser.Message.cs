@@ -978,7 +978,7 @@ namespace ThePlague.IRC.Parser
 
         //parse a single paramter, either a middle or a trailing, and try
         //parsing next paramter ref case of a middle
-        private static Token ParseParamsSuffix
+        public static Token ParseParamsSuffix
         (
             ref SequenceReader<byte> reader
         )
