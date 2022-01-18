@@ -37,9 +37,11 @@ namespace IRCParserThroughput
             ValueTask<ReadResult> vt;
             ReadOnlySequence<byte> sequence;
             Token message;
-            long averageTime = 0, maxTime = 0, minTime = 0, time = 0, total = 0;
+            long count = 0, maxTime = 0, minTime = 0, time = 0, total = 0,
+                 maxNr = 0, minNr = 0;
             ReadResult result;
             string min = string.Empty, max = string.Empty;
+            SequencePosition examined;
 
             while(true)
             {
@@ -64,49 +66,60 @@ namespace IRCParserThroughput
 
                 sequence = result.Buffer;
 
+                //warm-up (guarantee first message is less than 128B)
+                if(count == 0)
+                {
+                    if(IRCParser.TryParse
+                    (
+                        in sequence,
+                        out message,
+                        out _
+                    ))
+                    {
+                        message.Dispose();
+                    }
+                }
+
                 stopWatch.Start();
                 if(IRCParser.TryParse
                 (
                     in sequence,
-                    out message
+                    out message,
+                    out examined
                 ))
                 {
                     stopWatch.Stop();
 
-                    //Console.WriteLine(message.ToUtf8String().ToString());
-
-                    time = stopWatch.ElapsedTicks;
-                    total += time;
-
-                    if(averageTime == 0)
+                    using(message)
                     {
-                        averageTime = time;
-                    }
-                    else
-                    {
-                        averageTime += time;
-                        averageTime /= 2;
-                    }
+                        //Console.WriteLine(message.ToUtf8String().ToString());
 
-                    if(maxTime == 0
-                        || time > maxTime)
-                    {
-                        maxTime = time;
-                        max = message.ToUtf8String().ToString();
-                    }
+                        time = stopWatch.ElapsedTicks;
+                        total += time;
+                        count++;
 
-                    if(minTime == 0
-                       || time < minTime)
-                    {
-                        minTime = time;
-                        min = message.ToUtf8String().ToString();
-                    }
+                        if(maxTime == 0
+                            || time > maxTime)
+                        {
+                            maxTime = time;
+                            max = message.ToUtf8String().ToString();
+                            maxNr = count;
+                        }
 
-                    reader.AdvanceTo(message.Sequence.End);
+                        if(minTime == 0
+                        || time < minTime)
+                        {
+                            minTime = time;
+                            min = message.ToUtf8String().ToString();
+                            minNr = count;
+                        }
+
+                        reader.AdvanceTo(examined);
+                    }
                 }
                 else
                 {
-                    reader.AdvanceTo(sequence.Start, sequence.End);
+                    reader.AdvanceTo(sequence.Start, examined);
                 }
 
                 stopWatch.Reset();
@@ -114,10 +127,12 @@ namespace IRCParserThroughput
 
             reader.Complete();
 
-            Console.WriteLine($"Average: {averageTime * 1000000 / Stopwatch.Frequency}µs");
-            Console.WriteLine($"Max: {maxTime * 1000000 / Stopwatch.Frequency}µs ({max})");
-            Console.WriteLine($"Min: {minTime * 1000000 / Stopwatch.Frequency}µs ({min})");
-            Console.WriteLine($"Total: {total * 1000 / Stopwatch.Frequency}ms");
+            Console.WriteLine($"{count} messages processed");
+            Console.WriteLine($"Average time: {total / count * 1000000 / Stopwatch.Frequency}µs");
+            Console.WriteLine($"Max time: {maxTime * 1000000 / Stopwatch.Frequency}µs (#{maxNr} {max})");
+            Console.WriteLine($"Min time: {minTime * 1000000 / Stopwatch.Frequency}µs (#{minNr} {min})");
+            Console.WriteLine($"Total time: {total * 1000 / Stopwatch.Frequency}ms");
+            Console.WriteLine($"Throughput: {count / (total / Stopwatch.Frequency)}msg/s");
         }
     }
 }

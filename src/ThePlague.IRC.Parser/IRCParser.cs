@@ -11,13 +11,15 @@ namespace ThePlague.IRC.Parser
         public static bool TryParse
         (
             in ReadOnlySequence<byte> sequence,
-            out Token token
+            out Token token,
+            out SequencePosition examined
         )
         {
             //sequence is empty
             if(sequence.IsEmpty)
             {
                 token = null;
+                examined = sequence.Start;
                 return false;
             }
 
@@ -30,6 +32,7 @@ namespace ThePlague.IRC.Parser
             if(!lf.HasValue)
             {
                 token = null;
+                examined = sequence.End;
                 return false;
             }
 
@@ -47,6 +50,7 @@ namespace ThePlague.IRC.Parser
                 start,
                 end
             );
+            examined = message.End;
 
             //create a reader from the sliced sequence
             SequenceReader<byte> sequenceReader

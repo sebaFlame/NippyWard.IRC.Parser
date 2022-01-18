@@ -18,7 +18,8 @@ namespace ThePlague.IRC.Parser.Tests
                 IRCParser.TryParse
                 (
                     CreateReadOnlySequence(message),
-                    out Token token
+                    out Token token,
+                    out _
                 )
             );
 

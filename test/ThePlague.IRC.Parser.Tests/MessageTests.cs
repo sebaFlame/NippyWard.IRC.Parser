@@ -275,7 +275,8 @@ namespace ThePlague.IRC.Parser.Tests
                 IRCParser.TryParse
                 (
                     utf8,
-                    out Token token
+                    out Token token,
+                    out _
                 )
             );
 
@@ -357,7 +358,8 @@ namespace ThePlague.IRC.Parser.Tests
                 IRCParser.TryParse
                 (
                     utf8,
-                    out Token token
+                    out Token token,
+                    out _
                 )
             );
 
