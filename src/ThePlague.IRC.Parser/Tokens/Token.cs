@@ -15,56 +15,81 @@ namespace ThePlague.IRC.Parser.Tokens
         public Token Next { get; internal set; }
         public Token Child { get; internal set; }
 
+        [ThreadStatic]
+        private static TokenStack _Pool;
+        private const int _PoolSize = 64;
+
+        public static int PooledTokens => _Pool.Count;
+
         private Token()
         {
             this.Sequence = default;
         }
 
-        public Token
+        private static Token Create()
+        {
+            Token t;
+
+            if(_Pool is null)
+            {
+                _Pool = new TokenStack(_PoolSize);
+            }
+
+            if(!_Pool.TryPop(out t))
+            {
+                t = new Token();
+            }
+
+            t.Sequence = default;
+            return t;
+        }
+
+        public static Token Create
         (
             TokenType tokenType
         )
-            : this()
         {
-            this.TokenType = tokenType;
+            Token t = Create();
+            t.TokenType = tokenType;
+            return t;
         }
 
-        public Token
+        public static Token Create
         (
             TokenType tokenType,
             in ReadOnlySequence<byte> sequence
         )
-            : this(tokenType)
         {
-            this.Sequence = sequence;
+            Token t = Create(tokenType);
+            t.Sequence = sequence;
+            return t;
         }
 
-        public Token
+        public static Token Create
         (
             TokenType tokenType,
             in ReadOnlyMemory<byte> memory
         )
-            : this(tokenType, new ReadOnlySequence<byte>(memory))
-        { }
+            => Create(tokenType, new ReadOnlySequence<byte>(memory));
 
-        public Token
+        public static Token Create
         (
             TokenType tokenType,
             in ReadOnlySequence<byte> sequence,
             Token child
         )
-            : this(tokenType, sequence)
         {
-            this.Child = child;
+            Token t = Create(tokenType, sequence);
+            t.Child = child;
+            return t;
         }
 
-        internal Token
+        internal static Token Create
         (
             TokenType tokenType,
             Token child
         )
-            : this(tokenType, default, child)
-        { }
+            => Create(tokenType, default, child);
 
         ~Token()
         {
@@ -100,19 +125,28 @@ namespace ThePlague.IRC.Parser.Tokens
         }
 
         public void Dispose()
-        {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+            => this.Dispose(true);
 
         public void Dispose(bool isDisposing)
         {
-            this.Child?.Dispose();
-            this.Next?.Dispose();
+            this.Child?.Dispose(isDisposing);
+            this.Next?.Dispose(isDisposing);
 
             this.Child = null;
             this.Next = null;
             this.Sequence = default;
+
+            if(!isDisposing)
+            {
+                return;
+            }
+
+            if(_Pool is null)
+            {
+                return;
+            }
+
+            _Pool.Push(this);
         }
     }
 }

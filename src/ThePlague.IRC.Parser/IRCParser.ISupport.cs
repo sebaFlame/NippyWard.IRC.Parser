@@ -30,7 +30,7 @@ namespace ThePlague.IRC.Parser
                 )
             );
 
-            return new Token
+            return Token.Create
             (
                 TokenType.ISupport,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -58,7 +58,7 @@ namespace ThePlague.IRC.Parser
             //parse the suffix containing a value or return empty
             parameter.Combine(ParseISupportTokenSuffix(ref reader));
 
-            return new Token
+            return Token.Create
             (
                 TokenType.ISupportToken,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -78,7 +78,7 @@ namespace ThePlague.IRC.Parser
             {
                 reader.Advance(1);
 
-                return new Token
+                return Token.Create
                 (
                     TokenType.ISupportTokenNegated,
                     reader.Sequence.Slice(startPosition, reader.Position)
@@ -87,7 +87,7 @@ namespace ThePlague.IRC.Parser
             //can return empty
             else
             {
-                return new Token
+                return Token.Create
                 (
                     TokenType.ISupportTokenNegated
                 );
@@ -107,7 +107,7 @@ namespace ThePlague.IRC.Parser
                 reader.Advance(1);
             }
 
-            return new Token
+            return Token.Create
             (
                 TokenType.ISupportParameter,
                 reader.Sequence.Slice(startPosition, reader.Position)
@@ -129,7 +129,7 @@ namespace ThePlague.IRC.Parser
             ))
             {
                 //can return empty
-                return new Token
+                return Token.Create
                 (
                     TokenType.ISupportTokenSuffix
                 );
@@ -137,7 +137,7 @@ namespace ThePlague.IRC.Parser
 
             equals.Combine(ParseISupportValue(ref reader));
 
-            return new Token
+            return Token.Create
             (
                 TokenType.ISupportTokenSuffix,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -156,7 +156,7 @@ namespace ThePlague.IRC.Parser
             //can return empty if no value found
             if(!TryParseISupportValueItem(ref reader, out Token first))
             {
-                return new Token
+                return Token.Create
                 (
                     TokenType.ISupportValue
                 );
@@ -175,7 +175,7 @@ namespace ThePlague.IRC.Parser
                 )
             );
 
-            return new Token
+            return Token.Create
             (
                 TokenType.ISupportValue,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -217,7 +217,7 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            valueItem = new Token
+            valueItem = Token.Create
             (
                 TokenType.ISupportValueItem,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -265,7 +265,7 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            terminals = new Token
+            terminals = Token.Create
             (
                 TokenType.ISupportValueItemTerminals,
                 reader.Sequence.Slice(startPosition, reader.Position)
@@ -318,7 +318,7 @@ namespace ThePlague.IRC.Parser
 
                     x.Combine(escape);
 
-                    terminals = new Token
+                    terminals = Token.Create
                     (
                         TokenType.ISupportValueItemEscape,
                         reader.Sequence.Slice(startPosition, reader.Position),
@@ -352,7 +352,7 @@ namespace ThePlague.IRC.Parser
                && (MatchTerminal(TokenType.C, ref reader)
                    || MatchTerminal(TokenType.c, ref reader)))
             {
-                escape = new Token
+                escape = Token.Create
                 (
                     TokenType.ISupportValueItemEscapeBackslash,
                     reader.Sequence.Slice(startPosition, reader.Position)
@@ -379,7 +379,7 @@ namespace ThePlague.IRC.Parser
             if(MatchTerminal(TokenType.Two, ref reader)
                && MatchTerminal(TokenType.Zero, ref reader))
             {
-                escape = new Token
+                escape = Token.Create
                 (
                     TokenType.ISupportValueItemEscapeSpace,
                     reader.Sequence.Slice(startPosition, reader.Position)
@@ -407,7 +407,7 @@ namespace ThePlague.IRC.Parser
                && (MatchTerminal(TokenType.D, ref reader)
                    || MatchTerminal(TokenType.d, ref reader)))
             {
-                escape = new Token
+                escape = Token.Create
                 (
                     TokenType.ISupportValueItemEscapeEqual,
                     reader.Sequence.Slice(startPosition, reader.Position)

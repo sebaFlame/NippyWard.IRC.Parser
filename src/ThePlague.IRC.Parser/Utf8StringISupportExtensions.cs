@@ -77,14 +77,14 @@ namespace ThePlague.IRC.Parser
                 out Token first
             ))
             {
-                return new Token
+                return Token.Create
                 (
                     TokenType.ISupportValueItem
                 );
             }
             else
             {
-                return new Token
+                return Token.Create
                 (
                     TokenType.ISupportValueItem,
                     startSegment.CreateReadOnlySequence(segment),
@@ -134,7 +134,7 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            valueItem = new Token
+            valueItem = Token.Create
             (
                 TokenType.ISupportValueItem,
                 startSegment.CreateReadOnlySequence(segment),
@@ -167,7 +167,7 @@ namespace ThePlague.IRC.Parser
             segment = segment.AddNewSequenceSegment(child.Sequence);
 
             //create new token from segments
-            token = new Token
+            token = Token.Create
             (
                 child.TokenType,
                 startSegment.CreateReadOnlySequence(segment)
@@ -223,7 +223,7 @@ namespace ThePlague.IRC.Parser
 
             reader.Advance(1);
 
-            Token child = new Token
+            Token child = Token.Create
             (
                 tokenType,
                 new ReadOnlySequence<byte>
@@ -235,7 +235,7 @@ namespace ThePlague.IRC.Parser
                 )
             );
 
-            terminals = new Token
+            terminals = Token.Create
             (
                 TokenType.ISupportValueItemEscape,
                 child.Sequence,

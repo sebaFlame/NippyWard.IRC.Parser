@@ -29,7 +29,7 @@ namespace ThePlague.IRC.Parser
                 )
             );
 
-            return new Token
+            return Token.Create
             (
                 TokenType.MsgTarget,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -56,7 +56,7 @@ namespace ThePlague.IRC.Parser
                 msgTo = ParseMsgToNickname(ref reader);
             }
 
-            return new Token
+            return Token.Create
             (
                 TokenType.MsgTo,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -90,7 +90,7 @@ namespace ThePlague.IRC.Parser
             Token channelSuffix = ParseChannelSuffix(ref reader);
             channelString.Combine(channelSuffix);
 
-            channel = new Token
+            channel = Token.Create
             (
                 TokenType.MsgToChannel,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -117,7 +117,7 @@ namespace ThePlague.IRC.Parser
                 out channelPrefix
             ))
             {
-                prefix = new Token
+                prefix = Token.Create
                 (
                     TokenType.MsgToChannelPrefix,
                     reader.Sequence.Slice(startPosition, reader.Position),
@@ -139,7 +139,7 @@ namespace ThePlague.IRC.Parser
                     MsgToChannelPrefixChannelPrefixSuffix(ref reader)
                 );
 
-                prefix = new Token
+                prefix = Token.Create
                 (
                     TokenType.MsgToChannelPrefix,
                     reader.Sequence.Slice(startPosition, reader.Position),
@@ -155,7 +155,7 @@ namespace ThePlague.IRC.Parser
                 out channelPrefix
             ))
             {
-                prefix = new Token
+                prefix = Token.Create
                 (
                     TokenType.MsgToChannelPrefix,
                     reader.Sequence.Slice(startPosition, reader.Position),
@@ -194,7 +194,7 @@ namespace ThePlague.IRC.Parser
                 throw new ParserException("Channel prefix expected");
             }
 
-            return new Token
+            return Token.Create
             (
                 TokenType.MsgToChannelPrefixChannelPrefixSuffix,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -228,7 +228,7 @@ namespace ThePlague.IRC.Parser
                     channelPrefix.Combine(nextPrefix);
                 }
 
-                prefix = new Token
+                prefix = Token.Create
                 (
                     TokenType.MsgToChannelChannelPrefixMembership,
                     reader.Sequence.Slice(startPosition, reader.Position),
@@ -268,7 +268,7 @@ namespace ThePlague.IRC.Parser
                     out channelPrefix
                 ))
             {
-                prefix = new Token
+                prefix = Token.Create
                 (
                     TokenType.ChannelMembershipPrefixWithoutChannelPrefix,
                     reader.Sequence.Slice(startPosition, reader.Position),
@@ -310,7 +310,7 @@ namespace ThePlague.IRC.Parser
                     out channelPrefix
                 ))
             {
-                prefix = new Token
+                prefix = Token.Create
                 (
                     TokenType.ChannelMembershipPrefix,
                     reader.Sequence.Slice(startPosition, reader.Position),
@@ -346,7 +346,7 @@ namespace ThePlague.IRC.Parser
 
             dollar.Combine(ParseMsgToTargetMaskLetters(ref reader));
 
-            targetMask = new Token
+            targetMask = Token.Create
             (
                 TokenType.MsgToTargetMask,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -373,7 +373,7 @@ namespace ThePlague.IRC.Parser
                 reader.Advance(1);
             }
 
-            return new Token
+            return Token.Create
             (
                 TokenType.MsgToTargetMaskLetters,
                 reader.Sequence.Slice(startPosition, reader.Position)
@@ -392,7 +392,7 @@ namespace ThePlague.IRC.Parser
 
             nickName.Combine(ParseMsgToNicknameSuffix(ref reader));
 
-            return new Token
+            return Token.Create
             (
                 TokenType.MsgToNickname,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -414,7 +414,7 @@ namespace ThePlague.IRC.Parser
                 {
                     username.Combine(hostName);
 
-                    return new Token
+                    return Token.Create
                     (
                         TokenType.MsgToNicknameSuffix,
                         reader.Sequence.Slice(startPosition, reader.Position),
@@ -431,7 +431,7 @@ namespace ThePlague.IRC.Parser
 
             userHost.Combine(ParseMsgToUserHostServer(ref reader));
 
-            return new Token
+            return Token.Create
             (
                 TokenType.MsgToNicknameSuffix,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -455,7 +455,7 @@ namespace ThePlague.IRC.Parser
             ))
             {
                 //return empty
-                return new Token
+                return Token.Create
                 (
                     TokenType.MsgToUserHost
                 );
@@ -463,7 +463,7 @@ namespace ThePlague.IRC.Parser
 
             percent.Combine(ParseHost(ref reader));
 
-            return new Token
+            return Token.Create
             (
                 TokenType.MsgToUserHost,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -487,7 +487,7 @@ namespace ThePlague.IRC.Parser
             ))
             {
                 //return empty
-                return new Token
+                return Token.Create
                 (
                     TokenType.MsgToUserHostServer
                 );
@@ -495,7 +495,7 @@ namespace ThePlague.IRC.Parser
 
             at.Combine(ParseServerName(ref reader));
 
-            return new Token
+            return Token.Create
             (
                 TokenType.MsgToUserHostServer,
                 reader.Sequence.Slice(startPosition, reader.Position),

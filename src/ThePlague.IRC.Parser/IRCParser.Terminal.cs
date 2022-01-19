@@ -64,7 +64,7 @@ namespace ThePlague.IRC.Parser
                 reader.Advance(1);
 
                 //create a token for the terminal
-                token = new Token
+                token = Token.Create
                 (
                     terminal,
                     reader.Sequence.Slice(startPosition, reader.Position)
@@ -108,7 +108,7 @@ namespace ThePlague.IRC.Parser
                 position = sequence.GetPosition(i, startPosition);
 
                 //space is always a length of 1
-                space = new Token
+                space = Token.Create
                 (
                     TokenType.Space,
                     sequence.Slice(position, 1)

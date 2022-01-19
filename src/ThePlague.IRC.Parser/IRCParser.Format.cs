@@ -32,7 +32,7 @@ namespace ThePlague.IRC.Parser
             }
             else
             {
-                format = new Token
+                format = Token.Create
                 (
                     TokenType.Format,
                     reader.Sequence.Slice(startPosition, reader.Position),
@@ -58,7 +58,7 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            boldFormat = new Token
+            boldFormat = Token.Create
             (
                 TokenType.BoldFormat,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -88,7 +88,7 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            italicsFormat = new Token
+            italicsFormat = Token.Create
             (
                 TokenType.ItalicsFormat,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -118,7 +118,7 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            underlineFormat = new Token
+            underlineFormat = Token.Create
             (
                 TokenType.UnderlineFormat,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -148,7 +148,7 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            strikethroughFormat = new Token
+            strikethroughFormat = Token.Create
             (
                 TokenType.StrikethroughFormat,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -177,7 +177,7 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            monospaceFormat = new Token
+            monospaceFormat = Token.Create
             (
                 TokenType.MonospaceFormat,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -207,7 +207,7 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            resetFormat = new Token
+            resetFormat = Token.Create
             (
                 TokenType.ResetFormat,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -238,7 +238,7 @@ namespace ThePlague.IRC.Parser
 
             color.Combine(colorFormatSuffix);
 
-            colorFormat = new Token
+            colorFormat = Token.Create
             (
                 TokenType.ColorFormat,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -265,7 +265,7 @@ namespace ThePlague.IRC.Parser
 
                 fg.Combine(combinationSuffix);
 
-                return new Token
+                return Token.Create
                 (
                     TokenType.ColorCombination,
                     reader.Sequence.Slice(startPosition, reader.Position),
@@ -275,7 +275,7 @@ namespace ThePlague.IRC.Parser
             //else return empty
             else
             {
-                return new Token
+                return Token.Create
                 (
                     TokenType.ColorCombination
                 );
@@ -298,7 +298,7 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            fg = new Token
+            fg = Token.Create
             (
                 TokenType.ForegroundColor,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -324,7 +324,7 @@ namespace ThePlague.IRC.Parser
                 {
                     comma.Combine(bg);
 
-                    return new Token
+                    return Token.Create
                     (
                         TokenType.ColorCombinationSuffix,
                         reader.Sequence.Slice(startPosition, reader.Position),
@@ -338,7 +338,7 @@ namespace ThePlague.IRC.Parser
                     reader.Rewind(1);
 
                     //return empty
-                    return new Token
+                    return Token.Create
                     (
                         TokenType.ColorCombinationSuffix,
                         reader.Sequence.Slice(startPosition, reader.Position)
@@ -348,7 +348,7 @@ namespace ThePlague.IRC.Parser
             //or return empty
             else
             {
-                return new Token
+                return Token.Create
                 (
                     TokenType.ColorCombinationSuffix,
                     reader.Sequence.Slice(startPosition, reader.Position)
@@ -372,7 +372,7 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            bg = new Token
+            bg = Token.Create
             (
                 TokenType.BackgroundColor,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -398,7 +398,7 @@ namespace ThePlague.IRC.Parser
                 //try parse the other digit or return empty
                 Token colorSuffix = ParseColorSuffix(ref reader);
 
-                color = new Token
+                color = Token.Create
                 (
                     TokenType.ColorNumber,
                     reader.Sequence.Slice(startPosition, reader.Position),
@@ -425,7 +425,7 @@ namespace ThePlague.IRC.Parser
             //match a (2nd) digit
             if(MatchDigit(ref reader))
             {
-                return new Token
+                return Token.Create
                 (
                     TokenType.ColorSuffix,
                     reader.Sequence.Slice(startPosition, reader.Position)
@@ -434,7 +434,7 @@ namespace ThePlague.IRC.Parser
             //or return empty
             else
             {
-                return new Token
+                return Token.Create
                 (
                     TokenType.ColorSuffix
                 );
@@ -467,7 +467,7 @@ namespace ThePlague.IRC.Parser
 
             hexColor.Combine(hexColorFormatSuffix);
 
-            hexColorFormat = new Token
+            hexColorFormat = Token.Create
             (
                 TokenType.HexColorFormat,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -493,7 +493,7 @@ namespace ThePlague.IRC.Parser
 
                 fg.Combine(suffix);
 
-                return new Token
+                return Token.Create
                 (
                     TokenType.HexColorCombination,
                     reader.Sequence.Slice(startPosition, reader.Position),
@@ -503,7 +503,7 @@ namespace ThePlague.IRC.Parser
             //or return empty
             else
             {
-                return new Token
+                return Token.Create
                 (
                     TokenType.HexColorCombination
                 );
@@ -526,7 +526,7 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            fg = new Token
+            fg = Token.Create
             (
                 TokenType.ForegroundHexColor,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -551,7 +551,7 @@ namespace ThePlague.IRC.Parser
                 {
                     comma.Combine(bg);
 
-                    return new Token
+                    return Token.Create
                     (
                         TokenType.HexColorCombinationSuffix,
                         reader.Sequence.Slice(startPosition, reader.Position),
@@ -564,7 +564,7 @@ namespace ThePlague.IRC.Parser
                     reader.Rewind(1);
 
                     //return empty
-                    return new Token
+                    return Token.Create
                     (
                         TokenType.HexColorCombinationSuffix
                     );
@@ -573,7 +573,7 @@ namespace ThePlague.IRC.Parser
             //or return empty
             else
             {
-                return new Token
+                return Token.Create
                 (
                     TokenType.HexColorCombinationSuffix
                 );
@@ -596,7 +596,7 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            bg = new Token
+            bg = Token.Create
             (
                 TokenType.BackgroundHexColor,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -631,7 +631,7 @@ namespace ThePlague.IRC.Parser
                     {
                         previous.Combine(child);
 
-                        color = new Token
+                        color = Token.Create
                         (
                             TokenType.HexColorTriplet,
                             reader.Sequence.Slice
@@ -676,7 +676,7 @@ namespace ThePlague.IRC.Parser
             {
                 if(MatchHexDigit(ref reader))
                 {
-                    hex = new Token
+                    hex = Token.Create
                     (
                         TokenType.HexDecimal,
                         reader.Sequence.Slice(startPosition, reader.Position)

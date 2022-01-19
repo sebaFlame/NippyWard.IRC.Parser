@@ -43,86 +43,95 @@ namespace IRCParserThroughput
             string min = string.Empty, max = string.Empty;
             SequencePosition examined;
 
-            while(true)
+            try
             {
-                if(!reader.TryRead(out result))
+                while(true)
                 {
-                    vt = reader.ReadAsync();
-
-                    if(!vt.IsCompletedSuccessfully)
+                    if(!reader.TryRead(out result))
                     {
-                        result = await vt;
+                        vt = reader.ReadAsync();
+
+                        if(!vt.IsCompletedSuccessfully)
+                        {
+                            result = await vt;
+                        }
+                        else
+                        {
+                            result = vt.Result;
+                        }
                     }
-                    else
+
+                    if(result.IsCompleted)
                     {
-                        result = vt.Result;
+                        break;
                     }
-                }
 
-                if(result.IsCompleted)
-                {
-                    break;
-                }
+                    sequence = result.Buffer;
 
-                sequence = result.Buffer;
+                    //warm-up (guarantee first message is less than 128B)
+                    //also creates token pool
+                    if(count == 0)
+                    {
+                        if(IRCParser.TryParse
+                        (
+                            in sequence,
+                            out message,
+                            out _
+                        ))
+                        {
+                            message.Dispose();
+                        }
+                    }
 
-                //warm-up (guarantee first message is less than 128B)
-                if(count == 0)
-                {
+                    stopWatch.Start();
                     if(IRCParser.TryParse
                     (
                         in sequence,
                         out message,
-                        out _
+                        out examined
                     ))
                     {
-                        message.Dispose();
+                        stopWatch.Stop();
+
+                        using(message)
+                        {
+                            //Console.WriteLine(message.ToUtf8String().ToString());
+
+                            time = stopWatch.ElapsedTicks;
+                            total += time;
+                            count++;
+
+                            if(maxTime == 0
+                                || time > maxTime)
+                            {
+                                maxTime = time;
+                                max = message.ToUtf8String().ToString();
+                                maxNr = count;
+                            }
+
+                            if(minTime == 0
+                            || time < minTime)
+                            {
+                                minTime = time;
+                                min = message.ToUtf8String().ToString();
+                                minNr = count;
+                            }
+
+                            reader.AdvanceTo(examined);
+
+                        }
                     }
-                }
-
-                stopWatch.Start();
-                if(IRCParser.TryParse
-                (
-                    in sequence,
-                    out message,
-                    out examined
-                ))
-                {
-                    stopWatch.Stop();
-
-                    using(message)
+                    else
                     {
-                        //Console.WriteLine(message.ToUtf8String().ToString());
-
-                        time = stopWatch.ElapsedTicks;
-                        total += time;
-                        count++;
-
-                        if(maxTime == 0
-                            || time > maxTime)
-                        {
-                            maxTime = time;
-                            max = message.ToUtf8String().ToString();
-                            maxNr = count;
-                        }
-
-                        if(minTime == 0
-                        || time < minTime)
-                        {
-                            minTime = time;
-                            min = message.ToUtf8String().ToString();
-                            minNr = count;
-                        }
-
-                        reader.AdvanceTo(examined);
+                        reader.AdvanceTo(sequence.Start, examined);
                     }
-                }
-                else
-                {
-                    reader.AdvanceTo(sequence.Start, examined);
-                }
 
-                stopWatch.Reset();
+                    stopWatch.Reset();
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
             }
 
             reader.Complete();
@@ -132,7 +141,8 @@ namespace IRCParserThroughput
             Console.WriteLine($"Max time: {maxTime * 1000000 / Stopwatch.Frequency}µs (#{maxNr} {max})");
             Console.WriteLine($"Min time: {minTime * 1000000 / Stopwatch.Frequency}µs (#{minNr} {min})");
             Console.WriteLine($"Total time: {total * 1000 / Stopwatch.Frequency}ms");
-            Console.WriteLine($"Throughput: {count / (total / Stopwatch.Frequency)}msg/s");
+            Console.WriteLine($"Throughput: {count / (total * 1000.0 / Stopwatch.Frequency) * 1000:0}msg/s");
+            Console.WriteLine($"Max pool size: {Token.PooledTokens}");
         }
     }
 }

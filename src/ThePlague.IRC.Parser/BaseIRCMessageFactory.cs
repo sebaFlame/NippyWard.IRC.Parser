@@ -304,12 +304,12 @@ namespace ThePlague.IRC.Parser
             Token tag, tagSuffix;
             if(tagValue.IsEmpty)
             {
-                tagSuffix = new Token(TokenType.TagSuffix);
+                tagSuffix = Token.Create(TokenType.TagSuffix);
             }
             else
             {
                 //add an equality sign for the value
-                Token equal = new Token
+                Token equal = Token.Create
                 (
                     TokenType.EqualitySign,
                     EqualsSign
@@ -318,7 +318,7 @@ namespace ThePlague.IRC.Parser
                 equal.Combine(tagValueEscaped);
 
                 //create tagsuffix with the tag value
-                tagSuffix = new Token
+                tagSuffix = Token.Create
                 (
                     TokenType.TagSuffix,
                     equal
@@ -329,7 +329,7 @@ namespace ThePlague.IRC.Parser
             tagKeyToken.Combine(tagSuffix);
 
             //create new tag with tag key and its suffix
-            tag = new Token
+            tag = Token.Create
             (
                 TokenType.Tag,
                 tagKeyToken
@@ -472,17 +472,17 @@ namespace ThePlague.IRC.Parser
             );
 
             int parameterExtraLength;
-            Token space = new Token
+            Token space = Token.Create
             (
                 TokenType.Space,
                 Space
             );
-            Token paramsSuffix = new Token(TokenType.ParamsSuffix);
+            Token paramsSuffix = Token.Create(TokenType.ParamsSuffix);
 
             //link space and suffix together to form the parameter
             space.Combine(paramsSuffix);
 
-            Token paramsPrefix = new Token
+            Token paramsPrefix = Token.Create
             (
                 TokenType.ParamsPrefix,
                 space
@@ -493,18 +493,18 @@ namespace ThePlague.IRC.Parser
             if(parameter.IsEmpty)
             {
                 //initialize a colon for the trailing parameter
-                Token colon = new Token
+                Token colon = Token.Create
                 (
                     TokenType.Colon,
                     Colon
                 );
 
                 //provide an empty trailing prefix
-                Token trailingPrefix = new Token(TokenType.TrailingPrefix);
+                Token trailingPrefix = Token.Create(TokenType.TrailingPrefix);
 
                 colon.Combine(trailingPrefix);
 
-                paramsSuffix.Child = new Token
+                paramsSuffix.Child = Token.Create
                 (
                     TokenType.Trailing,
                     colon
@@ -521,7 +521,7 @@ namespace ThePlague.IRC.Parser
                     reader.Rewind(reader.Consumed);
 
                     //initialize a colon for the trailing parameter
-                    Token colon = new Token
+                    Token colon = Token.Create
                     (
                         TokenType.Colon,
                         Colon
@@ -535,7 +535,7 @@ namespace ThePlague.IRC.Parser
 
                     colon.Combine(trailingPrefix);
 
-                    paramsSuffix.Child = new Token
+                    paramsSuffix.Child = Token.Create
                     (
                         TokenType.Trailing,
                         colon
@@ -636,15 +636,15 @@ namespace ThePlague.IRC.Parser
         protected Token CreateNewConstructedMessage()
         {
             Token oldMessage = this._message?.GetLastToken();
-            Token tagPrefix = new Token(TokenType.TagPrefix);
+            Token tagPrefix = Token.Create(TokenType.TagPrefix);
 
             tagPrefix
-                .Combine(new Token(TokenType.SourcePrefix))
-                .Combine(new Token(TokenType.Verb))
-                .Combine(new Token(TokenType.Params))
-                .Combine(new Token(TokenType.CrLf, CrLf));
+                .Combine(Token.Create(TokenType.SourcePrefix))
+                .Combine(Token.Create(TokenType.Verb))
+                .Combine(Token.Create(TokenType.Params))
+                .Combine(Token.Create(TokenType.CrLf, CrLf));
 
-            Token newMessage = new Token
+            Token newMessage = Token.Create
             (
                 TokenType.ConstructedMessage,
                 tagPrefix
@@ -787,7 +787,7 @@ namespace ThePlague.IRC.Parser
             //first create a new tag
             Token tag, tagSuffix, tagKey;
 
-            tagKey = new Token
+            tagKey = Token.Create
             (
                 TokenType.TagKey,
                 oldTagKey.Sequence
@@ -796,11 +796,11 @@ namespace ThePlague.IRC.Parser
             if(oldTagValue is null
                || oldTagValue.IsEmpty)
             {
-                tagSuffix = new Token(TokenType.TagSuffix);
+                tagSuffix = Token.Create(TokenType.TagSuffix);
             }
             else
             {
-                Token equalSign = new Token
+                Token equalSign = Token.Create
                 (
                     TokenType.EqualitySign,
                     EqualsSign
@@ -813,7 +813,7 @@ namespace ThePlague.IRC.Parser
                 equalSign.Combine(tagValue);
 
                 //create tagsuffix with the tag value
-                tagSuffix = new Token
+                tagSuffix = Token.Create
                 (
                     TokenType.TagSuffix,
                     equalSign
@@ -824,7 +824,7 @@ namespace ThePlague.IRC.Parser
             tagKey.Combine(tagSuffix);
 
             //create new tag with tag key and its suffix
-            tag = new Token
+            tag = Token.Create
             (
                 TokenType.Tag,
                 tagKey
@@ -846,7 +846,7 @@ namespace ThePlague.IRC.Parser
                 out Token sourcePrefix
             ))
             {
-                Token sourcePrefixTarget = new Token
+                Token sourcePrefixTarget = Token.Create
                 (
                     TokenType.SourcePrefix,
                     oldSourcePrefixTarget.Sequence
@@ -868,7 +868,7 @@ namespace ThePlague.IRC.Parser
                 out Token command
             );
 
-            Token newVerb = new Token
+            Token newVerb = Token.Create
             (
                 oldVerb.TokenType,
                 oldVerb.Sequence
@@ -893,7 +893,7 @@ namespace ThePlague.IRC.Parser
                 out Token parameters
             );
 
-            Token space = new Token
+            Token space = Token.Create
             (
                 TokenType.Space,
                 Space
@@ -902,13 +902,13 @@ namespace ThePlague.IRC.Parser
             Token parameter;
             if(oldParamsSuffix.IsEmpty)
             {
-                parameter = new Token(TokenType.ParamsSuffix);
+                parameter = Token.Create(TokenType.ParamsSuffix);
             }
             else
             {
                 //actual parameter should always be first child, so the rest of
                 //the linked list gets skipped (there should not be a linked
-                //list yet!). This ensures new Token instances get created.
+                //list yet!). This ensures Token.Create instances get created.
                 SequenceReader<byte> reader
                     = new SequenceReader<byte>(oldParamsSuffix.Child.Sequence);
 
@@ -916,7 +916,7 @@ namespace ThePlague.IRC.Parser
             }
 
             space.Combine(parameter);
-            Token parameterPrefix = new Token
+            Token parameterPrefix = Token.Create
             (
                 TokenType.ParamsPrefix,
                 space
@@ -935,7 +935,7 @@ namespace ThePlague.IRC.Parser
             Token sourcePrefixTarget
         )
         {
-            Token colon = new Token
+            Token colon = Token.Create
             (
                 TokenType.Colon,
                 Colon
@@ -944,7 +944,7 @@ namespace ThePlague.IRC.Parser
             //first link a colon and the target together
             colon.Combine(sourcePrefixTarget);
 
-            Token space = new Token
+            Token space = Token.Create
             (
                 TokenType.Space,
                 Space
@@ -976,10 +976,10 @@ namespace ThePlague.IRC.Parser
                 {
                     tagsSuffix.Child
                         = tagsList
-                        = new Token(TokenType.TagsList);
+                        = Token.Create(TokenType.TagsList);
                 }
 
-                Token semiColon = new Token
+                Token semiColon = Token.Create
                 (
                     TokenType.Semicolon,
                     Semicolon
@@ -1002,20 +1002,20 @@ namespace ThePlague.IRC.Parser
                 //first tag
 
                 //initialize empty TagsSuffix token
-                tagsSuffix = new Token(TokenType.TagsSuffix);
+                tagsSuffix = Token.Create(TokenType.TagsSuffix);
 
                 //add an empty TagsSuffix to the tags
                 tag.Combine(tagsSuffix);
 
                 //create tags token
-                Token tags = new Token
+                Token tags = Token.Create
                 (
                     TokenType.Tags,
                     tag
                 );
 
                 //first add the at prefix
-                Token at = new Token
+                Token at = Token.Create
                 (
                     TokenType.AtSign,
                     At
@@ -1025,7 +1025,7 @@ namespace ThePlague.IRC.Parser
                 at.Combine(tags);
 
                 //add trailing space
-                Token space = new Token
+                Token space = Token.Create
                 (
                     TokenType.Space,
                     Space
@@ -1090,19 +1090,13 @@ namespace ThePlague.IRC.Parser
         }
 
         public void Dispose()
-            => this.Dispose(true);
-
-        public void Dispose(bool isDisposing)
         {
-            this.Reset();
-
-            if(!isDisposing)
-            {
-                return;
-            }
-
+            this.Dispose(true);
             GC.SuppressFinalize(this);
         }
+
+        public void Dispose(bool isDisposing)
+            => this.Reset();
 
         #region helper methods
         private static FactoryTokenVisitor GetFactoryTokenVisitor()

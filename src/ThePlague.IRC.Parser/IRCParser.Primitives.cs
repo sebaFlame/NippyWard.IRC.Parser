@@ -28,7 +28,7 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            integer = new Token
+            integer = Token.Create
             (
                 TokenType.Integer,
                 reader.Sequence.Slice(startPosition, reader.Position)
@@ -55,7 +55,7 @@ namespace ThePlague.IRC.Parser
 
                 //value should be 1-1 translation to tokentype
                 //create a token for the terminal
-                first = new Token
+                first = Token.Create
                 (
                     (TokenType)value,
                     reader.Sequence.Slice(startPosition, reader.Position)
@@ -67,7 +67,7 @@ namespace ThePlague.IRC.Parser
                     ParseNicknameSuffix(ref reader)
                 );
 
-                return new Token
+                return Token.Create
                 (
                     TokenType.Nickname,
                     reader.Sequence.Slice(startPosition, reader.Position),
@@ -99,13 +99,13 @@ namespace ThePlague.IRC.Parser
             //can be empty
             if(!found)
             {
-                return new Token
+                return Token.Create
                 (
                     TokenType.NicknameSuffix
                 );
             }
 
-            return new Token
+            return Token.Create
             (
                 TokenType.NicknameSuffix,
                 reader.Sequence.Slice(startPosition, reader.Position)
@@ -125,7 +125,7 @@ namespace ThePlague.IRC.Parser
                 reader.Advance(1);
             }
 
-            return new Token
+            return Token.Create
             (
                 TokenType.Username,
                 reader.Sequence.Slice(startPosition, reader.Position)
@@ -145,7 +145,7 @@ namespace ThePlague.IRC.Parser
 
             shortName.Combine(hostSuffix);
 
-            return new Token
+            return Token.Create
             (
                 TokenType.Host,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -170,7 +170,7 @@ namespace ThePlague.IRC.Parser
             //link prefix and suffix together
             shortNamePrefix.Combine(shortNameSuffix);
 
-            return new Token
+            return Token.Create
             (
                 TokenType.ShortName,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -188,7 +188,7 @@ namespace ThePlague.IRC.Parser
             //a short name start with an alphanumeric
             if(MatchAlphaNumeric(ref reader))
             {
-                return new Token
+                return Token.Create
                 (
                     TokenType.ShortNamePrefix,
                     reader.Sequence.Slice(startPosition, reader.Position)
@@ -211,7 +211,7 @@ namespace ThePlague.IRC.Parser
             //can return an empty token
             if(!TryParseShortNameList(ref reader, out Token shortNameList))
             {
-                return new Token
+                return Token.Create
                 (
                     TokenType.ShortNameSuffix
                 );
@@ -219,7 +219,7 @@ namespace ThePlague.IRC.Parser
             //or return a list of shortname terminals
             else
             {
-                return new Token
+                return Token.Create
                 (
                     TokenType.ShortNameSuffix,
                     reader.Sequence.Slice(startPosition, reader.Position),
@@ -253,7 +253,7 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            shortNameList = new Token
+            shortNameList = Token.Create
             (
                 TokenType.ShortNameSuffix,
                 reader.Sequence.Slice(startPosition, reader.Position)
@@ -304,13 +304,13 @@ namespace ThePlague.IRC.Parser
             //can return an empty lsit
             if(!found)
             {
-                return new Token
+                return Token.Create
                 (
                     TokenType.HostSuffix
                 );
             }
 
-            return new Token
+            return Token.Create
             (
                 TokenType.HostSuffix,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -349,7 +349,7 @@ namespace ThePlague.IRC.Parser
                 .Combine(userName)
                 .Combine(hostname);
 
-            return new Token
+            return Token.Create
             (
                 TokenType.UserHost,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -378,7 +378,7 @@ namespace ThePlague.IRC.Parser
 
             exclamation.Combine(ParseUsername(ref reader));
 
-            userName = new Token
+            userName = Token.Create
             (
                 TokenType.UserHostUsername,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -409,7 +409,7 @@ namespace ThePlague.IRC.Parser
 
             at.Combine(ParseHost(ref reader));
 
-            hostName = new Token
+            hostName = Token.Create
             (
                 TokenType.UserHostHostname,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -436,7 +436,7 @@ namespace ThePlague.IRC.Parser
                 .Combine(ParseChannelString(ref reader))
                 .Combine(ParseChannelSuffix(ref reader));
 
-            return new Token
+            return Token.Create
             (
                 TokenType.Channel,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -463,7 +463,7 @@ namespace ThePlague.IRC.Parser
                         out prefix
                     ))
             {
-                channelPrefix = new Token
+                channelPrefix = Token.Create
                 (
                     TokenType.ChannelPrefix,
                     reader.Sequence.Slice(startPosition, reader.Position),
@@ -490,7 +490,7 @@ namespace ThePlague.IRC.Parser
             //default channel prefix
             if(TryParseTerminal(TokenType.Number, ref reader, out prefix))
             {
-                channelPrefix = new Token
+                channelPrefix = Token.Create
                 (
                     TokenType.ChannelPrefixWithoutMembership,
                     reader.Sequence.Slice(startPosition, reader.Position),
@@ -516,7 +516,7 @@ namespace ThePlague.IRC.Parser
                 {
                     prefix.Combine(channelId);
 
-                    channelPrefix = new Token
+                    channelPrefix = Token.Create
                     (
                         TokenType.ChannelPrefixWithoutMembership,
                         reader.Sequence.Slice(startPosition, reader.Position),
@@ -564,7 +564,7 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            channelId = new Token
+            channelId = Token.Create
             (
                 TokenType.ChannelId,
                 reader.Sequence.Slice(startPosition, reader.Position)
@@ -589,7 +589,7 @@ namespace ThePlague.IRC.Parser
                 reader.Advance(1);
             }
 
-            return new Token
+            return Token.Create
             (
                 TokenType.ChannelString,
                 reader.Sequence.Slice(startPosition, reader.Position)
@@ -607,7 +607,7 @@ namespace ThePlague.IRC.Parser
             //can be empty
             if(!TryParseTerminal(TokenType.Colon, ref reader, out Token colon))
             {
-                return new Token
+                return Token.Create
                 (
                     TokenType.ChannelSuffix
                 );
@@ -617,7 +617,7 @@ namespace ThePlague.IRC.Parser
 
             colon.Combine(channelString);
 
-            return new Token
+            return Token.Create
             (
                 TokenType.ChannelSuffix,
                 reader.Sequence.Slice(startPosition, reader.Position),

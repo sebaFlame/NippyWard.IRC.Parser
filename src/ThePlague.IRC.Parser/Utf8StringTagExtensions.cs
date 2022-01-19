@@ -63,7 +63,7 @@ namespace ThePlague.IRC.Parser
             //try parse a tag value as a list of terminals
             if(TryParseTagValueList(ref reader, out Token tagValueList))
             {
-                return new Token
+                return Token.Create
                 (
                     TokenType.TagValue,
                     tagValueList.Sequence,
@@ -73,7 +73,7 @@ namespace ThePlague.IRC.Parser
             //or return empty
             else
             {
-                return new Token
+                return Token.Create
                 (
                     TokenType.TagValue
                 );
@@ -128,7 +128,7 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            tagValueList = new Token
+            tagValueList = Token.Create
             (
                 TokenType.TagValueList,
                 startSegment.CreateReadOnlySequence(segment),
@@ -160,7 +160,7 @@ namespace ThePlague.IRC.Parser
             segment = segment.AddNewSequenceSegment(child.Sequence);
 
             //create new token from segments
-            token = new Token
+            token = Token.Create
             (
                 child.TokenType,
                 startSegment.CreateReadOnlySequence(segment)
@@ -207,7 +207,7 @@ namespace ThePlague.IRC.Parser
             }
 
             //children should've already been added to segment sequence
-            tagValueEscapeList = new Token
+            tagValueEscapeList = Token.Create
             (
                 TokenType.TagValueEscapeList,
                 startSegment.CreateReadOnlySequence(segment),
@@ -239,7 +239,7 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            Token firstBackslash = new Token
+            Token firstBackslash = Token.Create
             (
                 TokenType.Backslash,
                 new ReadOnlySequence<byte>
@@ -253,7 +253,7 @@ namespace ThePlague.IRC.Parser
 
             firstBackslash.Combine(tagValueEscapeSuffix);
 
-            tagValueEscape = new Token
+            tagValueEscape = Token.Create
             (
                 TokenType.TagValueEscape,
                 startSegment.CreateReadOnlySequence(segment),
@@ -327,7 +327,7 @@ namespace ThePlague.IRC.Parser
 
             reader.Advance(1);
 
-            Token child = new Token
+            Token child = Token.Create
             (
                 tokenType,
                 new ReadOnlySequence<byte>
@@ -339,7 +339,7 @@ namespace ThePlague.IRC.Parser
                 )
             );
 
-            tagValueEscapeSuffix = new Token
+            tagValueEscapeSuffix = Token.Create
             (
                 TokenType.TagValueEscapeSuffix,
                 child.Sequence,

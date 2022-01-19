@@ -87,7 +87,7 @@ namespace ThePlague.IRC.Parser
                 = this._segment;
             Token factoryToken;
 
-            factoryToken = new Token
+            factoryToken = Token.Create
             (
                 token.TokenType
             );
@@ -121,7 +121,7 @@ namespace ThePlague.IRC.Parser
 
             this._segment = startSegment;
 
-            factoryToken = new Token
+            factoryToken = Token.Create
             (
                 TokenType.Message
             );

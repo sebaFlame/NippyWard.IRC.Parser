@@ -2,7 +2,7 @@
 
 namespace ThePlague.Model.Core.Text
 {
-    internal static partial class SimpleCaseFolding
+    public abstract partial class BaseUtf8SimpleCaseFolding
     {
         private static readonly UInt16[] _SMPMapLevel1 =
         {

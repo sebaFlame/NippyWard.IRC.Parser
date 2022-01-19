@@ -26,7 +26,7 @@ namespace ThePlague.IRC.Parser
                 .Combine(ParseCTCPParams(ref reader))
                 .Combine(ParseCTCPMessageSuffix(ref reader));
 
-            ctcpMessage = new Token
+            ctcpMessage = Token.Create
             (
                 TokenType.CTCPMessage,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -48,7 +48,7 @@ namespace ThePlague.IRC.Parser
                 throw new ParserException("CTCP middle expected");
             }
 
-            return new Token
+            return Token.Create
             (
                 TokenType.CTCPCommand,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -82,7 +82,7 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            middle = new Token
+            middle = Token.Create
             (
                 TokenType.CTCPMiddle,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -108,7 +108,7 @@ namespace ThePlague.IRC.Parser
                 out Token space
             ))
             {
-                return new Token
+                return Token.Create
                 (
                     TokenType.CTCPParams
                 );
@@ -117,7 +117,7 @@ namespace ThePlague.IRC.Parser
             Token suffix = ParseCTCPParamsSuffix(ref reader);
             space.Combine(suffix);
 
-            return new Token
+            return Token.Create
             (
                 TokenType.CTCPParams,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -135,13 +135,13 @@ namespace ThePlague.IRC.Parser
 
             if(!TryParseCTCPParamsMiddle(ref reader, out Token middle))
             {
-                return new Token
+                return Token.Create
                 (
                     TokenType.CTCPParamsSuffix
                 );
             }
 
-            return new Token
+            return Token.Create
             (
                 TokenType.CTCPParamsSuffix,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -175,7 +175,7 @@ namespace ThePlague.IRC.Parser
                 return false;
             }
 
-            middle = new Token
+            middle = Token.Create
             (
                 TokenType.CTCPParamsMiddle,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -195,13 +195,13 @@ namespace ThePlague.IRC.Parser
 
             if(!TryParseTerminal(TokenType.CTCP, ref reader, out Token ctcp))
             {
-                return new Token
+                return Token.Create
                 (
                     TokenType.CTCPMessageSuffix
                 );
             }
 
-            return new Token
+            return Token.Create
             (
                 TokenType.CTCPMessageSuffix,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -249,7 +249,7 @@ namespace ThePlague.IRC.Parser
             argument = ParseDCCArgument(ref reader);
             spaces.Combine(argument);
 
-            return new Token
+            return Token.Create
             (
                 TokenType.DCCMessage,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -270,7 +270,7 @@ namespace ThePlague.IRC.Parser
                 throw new ParserException("DCC type expected");
             }
 
-            return new Token
+            return Token.Create
             (
                 TokenType.DCCType,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -291,7 +291,7 @@ namespace ThePlague.IRC.Parser
                 throw new ParserException("DCC argument expected");
             }
 
-            return new Token
+            return Token.Create
             (
                 TokenType.DCCArgument,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -310,7 +310,7 @@ namespace ThePlague.IRC.Parser
 
             if(TryParseDCCQuotedFilename(ref reader, out argument))
             {
-                return new Token
+                return Token.Create
                 (
                     TokenType.DCCQuotedArgument,
                     reader.Sequence.Slice(startPosition, reader.Position),
@@ -320,7 +320,7 @@ namespace ThePlague.IRC.Parser
 
             argument = ParseDCCFilenameList(ref reader);
 
-            return new Token
+            return Token.Create
             (
                 TokenType.DCCQuotedArgument,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -341,7 +341,7 @@ namespace ThePlague.IRC.Parser
                 reader.Advance(1);
             }
 
-            return new Token
+            return Token.Create
             (
                 TokenType.DCCFilenameList,
                 reader.Sequence.Slice(startPosition, reader.Position)
@@ -386,7 +386,7 @@ namespace ThePlague.IRC.Parser
 
             filename.Combine(doubleQuote);
 
-            quotedFilename = new Token
+            quotedFilename = Token.Create
             (
                 TokenType.DCCQuotedFilename,
                 reader.Sequence.Slice(startPosition, reader.Position),
@@ -409,7 +409,7 @@ namespace ThePlague.IRC.Parser
                 reader.Advance(1);
             }
 
-            return new Token
+            return Token.Create
             (
                 TokenType.DCCFilenameSpaceList,
                 reader.Sequence.Slice(startPosition, reader.Position)
