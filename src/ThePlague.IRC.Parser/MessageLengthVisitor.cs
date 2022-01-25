@@ -41,5 +41,12 @@ namespace ThePlague.IRC.Parser
 
             base.Reset();
         }
+
+        public override void Dispose(bool isDisposing)
+        {
+            this._length = 0;
+
+            base.Dispose(isDisposing);
+        }
     }
 }

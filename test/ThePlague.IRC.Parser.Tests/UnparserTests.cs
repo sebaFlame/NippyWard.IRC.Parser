@@ -28,227 +28,239 @@ namespace ThePlague.IRC.Parser.Tests
         [Fact]
         public void VerbParamsTest()
         {
-            Token constructedMessage = this._factory
+            using(Token constructedMessage = this._factory
                 .Reset()
                 .Verb("foo")
                 .Parameter("bar")
                 .Parameter("baz")
                 .Parameter("asdf")
-                .ConstructMessage();
-
-            AssertMessage
-            (
-                constructedMessage,
-                "foo bar baz asdf" + "\r\n",
-                "foo bar baz :asdf" + "\r\n"
-            );
+                .ConstructMessage())
+            {
+                AssertMessage
+                (
+                    constructedMessage,
+                    "foo bar baz asdf" + "\r\n",
+                    "foo bar baz :asdf" + "\r\n"
+                );
+            }
         }
 
         [Fact]
         public void SourceVerbTest()
         {
-            Token constructedMessage = this._factory
+            using(Token constructedMessage = this._factory
                 .Reset()
                 .Verb("AWAY")
                 .SourcePrefix("src")
-                .ConstructMessage();
-
-            AssertMessage
-            (
-                constructedMessage,
-                ":src AWAY" + "\r\n"
-            );
+                .ConstructMessage())
+            {
+                AssertMessage
+                (
+                    constructedMessage,
+                    ":src AWAY" + "\r\n"
+                );
+            }
         }
 
         [Fact]
         public void SourceVerbEmptyParamTest()
         {
-            Token constructedMessage = this._factory
+            using(Token constructedMessage = this._factory
                 .Reset()
                 .Verb("AWAY")
                 .SourcePrefix("src")
                 .Parameter(string.Empty)
-                .ConstructMessage();
-
-            AssertMessage
-            (
-                constructedMessage,
-                ":src AWAY :" + "\r\n"
-            );
+                .ConstructMessage())
+            {
+                AssertMessage
+                (
+                    constructedMessage,
+                    ":src AWAY :" + "\r\n"
+                );
+            }
         }
 
         [Fact]
         public void SourceVerbParamsTest()
         {
-            Token constructedMessage = this._factory
+            using(Token constructedMessage = this._factory
                 .Reset()
                 .SourcePrefix("coolguy")
                 .Verb("foo")
                 .Parameter("bar")
                 .Parameter("baz")
                 .Parameter("asdf")
-                .ConstructMessage();
-
-            AssertMessage
-            (
-                constructedMessage,
-                ":coolguy foo bar baz asdf" + "\r\n",
-                ":coolguy foo bar baz :asdf" + "\r\n"
-            );
+                .ConstructMessage())
+            {
+                AssertMessage
+                (
+                    constructedMessage,
+                    ":coolguy foo bar baz asdf" + "\r\n",
+                    ":coolguy foo bar baz :asdf" + "\r\n"
+                );
+            }
         }
 
         [Fact]
         public void VerbTrailingParamsTest()
         {
-            Token constructedMessage = this._factory
+            using(Token constructedMessage = this._factory
                 .Reset()
                 .Verb("foo")
                 .Parameter("bar")
                 .Parameter("baz")
                 .Parameter("asdf quux")
-                .ConstructMessage();
-
-            AssertMessage
-            (
-                constructedMessage,
-                "foo bar baz :asdf quux" + "\r\n"
-            );
+                .ConstructMessage())
+            {
+                AssertMessage
+                (
+                    constructedMessage,
+                    "foo bar baz :asdf quux" + "\r\n"
+                );
+            }
         }
 
         [Fact]
         public void VerbParamsEmptyParamTest()
         {
-            Token constructedMessage = this._factory
+            using(Token constructedMessage = this._factory
                 .Reset()
                 .Verb("foo")
                 .Parameter("bar")
                 .Parameter("baz")
                 .Parameter(string.Empty)
-                .ConstructMessage();
-
-            AssertMessage
-            (
-                constructedMessage,
-                "foo bar baz :" + "\r\n"
-            );
+                .ConstructMessage())
+            {
+                AssertMessage
+                (
+                    constructedMessage,
+                    "foo bar baz :" + "\r\n"
+                );
+            }
         }
 
         [Fact]
         public void VerbParamsColonParamTest()
         {
-            Token constructedMessage = this._factory
+            using(Token constructedMessage = this._factory
                 .Reset()
                 .Verb("foo")
                 .Parameter("bar")
                 .Parameter("baz")
                 .Parameter(":asdf")
-                .ConstructMessage();
-
-            AssertMessage
-            (
-                constructedMessage,
-                "foo bar baz ::asdf" + "\r\n"
-            );
+                .ConstructMessage())
+            {
+                AssertMessage
+                (
+                    constructedMessage,
+                    "foo bar baz ::asdf" + "\r\n"
+                );
+            }
         }
 
         [Fact]
         public void SourceVerbParamsTrailingParamTest()
         {
-            Token constructedMessage = this._factory
+            using(Token constructedMessage = this._factory
                 .Reset()
                 .SourcePrefix("coolguy")
                 .Verb("foo")
                 .Parameter("bar")
                 .Parameter("baz")
                 .Parameter("asdf quux")
-                .ConstructMessage();
-
-            AssertMessage
-            (
-                constructedMessage,
-                ":coolguy foo bar baz :asdf quux" + "\r\n"
-            );
+                .ConstructMessage())
+            {
+                AssertMessage
+                (
+                    constructedMessage,
+                    ":coolguy foo bar baz :asdf quux" + "\r\n"
+                );
+            }
         }
 
         [Fact]
         public void SourceVerbParamsTrailingWhitespaceParamTest()
         {
-            Token constructedMessage = this._factory
+            using(Token constructedMessage = this._factory
                 .Reset()
                 .SourcePrefix("coolguy")
                 .Verb("foo")
                 .Parameter("bar")
                 .Parameter("baz")
                 .Parameter("  asdf quux ")
-                .ConstructMessage();
-
-            AssertMessage
-            (
-                constructedMessage,
-                ":coolguy foo bar baz :  asdf quux " + "\r\n"
-            );
+                .ConstructMessage())
+            {
+                AssertMessage
+                (
+                    constructedMessage,
+                    ":coolguy foo bar baz :  asdf quux " + "\r\n"
+                );
+            }
         }
 
         [Fact]
         public void SourceVerbParamsDoubleTrailingParamTest()
         {
-            Token constructedMessage = this._factory
+            using(Token constructedMessage = this._factory
                 .Reset()
                 .SourcePrefix("coolguy")
                 .Verb("PRIVMSG")
                 .Parameter("bar")
                 .Parameter("lol :) ")
-                .ConstructMessage();
-
-            AssertMessage
-            (
-                constructedMessage,
-                ":coolguy PRIVMSG bar :lol :) " + "\r\n"
-            );
+                .ConstructMessage())
+            {
+                AssertMessage
+                (
+                    constructedMessage,
+                    ":coolguy PRIVMSG bar :lol :) " + "\r\n"
+                );
+            }
         }
 
         [Fact]
         public void SourceVerbParamsEmptyParamTest()
         {
-            Token constructedMessage = this._factory
+            using(Token constructedMessage = this._factory
                 .Reset()
                 .SourcePrefix("coolguy")
                 .Verb("foo")
                 .Parameter("bar")
                 .Parameter("baz")
                 .Parameter(string.Empty)
-                .ConstructMessage();
-
-            AssertMessage
-            (
-                constructedMessage,
-                ":coolguy foo bar baz :" + "\r\n"
-            );
+                .ConstructMessage())
+            {
+                AssertMessage
+                (
+                    constructedMessage,
+                    ":coolguy foo bar baz :" + "\r\n"
+                );
+            }
         }
 
         [Fact]
         public void SourceVerbTabParamTest()
         {
-            Token constructedMessage = this._factory
+            using(Token constructedMessage = this._factory
                 .Reset()
                 .SourcePrefix("coolguy")
                 .Verb("foo")
                 .Parameter("b\tar")
                 .Parameter("baz")
-                .ConstructMessage();
-
-            AssertMessage
-            (
-                constructedMessage,
-                ":coolguy foo b\tar baz" + "\r\n",
-                ":coolguy foo b\tar :baz" + "\r\n"
-            );
+                .ConstructMessage())
+            {
+                AssertMessage
+                (
+                    constructedMessage,
+                    ":coolguy foo b\tar baz" + "\r\n",
+                    ":coolguy foo b\tar :baz" + "\r\n"
+                );
+            }
         }
 
         [Fact]
         public void EmptyTagSourceVerbParamTrailingWhitespaceParamTest()
         {
-            Token constructedMessage = this._factory
+            using(Token constructedMessage = this._factory
                 .Reset()
                 .Tag("asd", string.Empty)
                 .SourcePrefix("coolguy")
@@ -256,96 +268,101 @@ namespace ThePlague.IRC.Parser.Tests
                 .Parameter("bar")
                 .Parameter("baz")
                 .Parameter("  ")
-                .ConstructMessage();
-
-            AssertMessage
-            (
-                constructedMessage,
-                @"@asd :coolguy foo bar baz :  " + "\r\n"
-            );
+                .ConstructMessage())
+            {
+                AssertMessage
+                (
+                    constructedMessage,
+                    @"@asd :coolguy foo bar baz :  " + "\r\n"
+                );
+            }
         }
 
         [Fact]
         public void EscapedTagVerbTest()
         {
-            Token constructedMessage = this._factory
+            using(Token constructedMessage = this._factory
                 .Reset()
                 .Tag("a", "b\\and\nk")
                 .Tag("d", @"gh;764")
                 .Verb("foo")
-                .ConstructMessage();
-
-            AssertMessage
-            (
-                constructedMessage,
-                @"@a=b\\and\nk;d=gh\:764 foo" + "\r\n",
-                @"@d=gh\:764;a=b\\and\nk foo" + "\r\n"
-            );
+                .ConstructMessage())
+            {
+                AssertMessage
+                (
+                    constructedMessage,
+                    @"@a=b\\and\nk;d=gh\:764 foo" + "\r\n",
+                    @"@d=gh\:764;a=b\\and\nk foo" + "\r\n"
+                );
+            }
         }
 
         [Fact]
         public void EscapedTagVerbParamsTest()
         {
-            Token constructedMessage = this._factory
+            using(Token constructedMessage = this._factory
                 .Reset()
                 .Tag("a", "b\\and\nk")
                 .Tag("d", @"gh;764")
                 .Verb("foo")
                 .Parameter("par1")
                 .Parameter("par2")
-                .ConstructMessage();
-
-            AssertMessage
-            (
-                constructedMessage,
-                @"@a=b\\and\nk;d=gh\:764 foo par1 par2" + "\r\n",
-                @"@a=b\\and\nk;d=gh\:764 foo par1 :par2" + "\r\n",
-                @"@d=gh\:764;a=b\\and\nk foo par1 par2" + "\r\n",
-                @"@d=gh\:764;a=b\\and\nk foo par1 :par2" + "\r\n"
-            );
+                .ConstructMessage())
+            {
+                AssertMessage
+                (
+                    constructedMessage,
+                    @"@a=b\\and\nk;d=gh\:764 foo par1 par2" + "\r\n",
+                    @"@a=b\\and\nk;d=gh\:764 foo par1 :par2" + "\r\n",
+                    @"@d=gh\:764;a=b\\and\nk foo par1 par2" + "\r\n",
+                    @"@d=gh\:764;a=b\\and\nk foo par1 :par2" + "\r\n"
+                );
+            }
         }
 
         [Fact]
         public void LongEscapedTagVerbTest()
         {
-            Token constructedMessage = this._factory
+            using(Token constructedMessage = this._factory
                 .Reset()
                 .Tag("foo", "\\\\;\\s \r\n")
                 .Verb("COMMAND")
-                .ConstructMessage();
-
-            AssertMessage
-            (
-                constructedMessage,
-                @"@foo=\\\\\:\\s\s\r\n COMMAND" + "\r\n"
-            );
+                .ConstructMessage())
+            {
+                AssertMessage
+                (
+                    constructedMessage,
+                    @"@foo=\\\\\:\\s\s\r\n COMMAND" + "\r\n"
+                );
+            }
         }
 
         [Fact]
         public void NewMessageSourceTest()
         {
-            Token constructedMessage = this._factory
+            using(Token constructedMessage = this._factory
                 .Reset()
                 .SourcePrefix("coolguy")
                 .Verb("foo")
                 .Parameter("bar")
                 .NewMessage()
                 .Parameter("baz")
-                .ConstructMessage();
+                .ConstructMessage())
+            {
+                Assert.NotNull(constructedMessage.Next);
 
-            Assert.NotNull(constructedMessage.Next);
+                AssertMessage
+                (
+                    constructedMessage,
+                    ":coolguy foo bar" + "\r\n"
+                );
 
-            AssertMessage
-            (
-                constructedMessage,
-                ":coolguy foo bar" + "\r\n"
-            );
-
-            AssertMessage
-            (
-                constructedMessage.Next,
-                ":coolguy foo baz" + "\r\n"
-            );
+                AssertMessage
+                (
+                    constructedMessage.Next,
+                    ":coolguy foo baz" + "\r\n"
+                );
+            }
         }
 
         [Fact]
@@ -368,7 +385,7 @@ namespace ThePlague.IRC.Parser.Tests
         [Fact]
         public void NewMessageTagTest()
         {
-            Token constructedMessage = this._factory
+            using(Token constructedMessage = this._factory
                 .Reset()
                 .SourcePrefix("coolguy")
                 .Tag("asd", string.Empty)
@@ -376,21 +393,22 @@ namespace ThePlague.IRC.Parser.Tests
                 .Parameter("bar")
                 .NewMessage()
                 .Parameter("baz")
-                .ConstructMessage();
+                .ConstructMessage())
+            {
+                Assert.NotNull(constructedMessage.Next);
 
-            Assert.NotNull(constructedMessage.Next);
+                AssertMessage
+                (
+                    constructedMessage,
+                    "@asd :coolguy foo bar" + "\r\n"
+                );
 
-            AssertMessage
-            (
-                constructedMessage,
-                "@asd :coolguy foo bar" + "\r\n"
-            );
-
-            AssertMessage
-            (
-                constructedMessage.Next,
-                "@asd :coolguy foo baz" + "\r\n"
-            );
+                AssertMessage
+                (
+                    constructedMessage.Next,
+                    "@asd :coolguy foo baz" + "\r\n"
+                );
+            }
         }
 
         [Fact]
@@ -477,41 +495,42 @@ namespace ThePlague.IRC.Parser.Tests
             //ensure it is too long even with prefix and verb
             string message = new string('a', 512);
 
-            Token constructedMessage = this._testFactory
+            using(Token constructedMessage = this._testFactory
                 .Reset()
                 .SourcePrefix("coolguy")
                 .Verb("PRIVMSG")
                 .Parameter("bob")
                 .Parameter(message)
-                .ConstructMessage();
+                .ConstructMessage())
+            {
+                Assert.NotNull(constructedMessage);
+                Assert.NotNull(constructedMessage.Next);
 
-            Assert.NotNull(constructedMessage);
-            Assert.NotNull(constructedMessage.Next);
+                Assert.True(constructedMessage.Length <= BaseIRCMessageFactory._MaxMessageLength);
+                Assert.True(constructedMessage.Next.Length <= BaseIRCMessageFactory._MaxMessageLength);
 
-            Assert.True(constructedMessage.Length <= BaseIRCMessageFactory._MaxMessageLength);
-            Assert.True(constructedMessage.Next.Length <= BaseIRCMessageFactory._MaxMessageLength);
-
-            AssertMessage
-            (
-                constructedMessage,
-                string.Concat
+                AssertMessage
                 (
-                    ":coolguy PRIVMSG bob ",
-                    new string('a', 489),
-                    "\r\n"
-                )
-            );
+                    constructedMessage,
+                    string.Concat
+                    (
+                        ":coolguy PRIVMSG bob ",
+                        new string('a', 489),
+                        "\r\n"
+                    )
+                );
 
-            AssertMessage
-            (
-                constructedMessage.Next,
-                string.Concat
+                AssertMessage
                 (
-                    ":coolguy PRIVMSG bob ",
-                    new string('a', 23),
-                    "\r\n"
-                )
-            );
+                    constructedMessage.Next,
+                    string.Concat
+                    (
+                        ":coolguy PRIVMSG bob ",
+                        new string('a', 23),
+                        "\r\n"
+                    )
+                );
+            }
         }
 
         [Fact]
@@ -535,41 +554,42 @@ namespace ThePlague.IRC.Parser.Tests
                 return fact;
             }
 
-            Token constructedMessage = AddParams
+            using(Token constructedMessage = AddParams
             (
                 factory
                     .Reset()
                     .SourcePrefix("coolguy")
                     .Verb("TAGMSG")
             )
-            .ConstructMessage();
+            .ConstructMessage())
+            {
+                Assert.NotNull(constructedMessage);
+                Assert.NotNull(constructedMessage.Next);
 
-            Assert.NotNull(constructedMessage);
-            Assert.NotNull(constructedMessage.Next);
-
-            AssertMessage
-            (
-                constructedMessage,
-                string.Concat
+                AssertMessage
                 (
-                    ":coolguy TAGMSG ",
-                    string.Join
+                    constructedMessage,
+                    string.Concat
                     (
-                        ' ', Enumerable.Range(0, 15)
-                    ),
-                    "\r\n"
-                )
-            );
+                        ":coolguy TAGMSG ",
+                        string.Join
+                        (
+                            ' ', Enumerable.Range(0, 15)
+                        ),
+                        "\r\n"
+                    )
+                );
 
-            AssertMessage
-            (
-                constructedMessage.Next,
-                string.Concat
+                AssertMessage
                 (
-                    ":coolguy TAGMSG 15",
-                    "\r\n"
-                )
-            );
+                    constructedMessage.Next,
+                    string.Concat
+                    (
+                        ":coolguy TAGMSG 15",
+                        "\r\n"
+                    )
+                );
+            }
         }
 
         [Fact]
@@ -582,7 +602,7 @@ namespace ThePlague.IRC.Parser.Tests
                 true
             );
 
-            Token constructedMessage = factory
+            using(Token constructedMessage = factory
                 .Reset()
                 .Verb("foo")
                 .Parameter("bar")
@@ -590,21 +610,22 @@ namespace ThePlague.IRC.Parser.Tests
                 .Parameter("asdf")
                 .NewMessage()
                 .Parameter("quux")
-                .ConstructMessage();
+                .ConstructMessage())
+            {
+                Assert.NotNull(constructedMessage.Next);
 
-            Assert.NotNull(constructedMessage.Next);
+                AssertMessage
+                (
+                    constructedMessage,
+                    "foo bar baz asdf" + "\r\n"
+                );
 
-            AssertMessage
-            (
-                constructedMessage,
-                "foo bar baz asdf" + "\r\n"
-            );
-
-            AssertMessage
-            (
-                constructedMessage.Next,
-                "foo bar baz quux" + "\r\n"
-            );
+                AssertMessage
+                (
+                    constructedMessage.Next,
+                    "foo bar baz quux" + "\r\n"
+                );
+            }
         }
 
         [Fact]
@@ -617,7 +638,7 @@ namespace ThePlague.IRC.Parser.Tests
                 false
             );
 
-            Token constructedMessage = factory
+            using(Token constructedMessage = factory
                 .Reset()
                 .SourcePrefix("coolguy")
                 .Tag("asd", string.Empty)
@@ -625,21 +646,22 @@ namespace ThePlague.IRC.Parser.Tests
                 .Parameter("bar")
                 .NewMessage()
                 .Parameter("baz")
-                .ConstructMessage();
+                .ConstructMessage())
+            {
+                Assert.NotNull(constructedMessage.Next);
 
-            Assert.NotNull(constructedMessage.Next);
+                AssertMessage
+                (
+                    constructedMessage,
+                    "@asd :coolguy foo bar" + "\r\n"
+                );
 
-            AssertMessage
-            (
-                constructedMessage,
-                "@asd :coolguy foo bar" + "\r\n"
-            );
-
-            AssertMessage
-            (
-                constructedMessage.Next,
-                "foo bar baz" + "\r\n"
-            );
+                AssertMessage
+                (
+                    constructedMessage.Next,
+                    "foo bar baz" + "\r\n"
+                );
+            }
         }
 
         [Fact]
@@ -647,41 +669,42 @@ namespace ThePlague.IRC.Parser.Tests
         {
             string message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer tincidunt odio in interdum efficitur. Fusce at fermentum augue. Pellentesque venenatis sagittis quam, sit amet porta leo consectetur nec. Ut non venenatis enim. Nulla sed mi vehicula, ultricies felis vel, blandit justo. In mauris nunc, eleifend vitae egestas nec, volutpat eu risus. Nulla sed nisi arcu. Vivamus eget luctus nisl. Fusce dignissim consequat placerat. Donec ultrices, purus quis gravida volutpat, justo arcu scelerisque elit, quis lacinia diam ex in nibh. Aliquam ultrices pulvinar sem, ac mollis metus fringilla sit amet. Nullam consectetur tortor non turpis gravida, sit amet efficitur purus dignissim. Sed arcu sapien, sodales sit amet odio at, tempor congue orci. Ut eget libero non ligula condimentum ullamcorper. Aliquam enim ligula, commodo in hendrerit ac, tincidunt eu augue.";
 
-            Token constructedMessage = this._testFactory
+            using(Token constructedMessage = this._testFactory
                 .Reset()
                 .SourcePrefix("coolguy")
                 .Verb("PRIVMSG")
                 .Parameter("bob")
                 .Parameter(message)
-                .ConstructMessage();
+                .ConstructMessage())
+            {
+                Assert.NotNull(constructedMessage);
+                Assert.NotNull(constructedMessage.Next);
 
-            Assert.NotNull(constructedMessage);
-            Assert.NotNull(constructedMessage.Next);
+                Assert.True(constructedMessage.Length <= BaseIRCMessageFactory._MaxMessageLength);
+                Assert.True(constructedMessage.Next.Length <= BaseIRCMessageFactory._MaxMessageLength);
 
-            Assert.True(constructedMessage.Length <= BaseIRCMessageFactory._MaxMessageLength);
-            Assert.True(constructedMessage.Next.Length <= BaseIRCMessageFactory._MaxMessageLength);
-
-            AssertMessage
-            (
-                constructedMessage,
-                string.Concat
+                AssertMessage
                 (
-                    ":coolguy PRIVMSG bob :",
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer tincidunt odio in interdum efficitur. Fusce at fermentum augue. Pellentesque venenatis sagittis quam, sit amet porta leo consectetur nec. Ut non venenatis enim. Nulla sed mi vehicula, ultricies felis vel, blandit justo. In mauris nunc, eleifend vitae egestas nec, volutpat eu risus. Nulla sed nisi arcu. Vivamus eget luctus nisl. Fusce dignissim consequat placerat. Donec ultrices, purus quis gravida volutpat, justo arcu",
-                    "\r\n"
-                )
-            );
+                    constructedMessage,
+                    string.Concat
+                    (
+                        ":coolguy PRIVMSG bob :",
+                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer tincidunt odio in interdum efficitur. Fusce at fermentum augue. Pellentesque venenatis sagittis quam, sit amet porta leo consectetur nec. Ut non venenatis enim. Nulla sed mi vehicula, ultricies felis vel, blandit justo. In mauris nunc, eleifend vitae egestas nec, volutpat eu risus. Nulla sed nisi arcu. Vivamus eget luctus nisl. Fusce dignissim consequat placerat. Donec ultrices, purus quis gravida volutpat, justo arcu",
+                        "\r\n"
+                    )
+                );
 
-            AssertMessage
-            (
-                constructedMessage.Next,
-                string.Concat
+                AssertMessage
                 (
-                    ":coolguy PRIVMSG bob :",
-                    " scelerisque elit, quis lacinia diam ex in nibh. Aliquam ultrices pulvinar sem, ac mollis metus fringilla sit amet. Nullam consectetur tortor non turpis gravida, sit amet efficitur purus dignissim. Sed arcu sapien, sodales sit amet odio at, tempor congue orci. Ut eget libero non ligula condimentum ullamcorper. Aliquam enim ligula, commodo in hendrerit ac, tincidunt eu augue.",
-                    "\r\n"
-                )
-            );
+                    constructedMessage.Next,
+                    string.Concat
+                    (
+                        ":coolguy PRIVMSG bob :",
+                        " scelerisque elit, quis lacinia diam ex in nibh. Aliquam ultrices pulvinar sem, ac mollis metus fringilla sit amet. Nullam consectetur tortor non turpis gravida, sit amet efficitur purus dignissim. Sed arcu sapien, sodales sit amet odio at, tempor congue orci. Ut eget libero non ligula condimentum ullamcorper. Aliquam enim ligula, commodo in hendrerit ac, tincidunt eu augue.",
+                        "\r\n"
+                    )
+                );
+            }
         }
 
         [Fact]
@@ -722,7 +745,7 @@ namespace ThePlague.IRC.Parser.Tests
             //ensure it is too long even with prefix and verb
             string message = new string('a', 512);
 
-            Token constructedMessage = AddTags
+            using(Token constructedMessage = AddTags
             (
                 this._testFactory
                     .Reset()
@@ -732,37 +755,38 @@ namespace ThePlague.IRC.Parser.Tests
                 .Verb("PRIVMSG")
                 .Parameter("bob")
                 .Parameter(message)
-                .ConstructMessage();
+                .ConstructMessage())
+            {
+                Assert.NotNull(constructedMessage);
+                Assert.NotNull(constructedMessage.Next);
 
-            Assert.NotNull(constructedMessage);
-            Assert.NotNull(constructedMessage.Next);
+                Assert.False(constructedMessage.Length <= BaseIRCMessageFactory._MaxMessageLength);
+                Assert.False(constructedMessage.Next.Length <= BaseIRCMessageFactory._MaxMessageLength);
 
-            Assert.False(constructedMessage.Length <= BaseIRCMessageFactory._MaxMessageLength);
-            Assert.False(constructedMessage.Next.Length <= BaseIRCMessageFactory._MaxMessageLength);
-
-            AssertMessage
-            (
-                constructedMessage,
-                string.Concat
+                AssertMessage
                 (
-                    tags,
-                    ":coolguy PRIVMSG bob ",
-                    new string('a', 489),
-                    "\r\n"
-                )
-            );
+                    constructedMessage,
+                    string.Concat
+                    (
+                        tags,
+                        ":coolguy PRIVMSG bob ",
+                        new string('a', 489),
+                        "\r\n"
+                    )
+                );
 
-            AssertMessage
-            (
-                constructedMessage.Next,
-                string.Concat
+                AssertMessage
                 (
-                    tags,
-                    ":coolguy PRIVMSG bob ",
-                    new string('a', 23),
-                    "\r\n"
-                )
-            );
+                    constructedMessage.Next,
+                    string.Concat
+                    (
+                        tags,
+                        ":coolguy PRIVMSG bob ",
+                        new string('a', 23),
+                        "\r\n"
+                    )
+                );
+            }
         }
 
         [Fact]
@@ -830,7 +854,11 @@ namespace ThePlague.IRC.Parser.Tests
         }
 
         public void Dispose()
-            => this._factory.Dispose();
+        {
+            this._factory.Dispose();
+            this._testFactory.Dispose();
+            GC.SuppressFinalize(this);
+        }
 
         #region Helper methods
         private static void AssertMessage

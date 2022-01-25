@@ -139,7 +139,9 @@ namespace ThePlague.IRC.Parser
             }
             else
             {
-                this._message.Combine(factoryToken);
+                this._message
+                    .GetLastToken()
+                    .Combine(factoryToken);
             }
 
             this.VisitFactoryNext(token, factoryToken);
@@ -156,8 +158,20 @@ namespace ThePlague.IRC.Parser
         {
             this._message = null;
             this._segment = null;
+            this._previousFactoryToken = null;
+            this._parentFactoryToken = null;
 
             base.Reset();
+        }
+
+        public override void Dispose(bool isDisposing)
+        {
+            this._message = null;
+            this._segment = null;
+            this._previousFactoryToken = null;
+            this._parentFactoryToken = null;
+
+            base.Dispose(isDisposing);
         }
     }
 }

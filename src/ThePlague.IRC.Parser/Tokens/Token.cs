@@ -135,7 +135,9 @@ namespace ThePlague.IRC.Parser.Tokens
             this.Child = null;
             this.Next = null;
             this.Sequence = default;
+            this.TokenType = TokenType.Null;
 
+            //ensure GC does NOT try to pool
             if(!isDisposing)
             {
                 return;

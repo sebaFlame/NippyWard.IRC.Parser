@@ -92,6 +92,9 @@ namespace ThePlague.IRC.Parser
 
             constructedMessage = tokenVisitor.ConstructMessage(this._message);
 
+            this._message.Dispose();
+            this._message = null;
+
             return constructedMessage;
         }
 
@@ -635,9 +638,10 @@ namespace ThePlague.IRC.Parser
 
         protected Token CreateNewConstructedMessage()
         {
+            //always base on the previous message
             Token oldMessage = this._message?.GetLastToken();
-            Token tagPrefix = Token.Create(TokenType.TagPrefix);
 
+            Token tagPrefix = Token.Create(TokenType.TagPrefix);
             tagPrefix
                 .Combine(Token.Create(TokenType.SourcePrefix))
                 .Combine(Token.Create(TokenType.Verb))
@@ -650,21 +654,15 @@ namespace ThePlague.IRC.Parser
                 tagPrefix
             );
 
-            //if first message, return it
-            if(oldMessage is null)
-            {
-                return newMessage;
-            }
-
-            //else combine with first message
-            oldMessage.Combine(newMessage);
+            //now you can iterate over oldMessage as there is no Next Token
 
             if(this._keepTags
                && oldMessage.TryGetFirstTokenOfType
             (
                 TokenType.TagPrefix,
                 out Token oldTagPrefix
-            ))
+            )
+                && !oldTagPrefix.IsEmpty)
             {
                 Token tagKey, tagValue;
 
@@ -695,7 +693,8 @@ namespace ThePlague.IRC.Parser
             (
                 TokenType.SourcePrefixTarget,
                 out Token sourcePrefixTarget
-            ))
+            )
+                && !sourcePrefixTarget.IsEmpty)
             {
                 AddSourcePrefix(newMessage, sourcePrefixTarget);
             }
@@ -704,16 +703,16 @@ namespace ThePlague.IRC.Parser
             if(oldMessage.TryGetFirstTokenOfType
             (
                 TokenType.Verb,
-                out Token oldCommand
+                out Token oldVerb
             )
-                && !oldCommand.IsEmpty)
+                && !oldVerb.IsEmpty)
             {
                 Token commandNameOrCode;
-                if(!(oldCommand.TryGetLastOfType
+                if(!(oldVerb.TryGetLastOfType
                 (
                     TokenType.CommandName,
                     out commandNameOrCode
-                ) || oldCommand.TryGetFirstTokenOfType
+                ) || oldVerb.TryGetFirstTokenOfType
                     (
                         TokenType.CommandCode,
                         out commandNameOrCode
@@ -731,11 +730,6 @@ namespace ThePlague.IRC.Parser
                     newMessage,
                     commandNameOrCode
                 );
-            }
-            //no command AND no parameters
-            else
-            {
-                return newMessage;
             }
 
             //verify if params have been set
@@ -767,6 +761,9 @@ namespace ThePlague.IRC.Parser
                 }
             }
 
+            //else combine with first message
+            oldMessage.Combine(newMessage);
+
             return newMessage;
         }
 
@@ -778,20 +775,24 @@ namespace ThePlague.IRC.Parser
         )
         {
             //fetch the TagPrefix token
-            newMessage.TryGetFirstTokenOfType
+            if(!newMessage.TryGetFirstTokenOfType
             (
                 TokenType.TagPrefix,
                 out Token tagPrefix
-            );
+            ))
+            {
+                throw new InvalidOperationException
+                (
+                    "New TagPrefix not found!"
+                );
+            }
 
             //first create a new tag
             Token tag, tagSuffix, tagKey;
 
-            tagKey = Token.Create
-            (
-                TokenType.TagKey,
-                oldTagKey.Sequence
-            );
+            SequenceReader<byte> reader
+                = new SequenceReader<byte>(oldTagKey.Sequence);
+            tagKey = IRCParser.ParseTagKey(ref reader);
 
             if(oldTagValue is null
                || oldTagValue.IsEmpty)
@@ -807,8 +808,7 @@ namespace ThePlague.IRC.Parser
                 );
 
                 //re-parse the value
-                SequenceReader<byte> reader
-                    = new SequenceReader<byte>(oldTagValue.Sequence);
+                reader = new SequenceReader<byte>(oldTagValue.Sequence);
                 Token tagValue = IRCParser.ParseTagValue(ref reader);
                 equalSign.Combine(tagValue);
 
@@ -840,20 +840,24 @@ namespace ThePlague.IRC.Parser
         )
         {
             //fetch the new SourcePrefix token
-            if(newMessage.TryGetFirstTokenOfType
+            if(!newMessage.TryGetFirstTokenOfType
             (
                 TokenType.SourcePrefix,
                 out Token sourcePrefix
             ))
             {
-                Token sourcePrefixTarget = Token.Create
+                throw new InvalidOperationException
                 (
-                    TokenType.SourcePrefix,
-                    oldSourcePrefixTarget.Sequence
+                    "New SourcePrefix not found!"
                 );
-
-                LinkConstructedSourcePrefix(sourcePrefix, sourcePrefixTarget);
             }
+
+            SequenceReader<byte> reader
+                = new SequenceReader<byte>(oldSourcePrefixTarget.Sequence);
+            Token sourcePrefixTarget
+                = IRCParser.ParseSourcePrefixTarget(ref reader);
+
+            LinkConstructedSourcePrefix(sourcePrefix, sourcePrefixTarget);
         }
 
         private static void AddVerb
@@ -862,11 +866,17 @@ namespace ThePlague.IRC.Parser
             Token oldVerb
         )
         {
-            newMessage.TryGetFirstTokenOfType
+            if(!newMessage.TryGetFirstTokenOfType
             (
                 TokenType.Verb,
-                out Token command
-            );
+                out Token verb
+            ))
+            {
+                throw new InvalidOperationException
+                (
+                    "New Verb not found!"
+                );
+            }
 
             Token newVerb = Token.Create
             (
@@ -876,7 +886,7 @@ namespace ThePlague.IRC.Parser
 
             LinkConstructedVerb
             (
-                command,
+                verb,
                 newVerb
             );
         }
@@ -887,11 +897,17 @@ namespace ThePlague.IRC.Parser
             Token oldParamsSuffix
         )
         {
-            newMessage.TryGetFirstTokenOfType
+            if(!newMessage.TryGetFirstTokenOfType
             (
                 TokenType.Params,
                 out Token parameters
-            );
+            ))
+            {
+                throw new InvalidOperationException
+                (
+                    "New Params not found!"
+                );
+            }
 
             Token space = Token.Create
             (
@@ -899,23 +915,14 @@ namespace ThePlague.IRC.Parser
                 Space
             );
 
-            Token parameter;
-            if(oldParamsSuffix.IsEmpty)
-            {
-                parameter = Token.Create(TokenType.ParamsSuffix);
-            }
-            else
-            {
-                //actual parameter should always be first child, so the rest of
-                //the linked list gets skipped (there should not be a linked
-                //list yet!). This ensures Token.Create instances get created.
-                SequenceReader<byte> reader
-                    = new SequenceReader<byte>(oldParamsSuffix.Child.Sequence);
+            //actual parameter should always be first child, so the rest of
+            //the linked list gets skipped (there should not be a linked
+            //list yet!). This ensures Token.Create instances get created.
+            SequenceReader<byte> reader
+                = new SequenceReader<byte>(oldParamsSuffix.Child.Sequence);
+            Token parameterSuffix = IRCParser.ParseParamsSuffix(ref reader);
 
-                parameter = IRCParser.ParseParamsSuffix(ref reader);
-            }
-
-            space.Combine(parameter);
+            space.Combine(parameterSuffix);
             Token parameterPrefix = Token.Create
             (
                 TokenType.ParamsPrefix,
@@ -994,7 +1001,10 @@ namespace ThePlague.IRC.Parser
                 }
                 else
                 {
-                    tagsList.Child.Combine(semiColon);
+                    tagsList
+                        .Child
+                        .GetLastToken()
+                        .Combine(semiColon);
                 }
             }
             else
@@ -1077,7 +1087,6 @@ namespace ThePlague.IRC.Parser
         public virtual BaseIRCMessageFactory Reset()
         {
             this._message?.Dispose();
-
             this._message = null;
 
             this._message = this.CreateNewConstructedMessage();
@@ -1096,7 +1105,10 @@ namespace ThePlague.IRC.Parser
         }
 
         public void Dispose(bool isDisposing)
-            => this.Reset();
+        {
+            this._message?.Dispose();
+            this._message = null;
+        }
 
         #region helper methods
         private static FactoryTokenVisitor GetFactoryTokenVisitor()

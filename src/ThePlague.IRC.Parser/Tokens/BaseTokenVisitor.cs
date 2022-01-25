@@ -100,18 +100,20 @@ namespace ThePlague.IRC.Parser.Tokens
         }
 
         public void Dispose()
-            => this.Dispose(true);
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
         public virtual void Dispose(bool isDisposing)
         {
-            this.Reset();
+            this._ancestors.Clear();
+            this._previous = null;
 
             if(!isDisposing)
             {
                 return;
             }
-
-            GC.SuppressFinalize(this);
         }
     }
 }
