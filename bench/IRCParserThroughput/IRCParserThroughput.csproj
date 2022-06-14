@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-      <ProjectReference Include="../../src/ThePlague.IRC.Parser/ThePlague.IRC.Parser.csproj" />
+      <ProjectReference Include="../../src/NippyWard.IRC.Parser/NippyWard.IRC.Parser.csproj" />
   </ItemGroup>
 
   <ItemGroup>

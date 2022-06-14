@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 
-using ThePlague.Model.Core.Text;
+using NippyWard.Model.Core.Text;
 
 namespace StringComparer
 {

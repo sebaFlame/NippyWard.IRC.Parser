@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+      <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NippyWard.Model.Core.Text\NippyWard.Model.Core.Text.csproj" />
+  </ItemGroup>
+
+  <!-- Source generator -->
+  <ItemGroup>
+    <ProjectReference Include="..\NippyWard.IRC.Parser.Generator\NippyWard.IRC.Parser.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+  </ItemGroup>
+
+</Project>

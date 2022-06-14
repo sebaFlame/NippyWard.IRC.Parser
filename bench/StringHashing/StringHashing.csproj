@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ThePlague.Model.Core.Text\ThePlague.Model.Core.Text.csproj" />
+    <ProjectReference Include="..\..\src\NippyWard.Model.Core.Text\NippyWard.Model.Core.Text.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

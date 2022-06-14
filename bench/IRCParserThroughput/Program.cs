@@ -6,9 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics;
 
-using ThePlague.Model.Core.Text;
-using ThePlague.IRC.Parser;
-using ThePlague.IRC.Parser.Tokens;
+using NippyWard.Model.Core.Text;
+using NippyWard.IRC.Parser;
+using NippyWard.IRC.Parser.Tokens;
 
 namespace IRCParserThroughput
 {
