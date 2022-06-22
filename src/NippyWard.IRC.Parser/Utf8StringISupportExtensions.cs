@@ -1,7 +1,7 @@
 using System;
 using System.Buffers;
 
-using NippyWard.Model.Core.Text;
+using NippyWard.Text;
 using NippyWard.IRC.Parser.Tokens;
 
 namespace NippyWard.IRC.Parser

@@ -6,7 +6,7 @@ using Xunit;
 using Xunit.Abstractions;
 
 using NippyWard.IRC.Parser.Tokens;
-using NippyWard.Model.Core.Text;
+using NippyWard.Text;
 
 namespace NippyWard.IRC.Parser.Tests
 {

@@ -1,4 +1,4 @@
-using NippyWard.Model.Core.Text;
+using NippyWard.Text;
 
 namespace NippyWard.IRC.Parser.Tests
 {

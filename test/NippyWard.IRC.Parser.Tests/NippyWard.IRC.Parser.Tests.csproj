@@ -1,8 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-      <TargetFramework>net5.0</TargetFramework>
-      <IsPackable>false</IsPackable>
+    <TargetFramework>net6.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,7 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\NippyWard.IRC.Parser\NippyWard.IRC.Parser.csproj" />
-    <ProjectReference Include="..\..\src\NippyWard.Model.Core.Text\NippyWard.Model.Core.Text.csproj" />
+    <ProjectReference Include="..\..\deps\NippyWard.Text\src\NippyWard.Text\NippyWard.Text.csproj" />
   </ItemGroup>
 
 </Project>

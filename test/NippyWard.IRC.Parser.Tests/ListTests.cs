@@ -3,7 +3,7 @@ using System.Buffers;
 using Xunit;
 
 using NippyWard.IRC.Parser.Tokens;
-using NippyWard.Model.Core.Text;
+using NippyWard.Text;
 
 namespace NippyWard.IRC.Parser.Tests
 {

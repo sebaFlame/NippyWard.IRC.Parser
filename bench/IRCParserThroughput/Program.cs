@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Diagnostics;
 
-using NippyWard.Model.Core.Text;
+using NippyWard.Text;
 using NippyWard.IRC.Parser;
 using NippyWard.IRC.Parser.Tokens;
 

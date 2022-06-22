@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 using Xunit;
 
-using NippyWard.Model.Core.Text;
+using NippyWard.Text;
 using NippyWard.IRC.Parser.Tokens;
 
 namespace NippyWard.IRC.Parser.Tests
