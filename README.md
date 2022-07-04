@@ -4,11 +4,7 @@ A fast LL(1) recursive descent IRC parser written for .NET containing a high-per
 ## Rationale
 After learning parsing with [CNFDotnet](https://github.com/sebaFlame/CNFDotnet), I needed to test these newly learned skills. I decided on writing an IRC grammar and parser.
 
-As IRC is built around UTF-8, I would need UTF-8 wrapper code: [NippyWard.Model.Core.Text](src/NippyWard.Model.Core.Text).
-
-The UTF-8 code is based on:
-- The experimental [System.Text.Utf8String](https://github.com/dotnet/corefxlab/tree/archive/src/System.Text.Utf8String)
-- The experimental [System.Text.CaseFolding](https://github.com/dotnet/corefxlab/tree/archive/src/System.Text.CaseFolding)
+As IRC is built around UTF-8, I would need UTF-8 wrapper code: [NippyWard.Text](deps/NippyWard.Text).
 
 This project was also written using [ViM](https://github.com/vim/vim) on [WSL1](https://docs.microsoft.com/en-us/windows/wsl/install).
 
