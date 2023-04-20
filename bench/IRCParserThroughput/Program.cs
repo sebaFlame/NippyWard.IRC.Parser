@@ -27,10 +27,27 @@ namespace IRCParserThroughput
 #endif
 
             Stopwatch stopWatch = new Stopwatch();
-            using Stream stream = File.OpenRead(_Filename);
+            Stream stream = File.OpenRead(_Filename);
+
+            using MemoryStream memory = new MemoryStream();
+            byte[] buffer = new byte[8192];
+            int length = 0;
+
+            //first read the log completely into memory to reduce latency
+            using (stream)
+            {
+                while ((length = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                {
+                    await memory.WriteAsync(buffer, 0, length);
+                }
+            }
+
+            //reset position
+            memory.Position = 0;
+
             PipeReader reader = PipeReader.Create
             (
-                stream,
+                memory,
                 new StreamPipeReaderOptions(null, 512, 128, true)
             );
 
@@ -105,7 +122,7 @@ namespace IRCParserThroughput
                                 || time > maxTime)
                             {
                                 maxTime = time;
-                                max = message.ToUtf8String().ToString();
+                                max = message.ToUtf8String().ToString().TrimEnd();
                                 maxNr = count;
                             }
 
@@ -113,16 +130,17 @@ namespace IRCParserThroughput
                             || time < minTime)
                             {
                                 minTime = time;
-                                min = message.ToUtf8String().ToString();
+                                min = message.ToUtf8String().ToString().TrimEnd();
                                 minNr = count;
                             }
 
+                            //message has been processed
                             reader.AdvanceTo(examined);
-
                         }
                     }
                     else
                     {
+                        //ensure more date becomes available
                         reader.AdvanceTo(sequence.Start, examined);
                     }
 
@@ -137,12 +155,16 @@ namespace IRCParserThroughput
             reader.Complete();
 
             Console.WriteLine($"{count} messages processed");
-            Console.WriteLine($"Average time: {total / count * 1000000 / Stopwatch.Frequency}µs");
-            Console.WriteLine($"Max time: {maxTime * 1000000 / Stopwatch.Frequency}µs (#{maxNr} {max})");
-            Console.WriteLine($"Min time: {minTime * 1000000 / Stopwatch.Frequency}µs (#{minNr} {min})");
-            Console.WriteLine($"Total time: {total * 1000 / Stopwatch.Frequency}ms");
-            Console.WriteLine($"Throughput: {count / (total * 1000.0 / Stopwatch.Frequency) * 1000:0}msg/s");
-            Console.WriteLine($"Max pool size: {Token.PooledTokens}");
+
+            if(count > 0)
+            {
+                Console.WriteLine($"Average time: {total / count * 1000000 / Stopwatch.Frequency}µs");
+                Console.WriteLine($"Max time: {maxTime * 1000000 / Stopwatch.Frequency}µs (#{maxNr} {max})");
+                Console.WriteLine($"Min time: {minTime * 1000000 / Stopwatch.Frequency}µs (#{minNr} {min})");
+                Console.WriteLine($"Total time: {total * 1000 / Stopwatch.Frequency}ms");
+                Console.WriteLine($"Throughput: {count / (total * 1000.0 / Stopwatch.Frequency) * 1000:0}msg/s");
+                Console.WriteLine($"Max pool size: {Token.PooledTokens}");
+            }
         }
     }
 }
