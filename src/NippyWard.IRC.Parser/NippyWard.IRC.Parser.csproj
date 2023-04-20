@@ -6,12 +6,26 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\deps\NippyWard.Text\src\NippyWard.Text\NippyWard.Text.csproj" />
+    <ProjectReference Include="..\..\deps\NippyWard.Text\src\NippyWard.Text\NippyWard.Text.csproj" PrivateAssets="all" />
   </ItemGroup>
 
   <!-- Source generator -->
   <ItemGroup>
     <ProjectReference Include="..\NippyWard.IRC.Parser.Generator\NippyWard.IRC.Parser.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+  </PropertyGroup>
+
+  <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="BuildOnlySettings;ResolveReferences">
+    <ItemGroup>
+      <_ReferenceCopyLocalPaths Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference')->WithMetadataValue('PrivateAssets', 'All'))"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <BuildOutputInPackage Include="@(_ReferenceCopyLocalPaths)" TargetPath="%(_ReferenceCopyLocalPaths.DestinationSubDirectory)"/>
+    </ItemGroup>
+  </Target>
 
 </Project>
