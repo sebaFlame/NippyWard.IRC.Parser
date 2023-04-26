@@ -19,6 +19,7 @@ namespace NippyWard.IRC.Parser.Tests
                 (
                     CreateReadOnlySequence(message),
                     out Token token,
+                    out _,
                     out _
                 )
             );

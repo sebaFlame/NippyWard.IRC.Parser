@@ -276,6 +276,7 @@ namespace NippyWard.IRC.Parser.Tests
                 (
                     utf8,
                     out Token token,
+                    out _,
                     out _
                 )
             );
@@ -359,6 +360,7 @@ namespace NippyWard.IRC.Parser.Tests
                 (
                     utf8,
                     out Token token,
+                    out _,
                     out _
                 )
             );

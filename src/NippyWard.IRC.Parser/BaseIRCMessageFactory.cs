@@ -20,7 +20,9 @@ namespace NippyWard.IRC.Parser
 
         //max message lengths
         public const int _MaxMessageLength = 512;
-        public const int _MaxTagsLength = 8192;
+        //client or server only max length is 4094
+        //combined max length is 8191
+        public const int _MaxTagsLength = 4094;
         private const int _MaxParameters = 15;
         private const int _AverageWordLength = 16;
 
@@ -587,7 +589,9 @@ namespace NippyWard.IRC.Parser
             return this;
         }
 
-        //add a new message, using same source/tags if configured
+        /// <summary>
+        /// add a new message, using same source/tags if configured
+        /// </summary>
         public BaseIRCMessageFactory NewMessage()
         {
             this.CreateNewConstructedMessage();

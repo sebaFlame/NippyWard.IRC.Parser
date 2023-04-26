@@ -58,7 +58,7 @@ namespace IRCParserThroughput
                  maxNr = 0, minNr = 0;
             ReadResult result;
             string min = string.Empty, max = string.Empty;
-            SequencePosition examined;
+            SequencePosition examined, consumed;
 
             try
             {
@@ -93,6 +93,7 @@ namespace IRCParserThroughput
                         (
                             in sequence,
                             out message,
+                            out _,
                             out _
                         ))
                         {
@@ -105,6 +106,7 @@ namespace IRCParserThroughput
                     (
                         in sequence,
                         out message,
+                        out consumed,
                         out examined
                     ))
                     {
@@ -135,13 +137,13 @@ namespace IRCParserThroughput
                             }
 
                             //message has been processed
-                            reader.AdvanceTo(examined);
+                            reader.AdvanceTo(consumed, examined);
                         }
                     }
                     else
                     {
                         //ensure more date becomes available
-                        reader.AdvanceTo(sequence.Start, examined);
+                        reader.AdvanceTo(consumed, examined);
                     }
 
                     stopWatch.Reset();

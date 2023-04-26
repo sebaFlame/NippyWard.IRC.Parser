@@ -12,6 +12,7 @@ namespace NippyWard.IRC.Parser
         (
             in ReadOnlySequence<byte> sequence,
             out Token token,
+            out SequencePosition consumed,
             out SequencePosition examined
         )
         {
@@ -19,6 +20,7 @@ namespace NippyWard.IRC.Parser
             if(sequence.IsEmpty)
             {
                 token = null;
+                consumed = sequence.Start;
                 examined = sequence.Start;
                 return false;
             }
@@ -32,6 +34,7 @@ namespace NippyWard.IRC.Parser
             if(!lf.HasValue)
             {
                 token = null;
+                consumed = sequence.Start;
                 examined = sequence.End;
                 return false;
             }
@@ -50,13 +53,16 @@ namespace NippyWard.IRC.Parser
                 start,
                 end
             );
-            examined = message.End;
 
             //create a reader from the sliced sequence
             SequenceReader<byte> sequenceReader
                 = new SequenceReader<byte>(message);
 
             token = ParseMessage(ref sequenceReader);
+
+            consumed = message.End;
+            examined = message.End;
+
             return true;
         }
 
