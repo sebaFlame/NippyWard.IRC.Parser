@@ -37,7 +37,7 @@ namespace NippyWard.IRC.Parser.Tokens
                 yield return t;
             }
 
-            foreach(Token t in VisitTokenInternal(token.Next))
+            foreach (Token t in VisitTokenInternal(token.Next))
             {
                 yield return t;
             }
@@ -48,7 +48,7 @@ namespace NippyWard.IRC.Parser.Tokens
         (
             this Token token
         )
-            => VisitTokenInternal(token);
+            => VisitTokenInternal(token.Child);
 
         public static void VisitAllTokens
         (
@@ -56,7 +56,7 @@ namespace NippyWard.IRC.Parser.Tokens
             Action<Token> action
         )
         {
-            foreach(Token t in VisitTokenInternal(token))
+            foreach(Token t in VisitTokenInternal(token?.Child))
             {
                 action(t);
             }
@@ -69,7 +69,7 @@ namespace NippyWard.IRC.Parser.Tokens
             Action<Token> action)
         {
 
-            foreach(Token t in VisitTokenInternal(token))
+            foreach(Token t in VisitTokenInternal(token?.Child))
             {
                 if(t.TokenType != tokenType)
                 {
@@ -87,7 +87,7 @@ namespace NippyWard.IRC.Parser.Tokens
             out Token result)
         {
 
-            foreach(Token t in VisitTokenInternal(token))
+            foreach(Token t in VisitTokenInternal(token?.Child))
             {
                 if(t.TokenType == tokenType)
                 {
@@ -110,7 +110,7 @@ namespace NippyWard.IRC.Parser.Tokens
         {
             int idx = index;
 
-            foreach(Token t in VisitTokenInternal(token))
+            foreach(Token t in VisitTokenInternal(token?.Child))
             {
                 if(t.TokenType == tokenType
                    && idx-- == 0)
@@ -133,7 +133,7 @@ namespace NippyWard.IRC.Parser.Tokens
         {
             result = null;
 
-            foreach(Token t in VisitTokenInternal(token))
+            foreach(Token t in VisitTokenInternal(token?.Child))
             {
                 if(t.TokenType == tokenType)
                 {
@@ -151,7 +151,7 @@ namespace NippyWard.IRC.Parser.Tokens
             out Token result)
         {
             int tokenType;
-            foreach(Token t in VisitTokenInternal(token))
+            foreach(Token t in VisitTokenInternal(token?.Child))
             {
                 tokenType = (int)t.TokenType;
                 if((tokenType & tokenMask) == tokenType)
@@ -172,7 +172,7 @@ namespace NippyWard.IRC.Parser.Tokens
         )
         {
 
-            foreach(Token t in VisitTokenInternal(token))
+            foreach(Token t in VisitTokenInternal(token?.Child))
             {
                 if(t.TokenType == tokenType)
                 {
@@ -188,7 +188,7 @@ namespace NippyWard.IRC.Parser.Tokens
         )
         {
             int tokenType;
-            foreach(Token t in VisitTokenInternal(token))
+            foreach(Token t in VisitTokenInternal(token?.Child))
             {
                 tokenType = (int)t.TokenType;
 

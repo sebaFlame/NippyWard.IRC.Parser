@@ -35,14 +35,23 @@ namespace NippyWard.IRC.Parser.Tests
             TokenType tokenType
         )
         {
-            Assert.True
-            (
-                token.TryGetFirstTokenOfType
+            Token? foundToken = null;
+
+            if (token.TokenType == tokenType)
+            {
+                foundToken = token;
+            }
+            else
+            {
+                Assert.True
                 (
-                    tokenType,
-                    out Token foundToken
-                )
-            );
+                    token.TryGetFirstTokenOfType
+                    (
+                        tokenType,
+                        out foundToken
+                    )
+                );
+            }
 
             Assert.True(foundToken.IsEmpty);
         }
@@ -54,14 +63,23 @@ namespace NippyWard.IRC.Parser.Tests
             string equalityComparer
         )
         {
-            Assert.True
-            (
-                token.TryGetFirstTokenOfType
+            Token? foundToken = null;
+
+            if (token.TokenType == tokenType)
+            {
+                foundToken = token;
+            }
+            else
+            {
+                Assert.True
                 (
-                    tokenType,
-                    out Token foundToken
-                )
-            );
+                    token.TryGetFirstTokenOfType
+                    (
+                        tokenType,
+                        out foundToken
+                    )
+                );
+            }
 
             Assert.False(foundToken.IsEmpty);
 
@@ -79,14 +97,23 @@ namespace NippyWard.IRC.Parser.Tests
             ReadOnlyMemory<byte> equalityComparer
         )
         {
-            Assert.True
-            (
-                token.TryGetFirstTokenOfType
+            Token? foundToken = null;
+
+            if (token.TokenType == tokenType)
+            {
+                foundToken = token;
+            }
+            else
+            {
+                Assert.True
                 (
-                    tokenType,
-                    out Token foundToken
-                )
-            );
+                    token.TryGetFirstTokenOfType
+                    (
+                        tokenType,
+                        out foundToken
+                    )
+                );
+            }
 
             Assert.False(foundToken.IsEmpty);
 
@@ -105,14 +132,23 @@ namespace NippyWard.IRC.Parser.Tests
             params Action<Token>[] verify
         )
         {
-            Assert.True
-            (
-                token.TryGetFirstTokenOfType
+            Token? foundToken = null;
+
+            if(token.TokenType == parentTokenType)
+            {
+                foundToken = token;
+            }
+            else
+            {
+                Assert.True
                 (
-                    parentTokenType,
-                    out Token foundToken
-                )
-            );
+                    token.TryGetFirstTokenOfType
+                    (
+                        parentTokenType,
+                        out foundToken
+                    )
+                );
+            }
 
             Assert.False(foundToken.IsEmpty);
 

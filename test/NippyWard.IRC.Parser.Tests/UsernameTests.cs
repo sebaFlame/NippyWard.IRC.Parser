@@ -51,16 +51,7 @@ namespace NippyWard.IRC.Parser.Tests
 
             Token token = IRCParser.ParseUsername(ref reader);
 
-            Assert.True
-            (
-                token.TryGetFirstTokenOfType
-                (
-                    TokenType.Username,
-                    out Token child
-                )
-            );
-
-            Assert.True(utf8.SequenceEquals(child.Sequence));
+            Assert.True(utf8.SequenceEquals(token.Sequence));
         }
 
         [Fact]
