@@ -163,7 +163,13 @@ namespace NippyWard.IRC.Parser
             token = Token.Create
             (
                 child.TokenType,
-                startSegment.CreateReadOnlySequence(segment)
+                new ReadOnlySequence<byte>
+                (
+                    startSegment,
+                    startSegment.Memory.Length,
+                    segment,
+                    segment.Memory.Length
+                )
             );
 
             return true;
