@@ -22,8 +22,8 @@ namespace NippyWard.IRC.Parser
             = new ParseToken(ParseMsgTo);
         private static readonly ParseToken _ParseISupportToken
             = new ParseToken(ParseISupportToken);
-        private static readonly ParseToken _ParseISupportValueItem
-            = new ParseToken(ParseISupportValueItem);
+        private static readonly ParseToken _ParseISupportValue
+            = new ParseToken(ParseISupportValue);
         private static readonly ParseToken _ParseCapListItem
             = new ParseToken(ParseCapListItem);
         private static readonly ParseToken _ParseCapListItemValueListItem

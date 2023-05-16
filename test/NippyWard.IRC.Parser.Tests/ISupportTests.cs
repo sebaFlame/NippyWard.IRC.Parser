@@ -169,30 +169,54 @@ namespace NippyWard.IRC.Parser.Tests
             (
                 token,
                 TokenType.ISupportValue,
-                "PRIVMSG:3,WHOIS:1,JOIN:"
+                "PRIVMSG:3"
             );
 
             AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
             (
                 token,
-                TokenType.ISupportValue,
+                TokenType.ISupportTokenSuffix,
                 TokenType.ISupportValueItem,
                 new Action<Token>[]
                 {
                     (Token t) => Assert.Equal
                     (
-                        (Utf8String)"PRIVMSG:3",
+                        (Utf8String)"PRIVMSG",
                         t.ToUtf8String()
                     ),
                     (Token t) => Assert.Equal
                     (
-                        (Utf8String)"WHOIS:1",
+                        (Utf8String)"WHOIS",
                         t.ToUtf8String()
                     ),
                     (Token t) => Assert.Equal
                     (
-                        (Utf8String)"JOIN:",
+                        (Utf8String)"JOIN",
                         t.ToUtf8String()
+                    ),
+                }
+            );
+
+            AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
+            (
+                token,
+                TokenType.ISupportTokenSuffix,
+                TokenType.ISupportValueItemSuffixValue,
+                new Action<Token>[]
+                {
+                    (Token t) => Assert.Equal
+                    (
+                        (Utf8String)"3",
+                        t.ToUtf8String()
+                    ),
+                    (Token t) => Assert.Equal
+                    (
+                        (Utf8String)"1",
+                        t.ToUtf8String()
+                    ),
+                    (Token t) => Assert.True
+                    (
+                        t.IsEmpty
                     ),
                 }
             );

@@ -135,7 +135,20 @@ namespace NippyWard.IRC.Parser
                 );
             }
 
-            equals.Combine(ParseISupportValue(ref reader));
+            equals
+                .Combine(ParseISupportValue(ref reader))
+                .Combine
+                (
+                    ParseListSuffix
+                    (
+                        _ParseISupportValue,
+                        TokenType.Comma,
+                        TokenType.ISupportValueSuffix,
+                        TokenType.ISupportValueList,
+                        ref reader
+                    )
+                );
+           
 
             return Token.Create
             (
@@ -162,17 +175,9 @@ namespace NippyWard.IRC.Parser
                 );
             }
 
-            //try to parse the rest of an ISupport value list or return empty
             first.Combine
             (
-                ParseListSuffix
-                (
-                    _ParseISupportValueItem,
-                    TokenType.Comma,
-                    TokenType.ISupportValueSuffix,
-                    TokenType.ISupportValueList,
-                    ref reader
-                )
+                ParseISupportValueItemSuffix(ref reader)
             );
 
             return Token.Create
@@ -180,6 +185,63 @@ namespace NippyWard.IRC.Parser
                 TokenType.ISupportValue,
                 reader.Sequence.Slice(startPosition, reader.Position),
                 first
+            );
+        }
+
+        private static Token ParseISupportValueItemSuffix
+        (
+            ref SequenceReader<byte> reader
+        )
+        {
+            SequencePosition startPosition = reader.Position;
+
+            if (!TryParseTerminal
+            (
+                TokenType.Colon,
+                ref reader,
+                out Token colon
+            ))
+            {
+                //can return empty
+                return Token.Create
+                (
+                    TokenType.ISupportValueItemSuffix
+                );
+            }
+
+            colon.Combine
+            (
+                ParseISupportValueItemSuffixValue(ref reader)
+            );
+
+            return Token.Create
+            (
+                TokenType.ISupportValueItemSuffix,
+                reader.Sequence.Slice(startPosition, reader.Position),
+                colon
+            );
+        }
+
+        private static Token ParseISupportValueItemSuffixValue
+        (
+            ref SequenceReader<byte> reader
+        )
+        {
+            SequencePosition startPosition = reader.Position;
+
+            if(!TryParseInteger(ref reader, out Token integer))
+            {
+                return Token.Create
+                (
+                    TokenType.ISupportValueItemSuffixValue
+                );
+            }
+
+            return Token.Create
+            (
+                TokenType.ISupportValueItemSuffixValue,
+                reader.Sequence.Slice(startPosition, reader.Position),
+                integer
             );
         }
 

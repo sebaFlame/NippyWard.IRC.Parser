@@ -383,6 +383,8 @@ namespace NippyWard.IRC.Parser.Tokens
         ISupportValueSuffix,
         ISupportValueList,
         ISupportValueItem,
+        ISupportValueItemSuffix,
+        ISupportValueItemSuffixValue,
         ISupportValueItemTerminals,
         ISupportValueItemEscape,
         ISupportValueItemEscapeSuffix,

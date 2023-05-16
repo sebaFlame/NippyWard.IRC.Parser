@@ -760,7 +760,7 @@ namespace NippyWard.IRC.Parser
                     && value <= (byte)TokenType.Plus)
                 || (value >= (byte)TokenType.Minus
                     && value <= (byte)TokenType.Slash)
-                || (value >= (byte)TokenType.Colon
+                || (value >= (byte)TokenType.Semicolon
                     && value <= (byte)TokenType.AtSign)
                 || (value >= (byte)TokenType.RightCurlyBracket
                     && value <= (byte)TokenType.Tilde);
