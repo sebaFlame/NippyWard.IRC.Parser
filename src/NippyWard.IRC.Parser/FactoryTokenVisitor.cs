@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 
 using NippyWard.IRC.Parser.Tokens;
 using NippyWard.Text;
@@ -16,7 +17,7 @@ namespace NippyWard.IRC.Parser
         public FactoryTokenVisitor()
         { }
 
-        private bool VisitFactoryChild
+        private bool TryVisitFactoryChild
         (
             Token token,
             Token factoryToken
@@ -41,7 +42,7 @@ namespace NippyWard.IRC.Parser
             return true;
         }
 
-        private bool VisitFactoryNext
+        private bool TryVisitFactoryNext
         (
             Token token,
             Token factoryToken
@@ -83,8 +84,7 @@ namespace NippyWard.IRC.Parser
         //create a copy of a token
         protected override void VisitTokenDefault(Token token)
         {
-            Utf8StringSequenceSegment startSegment
-                = this._segment;
+            Utf8StringSequenceSegment startSegment = this._segment;
             Token factoryToken;
 
             factoryToken = Token.Create
@@ -93,7 +93,7 @@ namespace NippyWard.IRC.Parser
             );
 
             //if no children, construct from token sequence
-            if(!this.VisitFactoryChild(token, factoryToken))
+            if(!this.TryVisitFactoryChild(token, factoryToken))
             {
                 this._segment = this._segment.AddNewSequenceSegment
                 (
@@ -101,15 +101,18 @@ namespace NippyWard.IRC.Parser
                 );
             }
 
-            factoryToken.Sequence = startSegment.CreateReadOnlySequence
+            factoryToken.Sequence = new ReadOnlySequence<byte>
             (
-                this._segment
+                startSegment,
+                startSegment.Memory.Length, //skip the start (previous) segment
+                this._segment,
+                this._segment.Memory.Length
             );
 
             //link into tree as child or next
             this.LinkNewTokenIntoTree(factoryToken);
 
-            this.VisitFactoryNext(token, factoryToken);
+            this.TryVisitFactoryNext(token, factoryToken);
         }
 
         protected override void VisitConstructedMessage(Token token)
@@ -126,14 +129,14 @@ namespace NippyWard.IRC.Parser
                 TokenType.Message
             );
 
-            this.VisitFactoryChild(token, factoryToken);
+            this.TryVisitFactoryChild(token, factoryToken);
 
             factoryToken.Sequence = startSegment.CreateReadOnlySequence
             (
                 this._segment
             );
 
-            if(this._message is null)
+            if (this._message is null)
             {
                 this._message = factoryToken;
             }
@@ -144,7 +147,7 @@ namespace NippyWard.IRC.Parser
                     .Combine(factoryToken);
             }
 
-            this.VisitFactoryNext(token, factoryToken);
+            this.TryVisitFactoryNext(token, factoryToken);
         }
 
         public Token ConstructMessage(Token token)

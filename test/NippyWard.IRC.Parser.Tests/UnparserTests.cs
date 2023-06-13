@@ -42,6 +42,30 @@ namespace NippyWard.IRC.Parser.Tests
                     "foo bar baz asdf" + "\r\n",
                     "foo bar baz :asdf" + "\r\n"
                 );
+
+                Assert.True
+                (
+                    constructedMessage.TryGetFirstTokenOfType(TokenType.Verb, out Token v)
+                        && new Utf8String(v.Sequence).Equals(new Utf8String("foo"))
+                );
+
+                Assert.True
+                (
+                    constructedMessage.TryGetTokenAtIndexOfType(0, TokenType.Middle, out Token m0)
+                        && new Utf8String(m0.Sequence).Equals(new Utf8String("bar"))
+                );
+
+                Assert.True
+                (
+                    constructedMessage.TryGetTokenAtIndexOfType(1, TokenType.Middle, out Token m1)
+                        && new Utf8String(m1.Sequence).Equals(new Utf8String("baz"))
+                );
+
+                Assert.True
+                (
+                    constructedMessage.TryGetTokenAtIndexOfType(2, TokenType.Middle, out Token m2)
+                        && new Utf8String(m2.Sequence).Equals(new Utf8String("asdf"))
+                );
             }
         }
 

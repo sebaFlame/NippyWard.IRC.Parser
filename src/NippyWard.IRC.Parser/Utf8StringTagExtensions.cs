@@ -166,7 +166,7 @@ namespace NippyWard.IRC.Parser
                 new ReadOnlySequence<byte>
                 (
                     startSegment,
-                    startSegment.Memory.Length,
+                    startSegment.Memory.Length, //skip previous segment
                     segment,
                     segment.Memory.Length
                 )
@@ -216,7 +216,13 @@ namespace NippyWard.IRC.Parser
             tagValueEscapeList = Token.Create
             (
                 TokenType.TagValueEscapeList,
-                startSegment.CreateReadOnlySequence(segment),
+                new ReadOnlySequence<byte>
+                (
+                    startSegment,
+                    startSegment.Memory.Length, //skip previous segment
+                    segment,
+                    segment.Memory.Length
+                ),
                 firstChild
             );
 
@@ -262,7 +268,13 @@ namespace NippyWard.IRC.Parser
             tagValueEscape = Token.Create
             (
                 TokenType.TagValueEscape,
-                startSegment.CreateReadOnlySequence(segment),
+                new ReadOnlySequence<byte>
+                (
+                    startSegment,
+                    startSegment.Memory.Length, //skip previous segment
+                    segment,
+                    segment.Memory.Length
+                ),
                 firstBackslash
             );
 

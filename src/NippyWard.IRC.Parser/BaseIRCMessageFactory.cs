@@ -1091,8 +1091,8 @@ namespace NippyWard.IRC.Parser
         public virtual BaseIRCMessageFactory Reset()
         {
             this._message?.Dispose();
-            this._message = null;
 
+            this._message = null;
             this._message = this.CreateNewConstructedMessage();
 
             this._keepParamsCount = this._defaultKeepParamsCount;
