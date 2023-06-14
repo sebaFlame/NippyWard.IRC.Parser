@@ -206,7 +206,7 @@ namespace NippyWard.IRC.Parser.Tokens
         {
             Token last = token, next;
 
-            while((next = last.Next) is not null)
+            while((next = last.Next) is { })
             {
                 last = next;
             }

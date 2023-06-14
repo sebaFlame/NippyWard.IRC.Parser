@@ -16,21 +16,21 @@ namespace NippyWard.IRC.Parser.Tests
         public void SingleNicknameMsgTargetTest()
         {
             string target = "coolguy";
-            AssertMsgTarget(target, TokenType.MsgToNickname);
+            using Token t = AssertMsgTarget(target, TokenType.MsgToNickname);
         }
 
         [Fact]
         public void SingleChannelMsgTargetTest()
         {
             string target = "#channel";
-            AssertMsgTarget(target, TokenType.MsgToChannel);
+            using Token t = AssertMsgTarget(target, TokenType.MsgToChannel);
         }
 
         [Fact]
         public void SingleMaskMsgTargetTest()
         {
             string target = "$c*lg?y";
-            AssertMsgTarget(target, TokenType.MsgToTargetMask);
+            using Token t = AssertMsgTarget(target, TokenType.MsgToTargetMask);
         }
 
         [Fact]
@@ -46,7 +46,7 @@ namespace NippyWard.IRC.Parser.Tests
 
             foreach(string[] parts in channelPrefixes)
             {
-                Token token = AssertMsgTarget
+                using Token token = AssertMsgTarget
                 (
                     string.Join("", parts),
                     TokenType.MsgToChannel
@@ -70,7 +70,7 @@ namespace NippyWard.IRC.Parser.Tests
 
             foreach(string[] parts in channelPrefixes)
             {
-                Token token = AssertMsgTarget
+                using Token token = AssertMsgTarget
                 (
                     string.Join("", parts),
                     TokenType.MsgToChannel
@@ -84,7 +84,7 @@ namespace NippyWard.IRC.Parser.Tests
         public void SingleChannelMembershipMsgTargetTest()
         {
             string target = "%#channel";
-            AssertMsgTarget(target, TokenType.MsgToChannel);
+            using Token t = AssertMsgTarget(target, TokenType.MsgToChannel);
         }
 
         [Fact]
@@ -109,13 +109,12 @@ namespace NippyWard.IRC.Parser.Tests
                 "~"
             };
 
-            Token channel;
             Token[] prefixTokens;
             foreach(string mem in membership)
             {
                 foreach(string pre in prefix)
                 {
-                    channel = AssertMsgTarget
+                    using Token channel = AssertMsgTarget
                     (
                         string.Join("", mem, pre, name),
                         TokenType.MsgToChannel
@@ -240,7 +239,7 @@ namespace NippyWard.IRC.Parser.Tests
                 = AssertHelpers.CreateReadOnlySequence(target);
             SequenceReader<byte> reader = new SequenceReader<byte>(sequence);
 
-            Token token = IRCParser.ParseMsgTarget(ref reader);
+            using Token token = IRCParser.ParseMsgTarget(ref reader);
             Assert.False(token.IsEmpty);
 
             Assert.True

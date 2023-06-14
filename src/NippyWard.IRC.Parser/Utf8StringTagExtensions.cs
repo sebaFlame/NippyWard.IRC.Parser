@@ -45,7 +45,7 @@ namespace NippyWard.IRC.Parser
 
         private static TagUnescapeVisitor GetUnescapeVisitor()
         {
-            if(_TagUnescapeVisitor is null)
+            if (_TagUnescapeVisitor is null)
             {
                 _TagUnescapeVisitor = new TagUnescapeVisitor();
             }

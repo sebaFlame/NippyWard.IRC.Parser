@@ -1024,7 +1024,7 @@ namespace NippyWard.IRC.Parser.Tests
             string message = @"@a=b\\and\nk;c=72\s45;d=gh\:764 foo"
                 + "\r\n";
 
-            using(Token token = AssertHelpers.AssertParsed(message))
+            using (Token token = AssertHelpers.AssertParsed(message))
             {
                 AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (
@@ -1684,7 +1684,7 @@ namespace NippyWard.IRC.Parser.Tests
             string message = @"@foo=\\\\\:\\s\s\r\n COMMAND"
                 + "\r\n";
 
-            using(Token token = AssertHelpers.AssertParsed(message))
+            using (Token token = AssertHelpers.AssertParsed(message))
             {
                 AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
                 (

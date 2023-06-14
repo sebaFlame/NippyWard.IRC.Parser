@@ -351,9 +351,7 @@ namespace NippyWard.IRC.Parser
                     firstChild = child;
                 }
 
-                previous.Combine(child);
-
-                previous = child;
+                previous = previous.Combine(child);
 
                 found = true;
             }

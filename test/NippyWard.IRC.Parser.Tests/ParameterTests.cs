@@ -17,7 +17,7 @@ namespace NippyWard.IRC.Parser.Tests
                 + " +user1 user2"
                 + "\r\n";
 
-            Token token = AssertHelpers.AssertParsed(message);
+            using Token token = AssertHelpers.AssertParsed(message);
             Assert.True
             (
                 token.TryGetTokenAtIndexOfType
@@ -37,7 +37,7 @@ namespace NippyWard.IRC.Parser.Tests
             SequenceReader<byte> reader =
                 new SequenceReader<byte>(skippedTarget.Sequence);
 
-            Token nameReply = IRCParser.ParseNameReply(ref reader);
+            using Token nameReply = IRCParser.ParseNameReply(ref reader);
 
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
             (
@@ -146,7 +146,7 @@ namespace NippyWard.IRC.Parser.Tests
                 + " bob=+bob@127.0.0.1"
                 + "\r\n";
 
-            Token token = AssertHelpers.AssertParsed(message);
+            using Token token = AssertHelpers.AssertParsed(message);
             Assert.True
             (
                 token.TryGetLastOfType
@@ -166,7 +166,7 @@ namespace NippyWard.IRC.Parser.Tests
 
             SequenceReader<byte> reader =
                 new SequenceReader<byte>(trailing.Sequence);
-            Token userHostReply = IRCParser.ParseUserHostList(ref reader);
+            using Token userHostReply = IRCParser.ParseUserHostList(ref reader);
 
             AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
             (
@@ -291,7 +291,7 @@ namespace NippyWard.IRC.Parser.Tests
                 + " :"
                 + "\r\n";
 
-            Token token = AssertHelpers.AssertParsed(message);
+            using Token token = AssertHelpers.AssertParsed(message);
             Assert.True
             (
                 token.TryGetTokenAtIndexOfType
@@ -317,7 +317,7 @@ namespace NippyWard.IRC.Parser.Tests
             SequenceReader<byte> reader =
                 new SequenceReader<byte>(skippedTarget.Sequence);
 
-            Token whoReply = IRCParser.ParseWhoReply(ref reader);
+            using Token whoReply = IRCParser.ParseWhoReply(ref reader);
 
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
             (
@@ -393,7 +393,7 @@ namespace NippyWard.IRC.Parser.Tests
                 + " :"
                 + "\r\n";
 
-            Token token = AssertHelpers.AssertParsed(message);
+            using Token token = AssertHelpers.AssertParsed(message);
             Assert.True
             (
                 token.TryGetTokenAtIndexOfType
@@ -419,7 +419,7 @@ namespace NippyWard.IRC.Parser.Tests
             SequenceReader<byte> reader =
                 new SequenceReader<byte>(skippedTarget.Sequence);
 
-            Token whoReply = IRCParser.ParseWhoReply(ref reader);
+            using Token whoReply = IRCParser.ParseWhoReply(ref reader);
 
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
             (

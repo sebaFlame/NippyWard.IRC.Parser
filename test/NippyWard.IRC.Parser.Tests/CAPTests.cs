@@ -20,7 +20,7 @@ namespace NippyWard.IRC.Parser.Tests
                 + " draft/packing=EX1,EX2"
                 + "\r\n";
 
-            Token token = AssertHelpers.AssertParsed(message);
+            using Token token = AssertHelpers.AssertParsed(message);
 
             Assert.True
             (
@@ -39,7 +39,7 @@ namespace NippyWard.IRC.Parser.Tests
 
             SequenceReader<byte> reader
                 = new SequenceReader<byte>(trailing.Sequence);
-            Token capItems = IRCParser.ParseCapList(ref reader);
+            using Token capItems = IRCParser.ParseCapList(ref reader);
 
             Assert.Equal
             (
@@ -88,7 +88,7 @@ namespace NippyWard.IRC.Parser.Tests
                 AssertHelpers.CreateReadOnlySequence(capList)
             );
 
-            Token token = IRCParser.ParseCapList(ref reader);
+            using Token token = IRCParser.ParseCapList(ref reader);
             Token valueList = null;
 
             AssertHelpers.AssertInNthChildOfTokenTypeInTokenType

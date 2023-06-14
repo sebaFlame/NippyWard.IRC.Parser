@@ -64,7 +64,7 @@ namespace NippyWard.IRC.Parser.Tests
                 = AssertHelpers.CreateReadOnlySequence(modes);
             SequenceReader<byte> reader = new SequenceReader<byte>(sequence);
 
-            Token token = IRCParser.ParseModeStringList(ref reader);
+            using Token token = IRCParser.ParseModeStringList(ref reader);
 
             AssertHelpers.AssertFirstOfTokenTypeIsEmpty
             (
@@ -84,7 +84,7 @@ namespace NippyWard.IRC.Parser.Tests
                 = AssertHelpers.CreateReadOnlySequence(modes);
             SequenceReader<byte> reader = new SequenceReader<byte>(sequence);
 
-            Token token = IRCParser.ParseModeStringList(ref reader);
+            using Token token = IRCParser.ParseModeStringList(ref reader);
 
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
             (

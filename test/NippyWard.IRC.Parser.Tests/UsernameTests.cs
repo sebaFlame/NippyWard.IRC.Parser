@@ -49,7 +49,7 @@ namespace NippyWard.IRC.Parser.Tests
             );
             SequenceReader<byte> reader = new SequenceReader<byte>(utf8);
 
-            Token token = IRCParser.ParseUsername(ref reader);
+            using Token token = IRCParser.ParseUsername(ref reader);
 
             Assert.True(utf8.SequenceEquals(token.Sequence));
         }
@@ -63,7 +63,7 @@ namespace NippyWard.IRC.Parser.Tests
                 = AssertHelpers.CreateReadOnlySequence(userHost);
             SequenceReader<byte> reader = new SequenceReader<byte>(sequence);
 
-            Token token = IRCParser.ParseUserHost(ref reader);
+            using Token token = IRCParser.ParseUserHost(ref reader);
 
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
             (
@@ -97,7 +97,7 @@ namespace NippyWard.IRC.Parser.Tests
                 = AssertHelpers.CreateReadOnlySequence(username);
             SequenceReader<byte> reader = new SequenceReader<byte>(sequence);
 
-            Token token = IRCParser.ParseUsername(ref reader);
+            using Token token = IRCParser.ParseUsername(ref reader);
 
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
             (

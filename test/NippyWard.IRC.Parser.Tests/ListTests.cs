@@ -61,7 +61,7 @@ namespace NippyWard.IRC.Parser.Tests
             );
             SequenceReader<byte> reader = new SequenceReader<byte>(utf8);
 
-            Token token = IRCParser.ParseKeyListItem(ref reader);
+            using Token token = IRCParser.ParseKeyListItem(ref reader);
 
             Assert.True
             (
@@ -114,7 +114,7 @@ namespace NippyWard.IRC.Parser.Tests
                 //add invalid character
                 key[index] = invalidChars[i];
 
-                Token token = IRCParser.ParseKeyListItem(ref reader);
+                using Token token = IRCParser.ParseKeyListItem(ref reader);
 
                 Assert.False
                 (
@@ -199,7 +199,7 @@ namespace NippyWard.IRC.Parser.Tests
                 = AssertHelpers.CreateReadOnlySequence(list);
             SequenceReader<byte> reader = new SequenceReader<byte>(sequence);
 
-            Token token = parseList(ref reader);
+            using Token token = parseList(ref reader);
 
             int index = 0;
             foreach(Token item

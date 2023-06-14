@@ -19,7 +19,7 @@ namespace NippyWard.IRC.Parser.Tests
                 = AssertHelpers.CreateReadOnlySequence(parameter);
             SequenceReader<byte> reader = new SequenceReader<byte>(sequence);
 
-            Token token = IRCParser.ParseISupport(ref reader);
+            using Token token = IRCParser.ParseISupport(ref reader);
 
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
             (
@@ -44,7 +44,7 @@ namespace NippyWard.IRC.Parser.Tests
                 = AssertHelpers.CreateReadOnlySequence(parameter);
             SequenceReader<byte> reader = new SequenceReader<byte>(sequence);
 
-            Token token = IRCParser.ParseISupport(ref reader);
+            using Token token = IRCParser.ParseISupport(ref reader);
 
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
             (
@@ -71,7 +71,7 @@ namespace NippyWard.IRC.Parser.Tests
                 = AssertHelpers.CreateReadOnlySequence(isupport);
             SequenceReader<byte> reader = new SequenceReader<byte>(sequence);
 
-            Token token = IRCParser.ParseISupport(ref reader);
+            using Token token = IRCParser.ParseISupport(ref reader);
 
             AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
             (
@@ -156,7 +156,7 @@ namespace NippyWard.IRC.Parser.Tests
                 = AssertHelpers.CreateReadOnlySequence(parameter);
             SequenceReader<byte> reader = new SequenceReader<byte>(sequence);
 
-            Token token = IRCParser.ParseISupport(ref reader);
+            using Token token = IRCParser.ParseISupport(ref reader);
 
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
             (
@@ -231,7 +231,7 @@ namespace NippyWard.IRC.Parser.Tests
                 = AssertHelpers.CreateReadOnlySequence(parameter);
             SequenceReader<byte> reader = new SequenceReader<byte>(sequence);
 
-            Token token = IRCParser.ParseISupport(ref reader);
+            using Token token = IRCParser.ParseISupport(ref reader);
 
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
             (
@@ -252,7 +252,7 @@ namespace NippyWard.IRC.Parser.Tests
         public void UnescapeISupportTest()
         {
             Utf8String value = (Utf8String)"Example Network";
-            Token token = value.ISupportEscape();
+            using Token token = value.ISupportEscape();
 
             Assert.Equal
             (
@@ -276,7 +276,7 @@ namespace NippyWard.IRC.Parser.Tests
                 = AssertHelpers.CreateReadOnlySequence(parameter);
             SequenceReader<byte> reader = new SequenceReader<byte>(sequence);
 
-            Token token = IRCParser.ParseISupport(ref reader);
+            using Token token = IRCParser.ParseISupport(ref reader);
 
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
             (

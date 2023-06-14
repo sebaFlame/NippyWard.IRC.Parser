@@ -287,16 +287,16 @@ namespace NippyWard.IRC.Parser
                 //add semicolon to linked list
                 previous = previous.Combine(seperator);
 
+                if (first is null)
+                {
+                    first = previous;
+                }
+
                 //parse tag and add to children
                 previous = previous.Combine
                 (
                     ParseShortName(ref reader)
                 );
-
-                if(first is null)
-                {
-                    first = previous;
-                }
 
                 found = true;
             }

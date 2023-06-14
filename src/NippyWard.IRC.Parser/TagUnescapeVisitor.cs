@@ -92,7 +92,7 @@ namespace NippyWard.IRC.Parser
 
         protected override void VisitTagValueEscapeBackslash(Token token)
         {
-            //add a '\{ to the sequence
+            //add a '\' to the sequence
             this._segment = this._segment.AddNewSequenceSegment(Backslash);
 
             this.VisitTokenDefault(token);

@@ -125,7 +125,7 @@ namespace NippyWard.IRC.Parser.Tests
                 = AssertHelpers.CreateReadOnlySequence(nickname);
             SequenceReader<byte> reader = new SequenceReader<byte>(sequence);
 
-            Token token = IRCParser.ParseNickname(ref reader);
+            using Token token = IRCParser.ParseNickname(ref reader);
 
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
             (

@@ -16,7 +16,7 @@ namespace NippyWard.IRC.Parser.Tests
             string message = ":alice!a@localhost PRIVMSG bob :\x01VERSION\x01"
                 + "\r\n";
 
-            Token token = AssertHelpers.AssertParsed(message);
+            using Token token = AssertHelpers.AssertParsed(message);
 
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
             (
@@ -53,7 +53,7 @@ namespace NippyWard.IRC.Parser.Tests
             string message = ":alice!a@localhost PRIVMSG bob \x01VERSION\x01"
                 + "\r\n";
 
-            Token token = AssertHelpers.AssertParsed(message);
+            using Token token = AssertHelpers.AssertParsed(message);
 
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
             (
@@ -84,7 +84,7 @@ namespace NippyWard.IRC.Parser.Tests
                + " :\x01PING 1473523796 918320"
                 + "\r\n";
 
-            Token token = AssertHelpers.AssertParsed(message);
+            using Token token = AssertHelpers.AssertParsed(message);
 
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
             (
@@ -128,7 +128,7 @@ namespace NippyWard.IRC.Parser.Tests
                 + " :\x01VERSION Snak for Mac 4.13\x01"
                 + "\r\n";
 
-            Token token = AssertHelpers.AssertParsed(message);
+            using Token token = AssertHelpers.AssertParsed(message);
 
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
             (
@@ -166,7 +166,7 @@ namespace NippyWard.IRC.Parser.Tests
                + " :\x01PING 1473523796 918320\x01"
                 + "\r\n";
 
-            Token token = AssertHelpers.AssertParsed(message);
+            using Token token = AssertHelpers.AssertParsed(message);
 
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
             (
@@ -204,7 +204,7 @@ namespace NippyWard.IRC.Parser.Tests
                 + " :\u0001DCC SEND file.dat 2130706433 47515\x01"
                 + "\r\n";
 
-            Token token = AssertHelpers.AssertParsed(message);
+            using Token token = AssertHelpers.AssertParsed(message);
 
             Assert.True
             (
@@ -242,7 +242,7 @@ namespace NippyWard.IRC.Parser.Tests
             (
                 parameters.Sequence
             );
-            Token dccMessage = IRCParser.ParseDCCMessage(ref reader);
+            using Token dccMessage = IRCParser.ParseDCCMessage(ref reader);
 
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
             (
@@ -286,7 +286,7 @@ namespace NippyWard.IRC.Parser.Tests
                 + " :\u0001DCC SEND \"file 1.dat\" 2130706433 47515\x01"
                 + "\r\n";
 
-            Token token = AssertHelpers.AssertParsed(message);
+            using Token token = AssertHelpers.AssertParsed(message);
 
             Assert.True
             (
@@ -324,7 +324,7 @@ namespace NippyWard.IRC.Parser.Tests
             (
                 parameters.Sequence
             );
-            Token dccMessage = IRCParser.ParseDCCMessage(ref reader);
+            using Token dccMessage = IRCParser.ParseDCCMessage(ref reader);
 
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
             (

@@ -39,8 +39,12 @@ namespace NippyWard.IRC.Parser.Tokens
             {
                 t = new Token();
             }
+            else
+            {
+                //t has finalizer disabled, re-enable
+                GC.ReRegisterForFinalize(t);
+            }
 
-            t.Sequence = default;
             return t;
         }
 
@@ -112,23 +116,13 @@ namespace NippyWard.IRC.Parser.Tokens
             }
         }
 
-        public void ReplaceChild(Token newChild)
-        {
-            Token oldChild = this.Child;
-
-            this.Child = newChild;
-
-            if(oldChild is not null)
-            {
-                oldChild.Dispose();
-            }
-        }
-
         public void Dispose()
             => this.Dispose(true);
 
         public void Dispose(bool isDisposing)
         {
+            GC.SuppressFinalize(this);
+
             this.Child?.Dispose(isDisposing);
             this.Next?.Dispose(isDisposing);
 
