@@ -26,11 +26,6 @@ namespace NippyWard.Text
             in ReadOnlySequence<byte> sequence
         )
         {
-            if(sequence.IsEmpty)
-            {
-                return segment;
-            }
-
             foreach(ReadOnlyMemory<byte> memory in sequence)
             {
                 segment = AddNewSequenceSegment
