@@ -88,7 +88,7 @@ namespace NippyWard.IRC.Parser.Tokens
             return t;
         }
 
-        internal static Token Create
+        public static Token Create
         (
             TokenType tokenType,
             Token child

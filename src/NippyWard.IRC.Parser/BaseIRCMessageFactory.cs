@@ -102,8 +102,6 @@ namespace NippyWard.IRC.Parser
 
         public BaseIRCMessageFactory KeepParamsOnNextMessage(int count)
         {
-            CheckIfFirstMessage(this, this.GetMessage());
-
             if(count > _MaxParameters - 1)
             {
                 throw new InvalidOperationException
@@ -119,8 +117,6 @@ namespace NippyWard.IRC.Parser
 
         public BaseIRCMessageFactory KeepSourcePrefixOnNextMessage()
         {
-            CheckIfFirstMessage(this, this.GetMessage());
-
             this._keepSourcePrefix = true;
 
             return this;
@@ -128,8 +124,6 @@ namespace NippyWard.IRC.Parser
 
         public BaseIRCMessageFactory RemoveSourcePrefixOnNextMessage()
         {
-            CheckIfFirstMessage(this, this.GetMessage());
-
             this._keepSourcePrefix = false;
 
             return this;
@@ -137,8 +131,6 @@ namespace NippyWard.IRC.Parser
 
         public BaseIRCMessageFactory KeepTagsOnNextMessage()
         {
-            CheckIfFirstMessage(this, this.GetMessage());
-
             this._keepTags = true;
 
             return this;
@@ -146,14 +138,12 @@ namespace NippyWard.IRC.Parser
 
         public BaseIRCMessageFactory RemoveTagsOnNextMessage()
         {
-            CheckIfFirstMessage(this, this.GetMessage());
-
             this._keepTags = false;
 
             return this;
         }
 
-        private Token GetMessage()
+        protected Token GetMessage()
             => this._message.GetLastToken();
 
         public BaseIRCMessageFactory SourcePrefix(string str)
@@ -688,7 +678,7 @@ namespace NippyWard.IRC.Parser
                         out tagValue
                     );
 
-                    AddTag(newMessage, tagKey, tagValue);
+                    AddExistingTag(newMessage, tagKey, tagValue);
                 }
             }
 
@@ -700,7 +690,7 @@ namespace NippyWard.IRC.Parser
             )
                 && !sourcePrefixTarget.IsEmpty)
             {
-                AddSourcePrefix(newMessage, sourcePrefixTarget);
+                AddExistingSourcePrefix(newMessage, sourcePrefixTarget);
             }
 
             //verify if a verb has been set
@@ -729,7 +719,7 @@ namespace NippyWard.IRC.Parser
                     );
                 }
 
-                AddVerb
+                AddExistingVerb
                 (
                     newMessage,
                     commandNameOrCode
@@ -752,7 +742,7 @@ namespace NippyWard.IRC.Parser
                     TokenType.ParamsSuffix
                 ))
                 {
-                    AddParameter
+                    AddExistingParameter
                     (
                         newMessage,
                         t
@@ -771,7 +761,7 @@ namespace NippyWard.IRC.Parser
             return newMessage;
         }
 
-        private static void AddTag
+        private static void AddExistingTag
         (
             Token newMessage,
             Token oldTagKey,
@@ -794,9 +784,7 @@ namespace NippyWard.IRC.Parser
             //first create a new tag
             Token tag, tagSuffix, tagKey;
 
-            SequenceReader<byte> reader
-                = new SequenceReader<byte>(oldTagKey.Sequence);
-            tagKey = IRCParser.ParseTagKey(ref reader);
+            tagKey = CopyToken(oldTagKey, false);
 
             if(oldTagValue is null
                || oldTagValue.IsEmpty)
@@ -811,9 +799,7 @@ namespace NippyWard.IRC.Parser
                     EqualsSign
                 );
 
-                //re-parse the value
-                reader = new SequenceReader<byte>(oldTagValue.Sequence);
-                Token tagValue = IRCParser.ParseTagValue(ref reader);
+                Token tagValue = CopyToken(oldTagValue, false);
                 equalSign.Combine(tagValue);
 
                 //create tagsuffix with the tag value
@@ -837,7 +823,7 @@ namespace NippyWard.IRC.Parser
             LinkConstructedTag(tagPrefix, tag);
         }
 
-        private static void AddSourcePrefix
+        private static void AddExistingSourcePrefix
         (
             Token newMessage,
             Token oldSourcePrefixTarget
@@ -856,15 +842,12 @@ namespace NippyWard.IRC.Parser
                 );
             }
 
-            SequenceReader<byte> reader
-                = new SequenceReader<byte>(oldSourcePrefixTarget.Sequence);
-            Token sourcePrefixTarget
-                = IRCParser.ParseSourcePrefixTarget(ref reader);
+            Token sourcePrefixTarget = CopyToken(oldSourcePrefixTarget, false);
 
             LinkConstructedSourcePrefix(sourcePrefix, sourcePrefixTarget);
         }
 
-        private static void AddVerb
+        private static void AddExistingVerb
         (
             Token newMessage,
             Token oldVerb
@@ -895,7 +878,7 @@ namespace NippyWard.IRC.Parser
             );
         }
 
-        private static void AddParameter
+        private static void AddExistingParameter
         (
             Token newMessage,
             Token oldParamsSuffix
@@ -919,12 +902,14 @@ namespace NippyWard.IRC.Parser
                 Space
             );
 
-            //actual parameter should always be first child, so the rest of
-            //the linked list gets skipped (there should not be a linked
-            //list yet!). This ensures Token.Create instances get created.
-            SequenceReader<byte> reader
-                = new SequenceReader<byte>(oldParamsSuffix.Child.Sequence);
-            Token parameterSuffix = IRCParser.ParseParamsSuffix(ref reader);
+            //copy the middle/trailing child of the old ParamsSuffix
+            Token middle = CopyToken(oldParamsSuffix.Child, false);
+
+            Token parameterSuffix = Token.Create
+            (
+                TokenType.ParamsSuffix,
+                middle
+            );
 
             space.Combine(parameterSuffix);
             Token parameterPrefix = Token.Create
@@ -1059,7 +1044,7 @@ namespace NippyWard.IRC.Parser
         )
             => command.Child = verb;
 
-        private static void LinkConstructedParameter
+        protected static void LinkConstructedParameter
         (
             Token parameters,
             Token paramsPrefix
@@ -1085,6 +1070,25 @@ namespace NippyWard.IRC.Parser
                     "Invalid message structure"
                 );
             }
+        }
+
+        private static Token CopyToken(Token token, bool copyNext)
+        {
+            Token t = Token.Create
+            (
+                token.TokenType,
+                token.Sequence,
+                token.Child is null
+                    ? null
+                    : CopyToken(token.Child, true)
+            );
+
+            if(copyNext && token.Next is { })
+            {
+                t.Next = CopyToken(token.Next, true);
+            }
+
+            return t;
         }
 
         //MUST be called before every construction
@@ -1115,7 +1119,7 @@ namespace NippyWard.IRC.Parser
         }
 
         #region helper methods
-        private static FactoryTokenVisitor GetFactoryTokenVisitor()
+        protected static FactoryTokenVisitor GetFactoryTokenVisitor()
         {
             if(_FactoryTokenVisitor is null)
             {
@@ -1126,7 +1130,7 @@ namespace NippyWard.IRC.Parser
             return _FactoryTokenVisitor;
         }
 
-        private static MessageLengthVisitor GetMessageLengthVisitor()
+        protected static MessageLengthVisitor GetMessageLengthVisitor()
         {
             if(_MessageLengthVisitor is null)
             {
@@ -1137,7 +1141,7 @@ namespace NippyWard.IRC.Parser
             return _MessageLengthVisitor;
         }
 
-        private static bool MessageWillExceedMaxLength
+        protected static bool MessageWillExceedMaxLength
         (
             Token message,
             int messageLength,
@@ -1181,7 +1185,7 @@ namespace NippyWard.IRC.Parser
             return (lengthLeft -= addedLength) < 0;
         }
 
-        private static bool ParametersWillExceedMax
+        protected static bool ParametersWillExceedMax
         (
             Token parameters
         )
@@ -1198,7 +1202,7 @@ namespace NippyWard.IRC.Parser
             return count > _MaxParameters;
         }
 
-        private static void CheckIfConstructed(BaseIRCMessageFactory factory)
+        protected static void CheckIfConstructed(BaseIRCMessageFactory factory)
         {
             if(factory.IsConstructed)
             {

@@ -1031,7 +1031,7 @@ namespace NippyWard.IRC.Parser
         }
 
         //try parse a middle
-        internal static bool TryParseMiddle
+        public static bool TryParseMiddle
         (
             ref SequenceReader<byte> reader,
             out Token middle
@@ -1064,7 +1064,7 @@ namespace NippyWard.IRC.Parser
 
         //try parsing a list of terminals valid for the first byte of the
         //middle: UTF-8 without space, colon, NUL, CR, LF
-        private static bool TryParseMiddlePrefixList
+        public static bool TryParseMiddlePrefixList
         (
             ref SequenceReader<byte> reader,
             out Token middlePrefix

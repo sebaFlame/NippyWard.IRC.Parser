@@ -6,7 +6,7 @@ using NippyWard.Text;
 
 namespace NippyWard.IRC.Parser
 {
-    internal class FactoryTokenVisitor : BaseTokenVisitorByType
+    public class FactoryTokenVisitor : BaseTokenVisitorByType
     {
         private Token _message;
         //tail of the current utf-8 linked list

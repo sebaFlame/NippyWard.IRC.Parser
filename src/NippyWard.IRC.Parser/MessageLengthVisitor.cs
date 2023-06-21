@@ -2,7 +2,7 @@ using NippyWard.IRC.Parser.Tokens;
 
 namespace NippyWard.IRC.Parser
 {
-    internal class MessageLengthVisitor : BaseTokenVisitor
+    public class MessageLengthVisitor : BaseTokenVisitor
     {
         public int Length => this._length;
 
