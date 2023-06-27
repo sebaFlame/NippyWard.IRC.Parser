@@ -74,9 +74,10 @@ namespace NippyWard.IRC.Parser
         }
 
         //parse a sequence of mode strings
-        public static Token ParseModeStringList
+        public static bool TryParseModeStringList
         (
-            ref SequenceReader<byte> reader
+            ref SequenceReader<byte> reader,
+            out Token modeStringList
         )
         {
             SequencePosition startPosition = reader.Position;
@@ -92,12 +93,19 @@ namespace NippyWard.IRC.Parser
                 }
             }
 
-            return Token.Create
+            if(first is null)
+            {
+                modeStringList = null;
+                return false;
+            }
+
+            modeStringList = Token.Create
             (
                 TokenType.ModeStringList,
                 reader.Sequence.Slice(startPosition, reader.Position),
                 first
             );
+            return true;
         }
 
         //parse a full modestring
@@ -168,7 +176,7 @@ namespace NippyWard.IRC.Parser
             }
         }
 
-        public static bool TryParseModeCharsList
+        private static bool TryParseModeCharsList
         (
             ref SequenceReader<byte> reader,
             out Token modeCharsList
