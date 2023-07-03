@@ -419,6 +419,34 @@ namespace NippyWard.IRC.Parser
             return true;
         }
 
+        public static bool TryParseChannel
+        (
+            ref SequenceReader<byte> reader,
+            out Token channel
+        )
+        {
+            SequencePosition startPosition = reader.Position;
+
+            if (!TryParseChannelPrefix(ref reader, out Token channelPrefix))
+            {
+                channel = null;
+                return false;
+            }
+
+            channelPrefix
+                .Combine(ParseChannelString(ref reader))
+                .Combine(ParseChannelSuffix(ref reader));
+
+            channel = Token.Create
+            (
+                TokenType.Channel,
+                reader.Sequence.Slice(startPosition, reader.Position),
+                channelPrefix
+            );
+
+            return true;
+        }
+
         //parse a channel
         public static Token ParseChannel
         (

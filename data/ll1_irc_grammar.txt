@@ -178,7 +178,7 @@ Key -> UTF8WithoutNullCrLfCommaSpaceListTerminal Key .
 NicknameSpaceList -> Nickname NicknameSpaceListSuffix .
 NicknameSpaceListSuffix -> NicknameSpaceListItems | .
 NicknameSpaceListItems -> 0x20 Nickname NicknameSpaceListItems .
-ChannelCommaList -> Channel ChannelCommaListItems .
+ChannelCommaList -> Channel ChannelCommaListSuffix .
 ChannelCommaListSuffix -> ChannelCommaListItems | .
 ChannelCommaListItems -> 0x2C Channel ChannelCommaListItems .
 
@@ -255,7 +255,7 @@ NameReplyChannelType -> 0x3D | 0x40 | 0x2A .
 NicknameMembershipSpaceList -> NicknameMembership NicknameMembershipSpaceListSuffix .
 NicknameMembershipSpaceListSuffix -> NicknameMembershipSpaceListItems | .
 NicknameMembershipSpaceListItems -> 0x20 NicknameMembership NicknameMembershipSpaceListItems .
-NicknameMembership -> ChannelMembershipPrefix Nickname | Nickname .
+NicknameMembership -> ChannelMembershipPrefix Nickname SourcePrefixTargetSuffix | Nickname SourcePrefixTargetSuffix .
 
 # RPL_USERHOST (302)
 UserHostList -> UserHostListItem UserHostListSuffix .

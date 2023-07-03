@@ -64,13 +64,15 @@ namespace NippyWard.IRC.Parser.Tests
                 = AssertHelpers.CreateReadOnlySequence(modes);
             SequenceReader<byte> reader = new SequenceReader<byte>(sequence);
 
-            using Token token = IRCParser.ParseModeStringList(ref reader);
+            Assert.True(IRCParser.TryParseModeStringList(ref reader, out Token token));
 
             AssertHelpers.AssertFirstOfTokenTypeIsEmpty
             (
                 token,
                 TokenType.ModeChars
             );
+
+            token.Dispose();
         }
 
         #region helper methods
@@ -84,7 +86,7 @@ namespace NippyWard.IRC.Parser.Tests
                 = AssertHelpers.CreateReadOnlySequence(modes);
             SequenceReader<byte> reader = new SequenceReader<byte>(sequence);
 
-            using Token token = IRCParser.ParseModeStringList(ref reader);
+            Assert.True(IRCParser.TryParseModeStringList(ref reader, out Token token));
 
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
             (
@@ -104,6 +106,8 @@ namespace NippyWard.IRC.Parser.Tests
                     expectedModes
                 );
             }
+
+            token.Dispose();
         }
 
         private static void AssertModeString

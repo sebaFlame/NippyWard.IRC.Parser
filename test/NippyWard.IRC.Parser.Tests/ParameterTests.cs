@@ -138,6 +138,155 @@ namespace NippyWard.IRC.Parser.Tests
         }
 
         [Fact]
+        public void NameReplyUserHostTest()
+        {
+            string message = ":server 253 bob = #channel :~bob!bob@foo.com &alice!alice@bar.net %coolguy!cg@foobar.org"
+                + " +user1!user@foo.net user2!user@bar.com"
+                + "\r\n";
+
+            using Token token = AssertHelpers.AssertParsed(message);
+            Assert.True
+            (
+                token.TryGetTokenAtIndexOfType
+                (
+                    1,
+                    TokenType.ParamsSuffix,
+                    out Token skippedTarget
+                )
+            );
+
+            SequenceReader<byte> reader =
+                new SequenceReader<byte>(skippedTarget.Sequence);
+
+            using Token nameReply = IRCParser.ParseNameReply(ref reader);
+
+            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
+            (
+                nameReply,
+                TokenType.NameReplyChannelType,
+                "="
+            );
+
+            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
+            (
+                nameReply,
+                TokenType.Channel,
+                "#channel"
+            );
+
+            AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
+            (
+                nameReply,
+                TokenType.NicknameMembershipSpaceList,
+                TokenType.NicknameMembership,
+                new Action<Token>[]
+                {
+                    (Token t) =>
+                    {
+                        AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
+                        (
+                            t,
+                            TokenType.ChannelMembershipPrefix,
+                            "~"
+                        );
+
+                        AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
+                        (
+                            t,
+                            TokenType.Nickname,
+                            "bob"
+                        );
+
+                        AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
+                        (
+                            t,
+                            TokenType.Username,
+                            "bob"
+                        );
+
+                        AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
+                        (
+                            t,
+                            TokenType.Host,
+                            "foo.com"
+                        );
+                    },
+                    (Token t) =>
+                    {
+                        AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
+                        (
+                            t,
+                            TokenType.ChannelMembershipPrefix,
+                            "&"
+                        );
+
+                        AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
+                        (
+                            t,
+                            TokenType.Nickname,
+                            "alice"
+                        );
+                    },
+                    (Token t) =>
+                    {
+                        AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
+                        (
+                            t,
+                            TokenType.ChannelMembershipPrefix,
+                            "%"
+                        );
+
+                        AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
+                        (
+                            t,
+                            TokenType.Nickname,
+                            "coolguy"
+                        );
+                    },
+                    (Token t) =>
+                    {
+                        AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
+                        (
+                            t,
+                            TokenType.ChannelMembershipPrefix,
+                            "+"
+                        );
+
+                        AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
+                        (
+                            t,
+                            TokenType.Nickname,
+                            "user1"
+                        );
+                    },
+                    (Token t) =>
+                    {
+                        AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
+                        (
+                            t,
+                            TokenType.Nickname,
+                            "user2"
+                        );
+
+                        AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
+                        (
+                            t,
+                            TokenType.Username,
+                            "user"
+                        );
+
+                        AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
+                        (
+                            t,
+                            TokenType.Host,
+                            "bar.com"
+                        );
+                    },
+                }
+            );
+        }
+
+        [Fact]
         public void UserHostReplyTest()
         {
             string message = ":server 302 bob :"

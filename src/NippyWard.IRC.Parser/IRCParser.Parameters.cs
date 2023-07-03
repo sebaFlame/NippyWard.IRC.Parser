@@ -866,6 +866,13 @@ namespace NippyWard.IRC.Parser
                 first.Combine(nickname);
             }
 
+            //when UHNAMES is enabled
+            Token sourcePrefixTargetSuffix = ParseSourcePrefixTargetSuffix
+            (
+                ref reader
+            );
+            nickname.Combine(sourcePrefixTargetSuffix);
+
             return Token.Create
             (
                 TokenType.NicknameMembership,
