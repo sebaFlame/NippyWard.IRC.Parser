@@ -291,8 +291,9 @@ namespace NippyWard.IRC.Parser
         {
             SequencePosition startPosition = reader.Position;
             Token channelPrefix;
+            Token first = null, previous = null;
 
-            if(TryParseTerminal
+            while(TryParseTerminal
             (
                 TokenType.Ampersand,
                 ref reader,
@@ -310,18 +311,28 @@ namespace NippyWard.IRC.Parser
                     out channelPrefix
                 ))
             {
-                prefix = Token.Create
-                (
-                    TokenType.ChannelMembershipPrefix,
-                    reader.Sequence.Slice(startPosition, reader.Position),
-                    channelPrefix
-                );
+                if(first is null)
+                {
+                    first = channelPrefix;
+                }
 
-                return true;
+                previous = previous.Combine(channelPrefix);
             }
 
-            prefix = null;
-            return false;
+            if(first is null)
+            {
+                prefix = null;
+                return false;
+            }
+
+            prefix = Token.Create
+            (
+                TokenType.ChannelMembershipPrefix,
+                reader.Sequence.Slice(startPosition, reader.Position),
+                channelPrefix
+            );
+
+            return true;
         }
 
         //parse a target mask

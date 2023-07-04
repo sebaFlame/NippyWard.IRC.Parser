@@ -448,6 +448,7 @@ namespace NippyWard.IRC.Parser.Tokens
         DCCFilenameList = 184 << 8,
         DCCFilenameSpaceList = 185 << 8,
         DCCQuotedFilename = 186 << 8,
+        NicknameChannelMembership = 187 << 8,
         //all formatting in 4th byte
         Format = 1 << 24,
         BoldFormat = 2 << 24,

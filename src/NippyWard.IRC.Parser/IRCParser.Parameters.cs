@@ -848,23 +848,29 @@ namespace NippyWard.IRC.Parser
         )
         {
             SequencePosition startPosition = reader.Position;
-            Token first = null;
+            Token channelMembership;
 
             if(TryParseChannelMembershipPrefix(ref reader, out Token prefix))
             {
-                first = prefix;
-            }
-
-            Token nickname = ParseNickname(ref reader);
-
-            if(first is null)
-            {
-                first = nickname;
+                channelMembership = Token.Create
+                (
+                    TokenType.NicknameChannelMembership,
+                    reader.Sequence.Slice(startPosition, reader.Position),
+                    prefix
+                );
             }
             else
             {
-                first.Combine(nickname);
+                //allow empty
+                channelMembership = Token.Create
+                (
+                    TokenType.NicknameChannelMembership,
+                    reader.Sequence.Slice(startPosition, reader.Position)
+                );
             }
+
+            Token nickname = ParseNickname(ref reader);
+            channelMembership.Combine(nickname);
 
             //when UHNAMES is enabled
             Token sourcePrefixTargetSuffix = ParseSourcePrefixTargetSuffix
@@ -877,7 +883,7 @@ namespace NippyWard.IRC.Parser
             (
                 TokenType.NicknameMembership,
                 reader.Sequence.Slice(startPosition, reader.Position),
-                first
+                channelMembership
             );
         }
 

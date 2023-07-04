@@ -13,7 +13,7 @@ namespace NippyWard.IRC.Parser.Tests
         [Fact]
         public void NameReplyTest()
         {
-            string message = ":server 253 bob = #channel :~bob &alice %coolguy"
+            string message = ":server 353 bob = #channel :~bob &@alice %coolguy"
                 + " +user1 user2"
                 + "\r\n";
 
@@ -30,7 +30,7 @@ namespace NippyWard.IRC.Parser.Tests
 
             Assert.Equal
             (
-                (Utf8String)"= #channel :~bob &alice %coolguy +user1 user2",
+                (Utf8String)"= #channel :~bob &@alice %coolguy +user1 user2",
                 skippedTarget.ToUtf8String()
             );
 
@@ -82,7 +82,7 @@ namespace NippyWard.IRC.Parser.Tests
                         (
                             t,
                             TokenType.ChannelMembershipPrefix,
-                            "&"
+                            "&@"
                         );
 
                         AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
@@ -132,6 +132,12 @@ namespace NippyWard.IRC.Parser.Tests
                             TokenType.Nickname,
                             "user2"
                         );
+
+                        AssertHelpers.AssertFirstOfTokenTypeIsEmpty
+                        (
+                            t,
+                            TokenType.NicknameChannelMembership
+                        );
                     },
                 }
             );
@@ -140,7 +146,7 @@ namespace NippyWard.IRC.Parser.Tests
         [Fact]
         public void NameReplyUserHostTest()
         {
-            string message = ":server 253 bob = #channel :~bob!bob@foo.com &alice!alice@bar.net %coolguy!cg@foobar.org"
+            string message = ":server 353 bob = #channel :~bob!bob@foo.com &@alice!alice@bar.net %coolguy!cg@foobar.org"
                 + " +user1!user@foo.net user2!user@bar.com"
                 + "\r\n";
 
@@ -217,7 +223,7 @@ namespace NippyWard.IRC.Parser.Tests
                         (
                             t,
                             TokenType.ChannelMembershipPrefix,
-                            "&"
+                            "&@"
                         );
 
                         AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
