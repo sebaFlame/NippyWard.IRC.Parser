@@ -84,10 +84,6 @@ UTF8WithoutNullBellCrLfSpaceCommaAndColon -> UTF8WithoutNullCrLFBase | 0x3B | 0x
 # Comma seperated middle list (key)
 UTF8WithoutNullCrLfCommaSpaceListTerminal -> UTF8WithoutNullCrLFBase | 0x07 | 0x3A | 0x3B | 0x40 | Special .
 
-# DCC Filename
-DCCFileNameTerminalsBase -> UTF8WithoutAlphaNumericFormatCTCPNullCrLFBase | AlphaNumeric | 0x01 | 0x02 | 0x03 | 0x04 | 0x0F | 0x11 | 0x1D | 0x1E | 0x1F | 0x07 | 0x3B | 0x40 | Special .
-DCCFileNameTerminals -> DCCFileNameTerminalsBase | 0x20 .
-
 # Params base terminal collection
 MiddlePrefixListFormatBaseTerminals -> UTF8WithoutAlphaNumericFormatCTCPNullCrLfSpaceCommaColon MiddlePrefixListFormatBaseTerminals | LowerCaseLetter MiddlePrefixListFormatBaseTerminals | UpperCaseLetter MiddlePrefixListFormatBaseTerminals  .
 MiddlePrefixListFormatBase ->  Format MiddlePrefixListFormatBase | MiddlePrefixListFormatBaseTerminals MiddlePrefixListFormatBase .
@@ -286,12 +282,3 @@ CTCPParams -> 0x20 CTCPParamsSuffix | .
 CTCPParamsSuffix -> CTCPParamsMiddle | .
 CTCPParamsMiddle -> CTCPMiddle CTCPParamsMiddle | 0x20 CTCPParamsMiddle .
 CTCPMessageSuffix -> 0x01 | .
-
-# DCC
-DCCMessage -> DCCType Spaces DCCQuotedArgument Spaces DCCArgument Spaces DCCArgument .
-DCCType -> CTCPMiddle .
-DCCArgument -> CTCPMiddle .
-DCCQuotedArgument -> DCCQuotedFilename | DCCFilenameList .
-DCCFilenameList -> DCCFileNameTerminalsBase DCCFilenameList .
-DCCFilenameSpaceList -> DCCFileNameTerminals DCCFilenameSpaceList .
-DCCQuotedFilename -> 0x22 DCCFilenameSpaceList 0x22 .

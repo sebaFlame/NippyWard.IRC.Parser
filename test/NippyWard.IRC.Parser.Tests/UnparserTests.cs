@@ -7,6 +7,7 @@ using Xunit.Abstractions;
 
 using NippyWard.IRC.Parser.Tokens;
 using NippyWard.Text;
+using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 
 namespace NippyWard.IRC.Parser.Tests
 {
@@ -875,6 +876,208 @@ namespace NippyWard.IRC.Parser.Tests
                     .Verb("PRIVMSG")
                     .ConstructMessage()
             );
+        }
+
+        [Fact]
+        public void CTCPCommandTest()
+        {
+            using (Token constructedMessage = this._factory
+                .Reset()
+                .Verb("PRIVMSG")
+                .Parameter((ctcp) => ctcp.Command("VERSION"))
+                .ConstructMessage())
+            {
+                AssertMessage
+                (
+                    constructedMessage,
+                    "PRIVMSG \u0001VERSION\u0001" + "\r\n",
+                    "PRIVMSG \u0001VERSION" + "\r\n"
+                );
+
+                Assert.True
+                (
+                    constructedMessage.TryGetFirstTokenOfType(TokenType.Verb, out Token v)
+                        && new Utf8String(v.Sequence).Equals(new Utf8String("PRIVMSG"))
+                );
+
+                Assert.True
+                (
+                    constructedMessage.TryGetFirstTokenOfType(TokenType.CTCPCommand, out Token c)
+                        && new Utf8String(c.Sequence).Equals(new Utf8String("VERSION"))
+                );
+
+                //first CTCPMiddle is the CTCPCommand!
+                Assert.True
+                (
+                    constructedMessage.TryGetTokenAtIndexOfType(0, TokenType.CTCPMiddle, out Token m0)
+                        && new Utf8String(m0.Sequence).Equals(new Utf8String("VERSION"))
+                );
+            }
+        }
+
+        [Fact]
+        public void CTCPCommandWithParameterTest()
+        {
+            using (Token constructedMessage = this._factory
+                .Reset()
+                .Verb("NOTICE")
+                .Parameter
+                (
+                    (ctcp) => ctcp
+                        .Command("VERSION")
+                        .Parameter("foobar 1.0")
+                )
+                .ConstructMessage())
+            {
+                AssertMessage
+                (
+                    constructedMessage,
+                    "NOTICE :\u0001VERSION foobar 1.0\u0001" + "\r\n",
+                    "NOTICE :\u0001VERSION foobar 1.0" + "\r\n"
+                );
+
+                Assert.True
+                (
+                    constructedMessage.TryGetFirstTokenOfType(TokenType.Verb, out Token v)
+                        && new Utf8String(v.Sequence).Equals(new Utf8String("NOTICE"))
+                );
+
+                Assert.True
+                (
+                    constructedMessage.TryGetFirstTokenOfType(TokenType.CTCPCommand, out Token c)
+                        && new Utf8String(c.Sequence).Equals(new Utf8String("VERSION"))
+                );
+
+                //first CTCPMiddle is the CTCPCommand!
+                Assert.True
+                (
+                    constructedMessage.TryGetTokenAtIndexOfType(0, TokenType.CTCPMiddle, out Token m0)
+                        && new Utf8String(m0.Sequence).Equals(new Utf8String("VERSION"))
+                );
+
+                Assert.True
+                (
+                    constructedMessage.TryGetTokenAtIndexOfType(1, TokenType.CTCPMiddle, out Token m1)
+                        && new Utf8String(m1.Sequence).Equals(new Utf8String("foobar"))
+                );
+
+                Assert.True
+                (
+                    constructedMessage.TryGetTokenAtIndexOfType(2, TokenType.CTCPMiddle, out Token m2)
+                        && new Utf8String(m2.Sequence).Equals(new Utf8String("1.0"))
+                );
+            }
+        }
+
+        [Fact]
+        public void CTCPCommandWithDoubleParameterTest()
+        {
+            using (Token constructedMessage = this._factory
+                .Reset()
+                .Verb("NOTICE")
+                .Parameter
+                (
+                    (ctcp) => ctcp
+                        .Command("VERSION")
+                        .Parameter("foobar")
+                        .Parameter("1.0")
+                )
+                .ConstructMessage())
+            {
+                AssertMessage
+                (
+                    constructedMessage,
+                    "NOTICE :\u0001VERSION foobar 1.0\u0001" + "\r\n",
+                    "NOTICE :\u0001VERSION foobar 1.0" + "\r\n"
+                );
+
+                Assert.True
+                (
+                    constructedMessage.TryGetFirstTokenOfType(TokenType.Verb, out Token v)
+                        && new Utf8String(v.Sequence).Equals(new Utf8String("NOTICE"))
+                );
+
+                Assert.True
+                (
+                    constructedMessage.TryGetFirstTokenOfType(TokenType.CTCPCommand, out Token c)
+                        && new Utf8String(c.Sequence).Equals(new Utf8String("VERSION"))
+                );
+
+                //first CTCPMiddle is the CTCPCommand!
+                Assert.True
+                (
+                    constructedMessage.TryGetTokenAtIndexOfType(0, TokenType.CTCPMiddle, out Token m0)
+                        && new Utf8String(m0.Sequence).Equals(new Utf8String("VERSION"))
+                );
+
+                Assert.True
+                (
+                    constructedMessage.TryGetTokenAtIndexOfType(1, TokenType.CTCPMiddle, out Token m1)
+                        && new Utf8String(m1.Sequence).Equals(new Utf8String("foobar"))
+                );
+
+                Assert.True
+                (
+                    constructedMessage.TryGetTokenAtIndexOfType(2, TokenType.CTCPMiddle, out Token m2)
+                        && new Utf8String(m2.Sequence).Equals(new Utf8String("1.0"))
+                );
+            }
+        }
+
+        [Fact]
+        public void CTCPDCCWithParametersTest()
+        {
+            using (Token constructedMessage = this._factory
+                .Reset()
+                .Verb("PRIVMSG")
+                .Parameter
+                (
+                    (ctcp) => ctcp
+                        .Command("DCC")
+                        .Parameter("SEND")
+                        .Parameter("file.dat")
+                        .Parameter("2130706433")
+                        .Parameter("0")
+                        .Parameter("1024")
+                        .Parameter("0")
+                )
+                .ConstructMessage())
+            {
+                AssertMessage
+                (
+                    constructedMessage,
+                    "PRIVMSG :\u0001DCC SEND file.dat 2130706433 0 1024 0\u0001" + "\r\n",
+                    "PRIVMSG :\u0001DCC SEND file.dat 2130706433 0 1024 0" + "\r\n"
+                );
+            }
+        }
+
+        [Fact]
+        public void CTCPDCCWithQuotedParameterTest()
+        {
+            using (Token constructedMessage = this._factory
+                .Reset()
+                .Verb("PRIVMSG")
+                .Parameter
+                (
+                    (ctcp) => ctcp
+                        .Command("DCC")
+                        .Parameter("SEND")
+                        .Parameter("\"file 1.dat\"")
+                        .Parameter("2130706433")
+                        .Parameter("0")
+                        .Parameter("1024")
+                        .Parameter("0")
+                )
+                .ConstructMessage())
+            {
+                AssertMessage
+                (
+                    constructedMessage,
+                    "PRIVMSG :\u0001DCC SEND \"file 1.dat\" 2130706433 0 1024 0\u0001" + "\r\n",
+                    "PRIVMSG :\u0001DCC SEND \"file 1.dat\" 2130706433 0 1024 0" + "\r\n"
+                );
+            }
         }
 
         public void Dispose()

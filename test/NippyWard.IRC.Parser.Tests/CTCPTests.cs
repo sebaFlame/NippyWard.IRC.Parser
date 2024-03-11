@@ -229,131 +229,23 @@ namespace NippyWard.IRC.Parser.Tests
                 "SEND file.dat 2130706433 47515"
             );
 
-            Assert.True
-            (
-                ctcpMessage.TryGetLastOfType
-                (
-                    TokenType.CTCPParamsSuffix,
-                    out Token parameters
-                )
-            );
-
-            SequenceReader<byte> reader = new SequenceReader<byte>
-            (
-                parameters.Sequence
-            );
-            using Token dccMessage = IRCParser.ParseDCCMessage(ref reader);
-
-            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
-            (
-                dccMessage,
-                TokenType.DCCType,
-                "SEND"
-            );
-
-            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
-            (
-                dccMessage,
-                TokenType.DCCQuotedArgument,
-                "file.dat"
-            );
-
             AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
             (
-                dccMessage,
-                TokenType.DCCMessage,
-                TokenType.DCCArgument,
+                ctcpMessage,
+                TokenType.CTCPParamsMiddle,
+                TokenType.CTCPMiddle,
                 new Action<Token>[]
                 {
                     (Token t) => Assert.Equal
                     (
-                        (Utf8String)"2130706433",
+                        (Utf8String)"SEND",
                         t.ToUtf8String()
                     ),
                     (Token t) => Assert.Equal
                     (
-                        (Utf8String)"47515",
+                        (Utf8String)"file.dat",
                         t.ToUtf8String()
-                    )
-                }
-            );
-        }
-
-        [Fact]
-        public void DCCQuotedFilenameCTCPTest()
-        {
-            string message = ":alice!a@localhost PRIVMSG bob"
-                + " :\u0001DCC SEND \"file 1.dat\" 2130706433 47515\x01"
-                + "\r\n";
-
-            using Token token = AssertHelpers.AssertParsed(message);
-
-            Assert.True
-            (
-                token.TryGetFirstTokenOfType
-                (
-                    TokenType.CTCPMessage,
-                    out Token ctcpMessage
-                )
-            );
-
-            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
-            (
-                ctcpMessage,
-                TokenType.CTCPCommand,
-                "DCC"
-            );
-
-            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
-            (
-                ctcpMessage,
-                TokenType.CTCPParamsSuffix,
-                "SEND \"file 1.dat\" 2130706433 47515"
-            );
-
-            Assert.True
-            (
-                ctcpMessage.TryGetLastOfType
-                (
-                    TokenType.CTCPParamsSuffix,
-                    out Token parameters
-                )
-            );
-
-            SequenceReader<byte> reader = new SequenceReader<byte>
-            (
-                parameters.Sequence
-            );
-            using Token dccMessage = IRCParser.ParseDCCMessage(ref reader);
-
-            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
-            (
-                dccMessage,
-                TokenType.DCCType,
-                "SEND"
-            );
-
-            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
-            (
-                dccMessage,
-                TokenType.DCCQuotedArgument,
-                "\"file 1.dat\""
-            );
-
-            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
-            (
-                dccMessage,
-                TokenType.DCCFilenameSpaceList,
-                "file 1.dat"
-            );
-
-            AssertHelpers.AssertInNthChildOfTokenTypeInTokenType
-            (
-                dccMessage,
-                TokenType.DCCMessage,
-                TokenType.DCCArgument,
-                new Action<Token>[]
-                {
+                    ),
                     (Token t) => Assert.Equal
                     (
                         (Utf8String)"2130706433",

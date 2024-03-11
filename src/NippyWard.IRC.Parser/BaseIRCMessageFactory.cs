@@ -433,7 +433,7 @@ namespace NippyWard.IRC.Parser
         {
             CheckIfConstructed(this);
 
-            //paramter can be empty
+            //parameter can be empty
             if(parameter is null)
             {
                 return this;
@@ -572,6 +572,124 @@ namespace NippyWard.IRC.Parser
                 paramsPrefix.Dispose();
 
                 return this.ParameterTooLong(parameter, extraLength);
+            }
+
+            LinkConstructedParameter(parameters, paramsPrefix);
+
+            return this;
+        }
+
+        public BaseIRCMessageFactory Parameter(Action<ICTCPMessageFactory> tokenFactory)
+        {
+            CheckIfConstructed(this);
+
+            //paramter can be empty
+            if (tokenFactory is null)
+            {
+                return this;
+            }
+
+            Token message = this.GetMessage();
+
+            if (!message.TryGetFirstTokenOfType
+            (
+                TokenType.Params,
+                out Token parameters
+            ))
+            {
+                throw new InvalidOperationException
+                (
+                    "No Params token found, no command has been defined yet"
+                );
+            }
+
+            //check if too many parameters
+            if (ParametersWillExceedMax(parameters))
+            {
+                throw ThrowTooManyParameters();
+            }
+
+            CTCPMessageFactory fac = new CTCPMessageFactory();
+            tokenFactory(fac);
+            Token ctcpToken = fac.Verify();
+
+            MessageLengthVisitor lengthVisitor = GetMessageLengthVisitor();
+            int messageLength = lengthVisitor.ComputeTokenLength
+            (
+                message
+            );
+
+            int ctcpLength = lengthVisitor.ComputeTokenLength
+            (
+                ctcpToken
+            );
+
+            Token space = Token.Create
+            (
+                TokenType.Space,
+                Space
+            );
+
+            Token paramsSuffix = Token.Create(TokenType.ParamsSuffix);
+
+            //link space and suffix together to form the parameter
+            space.Combine(paramsSuffix);
+
+            Token paramsPrefix = Token.Create
+            (
+                TokenType.ParamsPrefix,
+                space
+            );
+
+            int extraLength = 0;
+            //CTCP message can be embedded into a ParamsSuffix
+            if (ctcpToken.TryGetFirstTokenOfType(TokenType.CTCPParams, out Token par)
+                && par.IsEmpty) //TODO: needs MessageLengthVisitor
+            {
+                paramsSuffix.Child = ctcpToken;
+
+                extraLength = 1; //account for ' '
+            }
+            //if parameters is not empty, the CTCP message needs to be embedded
+            //into a trailing
+            else
+            {
+                //initialize a colon for the trailing parameter
+                Token colon = Token.Create
+                (
+                    TokenType.Colon,
+                    Colon
+                );
+
+                //provide an empty trailing prefix
+                Token trailingPrefix = Token.Create
+                (
+                    TokenType.TrailingPrefix,
+                    ctcpToken
+                );
+
+                colon.Combine(trailingPrefix);
+
+                paramsSuffix.Child = Token.Create
+                (
+                    TokenType.Trailing,
+                    colon
+                );
+
+                extraLength = 2; //account for ':' and ' '
+            }
+
+            if (MessageWillExceedMaxLength
+            (
+                message,
+                messageLength,
+                ctcpLength + extraLength,
+                out _
+            ))
+            {
+                paramsPrefix.Dispose();
+
+                throw ThrowParameterTooLong();
             }
 
             LinkConstructedParameter(parameters, paramsPrefix);
