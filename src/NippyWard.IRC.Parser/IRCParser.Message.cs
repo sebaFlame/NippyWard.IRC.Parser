@@ -585,7 +585,7 @@ namespace NippyWard.IRC.Parser
         }
 
         //parse the actual source prefix target
-        internal static Token ParseSourcePrefixTarget
+        public static Token ParseSourcePrefixTarget
         (
             ref SequenceReader<byte> reader
         )

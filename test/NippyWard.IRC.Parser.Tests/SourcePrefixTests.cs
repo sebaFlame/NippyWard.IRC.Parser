@@ -15,7 +15,9 @@ namespace NippyWard.IRC.Parser.Tests
             ReadOnlySequence<byte> userhostSequence
                 = AssertHelpers.CreateReadOnlySequence("coolguy");
 
-            using Token userHost = IRCParser.ParseUserHost(in userhostSequence);
+            SequenceReader<byte> reader = new SequenceReader<byte>(userhostSequence);
+
+            using Token userHost = IRCParser.ParseSourcePrefixTarget(ref reader);
 
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
             (
@@ -34,7 +36,9 @@ namespace NippyWard.IRC.Parser.Tests
                 "coolguy!ag@127.0.0.1"
             );
 
-            using Token userHost = IRCParser.ParseUserHost(in userhostSequence);
+            SequenceReader<byte> reader = new SequenceReader<byte>(userhostSequence);
+
+            using Token userHost = IRCParser.ParseSourcePrefixTarget(ref reader);
 
             //nick
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
@@ -70,7 +74,9 @@ namespace NippyWard.IRC.Parser.Tests
                 "coolguy!~ag@localhost"
             );
 
-            using Token userHost = IRCParser.ParseUserHost(in userhostSequence);
+            SequenceReader<byte> reader = new SequenceReader<byte>(userhostSequence);
+
+            using Token userHost = IRCParser.ParseSourcePrefixTarget(ref reader);
 
             //nick
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
@@ -106,7 +112,9 @@ namespace NippyWard.IRC.Parser.Tests
                 "coolguy@127.0.0.1"
             );
 
-            using Token userHost = IRCParser.ParseUserHost(in userhostSequence);
+            SequenceReader<byte> reader = new SequenceReader<byte>(userhostSequence);
+
+            using Token userHost = IRCParser.ParseSourcePrefixTarget(ref reader);
 
             //nick
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
@@ -141,7 +149,9 @@ namespace NippyWard.IRC.Parser.Tests
                 "coolguy!ag"
             );
 
-            using Token userHost = IRCParser.ParseUserHost(in userhostSequence);
+            SequenceReader<byte> reader = new SequenceReader<byte>(userhostSequence);
+
+            using Token userHost = IRCParser.ParseSourcePrefixTarget(ref reader);
 
             //nick
             AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
@@ -164,6 +174,28 @@ namespace NippyWard.IRC.Parser.Tests
             (
                userHost,
                TokenType.SourcePrefixHostname
+            );
+        }
+
+        [Fact]
+        public void HostTest()
+        {
+            ReadOnlySequence<byte> userhostSequence
+                = AssertHelpers.CreateReadOnlySequence
+            (
+                "127.0.0.1"
+            );
+
+            SequenceReader<byte> reader = new SequenceReader<byte>(userhostSequence);
+
+            using Token userHost = IRCParser.ParseSourcePrefixTarget(ref reader);
+
+            //nick
+            AssertHelpers.AssertFirstOfTokenTypeIsEqualTo
+            (
+               userHost,
+               TokenType.SourcePrefixTargetPrefix,
+               "127.0.0.1"
             );
         }
     }

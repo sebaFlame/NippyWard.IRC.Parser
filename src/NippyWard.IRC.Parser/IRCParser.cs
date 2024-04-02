@@ -65,13 +65,5 @@ namespace NippyWard.IRC.Parser
 
             return true;
         }
-
-        public static Token ParseUserHost(in ReadOnlySequence<byte> sequence)
-        {
-            SequenceReader<byte> sequenceReader
-                = new SequenceReader<byte>(sequence);
-
-            return ParseSourcePrefixTarget(ref sequenceReader);
-        }
     }
 }
