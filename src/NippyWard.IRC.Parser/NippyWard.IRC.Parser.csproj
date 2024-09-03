@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\deps\NippyWard.Text\src\NippyWard.Text\NippyWard.Text.csproj" PrivateAssets="all" />
+    <PackageReference Include="NippyWard.Text" Version="1.0.0-alpha1" />
   </ItemGroup>
 
   <!-- Source generator -->

@@ -21,7 +21,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\NippyWard.IRC.Parser\NippyWard.IRC.Parser.csproj" />
-    <ProjectReference Include="..\..\deps\NippyWard.Text\src\NippyWard.Text\NippyWard.Text.csproj" />
   </ItemGroup>
 
 </Project>
